@@ -1,0 +1,106 @@
+import { mutation, query } from './_generated/server';
+import { v } from 'convex/values';
+
+export const createGame = mutation({
+	args: {
+		scenarioId: v.id('scenarios'),
+		playerNationId: v.string(),
+		playerId: v.optional(v.string())
+	},
+	handler: async (ctx, args) => {
+		const scenario = await ctx.db.get(args.scenarioId);
+
+		if (!scenario) {
+			throw new Error('Scenario not found');
+		}
+
+		const now = Date.now();
+
+		const gameId = await ctx.db.insert('games', {
+			scenarioId: args.scenarioId,
+			playerId: args.playerId,
+			currentTurn: 1,
+			status: 'active',
+			createdAt: now,
+			updatedAt: now
+		});
+
+		const world = (scenario as any).initialWorldState ?? {};
+		const nations = (world.nations ?? []) as any[];
+		const relationships = (world.relationships ?? []) as any[];
+
+		const nationIdMap: Record<string, any> = {};
+		let playerNationDocId: any = null;
+
+		for (const nation of nations) {
+			const insertedNationId = await ctx.db.insert('nations', {
+				gameId,
+				name: nation.name,
+				government: nation.government,
+				resources: nation.resources,
+				territories: nation.territories ?? [],
+				isPlayerControlled: nation.id === args.playerNationId
+			});
+
+			if (nation.id) {
+				nationIdMap[nation.id] = insertedNationId;
+			}
+
+			if (nation.id === args.playerNationId) {
+				playerNationDocId = insertedNationId;
+			}
+		}
+
+		for (const rel of relationships) {
+			const nation1Id = rel.nation1Id && nationIdMap[rel.nation1Id];
+			const nation2Id = rel.nation2Id && nationIdMap[rel.nation2Id];
+
+			if (!nation1Id || !nation2Id) continue;
+
+			await ctx.db.insert('relationships', {
+				gameId,
+				nation1Id,
+				nation2Id,
+				status: rel.status,
+				tradeAgreements: rel.tradeAgreements,
+				militaryAlliance: rel.militaryAlliance,
+				relationshipScore: rel.relationshipScore
+			});
+		}
+
+		if (!playerNationDocId) {
+			throw new Error('Player nation not found in scenario initialWorldState');
+		}
+
+		await ctx.db.patch(gameId, {
+			playerNationId: playerNationDocId,
+			updatedAt: Date.now()
+		});
+
+		return await ctx.db.get(gameId);
+	}
+});
+
+export const getGame = query({
+	args: {
+		gameId: v.id('games')
+	},
+	handler: async (ctx, args) => {
+		return await ctx.db.get(args.gameId);
+	}
+});
+
+export const listGamesForUser = query({
+	args: {
+		playerId: v.string()
+	},
+	handler: async (ctx, args) => {
+		const games = await ctx.db
+			.query('games')
+			.filter((q) => q.eq(q.field('playerId'), args.playerId))
+			.collect();
+
+		games.sort((a, b) => b.createdAt - a.createdAt);
+		return games;
+	}
+});

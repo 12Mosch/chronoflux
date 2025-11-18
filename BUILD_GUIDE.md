@@ -2,7 +2,7 @@
 
 Practical, step-by-step instructions for implementing the ChronoFlux website based on `PROJECT_PLAN.md`.
 
-## 1. Project Foundation
+## 1. Project Foundation ✅
 
 1. **Create/prepare SvelteKit app**
    - If starting fresh: `npm create svelte@latest chronoflux` (skeleton + TypeScript).
@@ -25,7 +25,7 @@ Practical, step-by-step instructions for implementing the ChronoFlux website bas
 
 ---
 
-## 2. Data Model & Convex Schema
+## 2. Data Model & Convex Schema ✅
 
 1. **Define tables in `convex/schema.ts`**
    - `games`, `scenarios`, `nations`, `turns`, `events`, `relationships`.
@@ -46,7 +46,7 @@ Practical, step-by-step instructions for implementing the ChronoFlux website bas
 
 ## 3. Core UI Shell
 
-1. **Landing page (`/+page.svelte`)**
+1. **Landing page (`/+page.svelte`)** ✅
    - Hero section (title, description).
    - "Start New Game" button → navigate to `/scenarios`.
 2. **Scenario selection (`/scenarios/+page.svelte`)**
