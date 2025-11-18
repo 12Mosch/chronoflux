@@ -1,3 +1,4 @@
+import { Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 
@@ -29,7 +30,7 @@ export const createGame = mutation({
 		const nations = (world.nations ?? []) as any[];
 		const relationships = (world.relationships ?? []) as any[];
 
-		const nationIdMap: Record<string, any> = {};
+		const nationIdMap: Record<string, Id<'nations'>> = {};
 		let playerNationDocId: any = null;
 
 		for (const nation of nations) {
