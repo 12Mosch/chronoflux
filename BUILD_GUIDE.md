@@ -193,4 +193,3 @@ Practical, step-by-step instructions for implementing the ChronoFlux website bas
 8. Build scenario editor and seed scenarios.
 9. Add tests (unit, integration, E2E, AI quality).
 10. Secure, deploy, and monitor the system.
-

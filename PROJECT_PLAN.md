@@ -14,6 +14,7 @@ ChronoFlux is a turn-based alternate history simulation game where players contr
 ## Core Features
 
 ### 1. Gameplay Mechanics
+
 - **Nation Control**: Players select and control a nation within historical scenarios
 - **Natural Language Actions**: Players describe actions in free-form text
 - **AI Evaluation**: Ollama/Qwen3 processes actions and generates consequences
@@ -22,12 +23,14 @@ ChronoFlux is a turn-based alternate history simulation game where players contr
 - **Narrative Generation**: AI creates coherent historical narratives
 
 ### 2. Historical Scenarios
+
 - Pre-configured starting points (e.g., WWI, Cold War, Ancient Rome)
 - Initial world state with nations, resources, and relationships
 - Historical context for AI to reference
 - Customizable scenario creation
 
 ### 3. Player Actions
+
 - **Political**: Policy changes, government reforms, internal affairs
 - **Military**: Troop movements, declarations of war, strategic planning
 - **Diplomatic**: Treaties, alliances, negotiations, trade agreements
@@ -93,6 +96,7 @@ convex/
 ## Data Models
 
 ### Game
+
 ```typescript
 {
   _id: Id<"games">,
@@ -107,6 +111,7 @@ convex/
 ```
 
 ### Scenario
+
 ```typescript
 {
   _id: Id<"scenarios">,
@@ -124,6 +129,7 @@ convex/
 ```
 
 ### Nation
+
 ```typescript
 {
   _id: Id<"nations">,
@@ -142,6 +148,7 @@ convex/
 ```
 
 ### Turn
+
 ```typescript
 {
   _id: Id<"turns">,
@@ -159,6 +166,7 @@ convex/
 ```
 
 ### Event
+
 ```typescript
 {
   _id: Id<"events">,
@@ -173,6 +181,7 @@ convex/
 ```
 
 ### Relationship
+
 ```typescript
 {
   _id: Id<"relationships">,
@@ -189,6 +198,7 @@ convex/
 ## Implementation Phases
 
 ### Phase 1: Foundation (Weeks 1-2)
+
 - [ ] Set up SvelteKit project structure
 - [ ] Install and configure shadcn-svelte
 - [ ] Set up Convex backend
@@ -198,6 +208,7 @@ convex/
 - [ ] Set up Tailwind CSS configuration
 
 ### Phase 2: Core Game Loop (Weeks 3-4)
+
 - [ ] Build scenario selection interface
 - [ ] Implement game creation flow
 - [ ] Create main game interface layout
@@ -207,6 +218,7 @@ convex/
 - [ ] Create basic prompt templates for AI
 
 ### Phase 3: AI Integration (Weeks 5-6)
+
 - [ ] Implement Ollama API communication layer
 - [ ] Design prompt engineering system for:
   - Action interpretation
@@ -219,6 +231,7 @@ convex/
 - [ ] Test AI consistency and quality
 
 ### Phase 4: Game State Management (Week 7)
+
 - [ ] Implement nation state tracking
 - [ ] Build relationship management system
 - [ ] Create resource calculation logic
@@ -227,6 +240,7 @@ convex/
 - [ ] Build state validation and consistency checks
 
 ### Phase 5: UI/UX Enhancement (Weeks 8-9)
+
 - [ ] Design and implement world map visualization
 - [ ] Create nation information panel
 - [ ] Build event log with filtering
@@ -236,6 +250,7 @@ convex/
 - [ ] Implement dark/light theme support
 
 ### Phase 6: Scenario System (Week 10)
+
 - [ ] Create scenario editor interface
 - [ ] Build initial scenario templates:
   - World War I (1914)
@@ -246,6 +261,7 @@ convex/
 - [ ] Create scenario import/export functionality
 
 ### Phase 7: Polish & Testing (Weeks 11-12)
+
 - [ ] Comprehensive testing of game loop
 - [ ] AI response quality assurance
 - [ ] Performance optimization
@@ -256,6 +272,7 @@ convex/
 ## AI Prompt Engineering Strategy
 
 ### Action Interpretation Prompt
+
 ```
 You are a historical simulation AI. A player controlling [NATION] in [YEAR] has taken the following action:
 
@@ -283,6 +300,7 @@ Respond in JSON format:
 ```
 
 ### Event Generation Prompt
+
 ```
 Based on the player's action and current world state, generate 1-3 significant events that occur this turn.
 
@@ -307,6 +325,7 @@ Generate events in JSON format:
 ## Technical Considerations
 
 ### Ollama Integration
+
 - **Endpoint**: `http://localhost:11434/api/generate`
 - **Model**: `qwen3:latest`
 - **Timeout**: 30 seconds per request
@@ -314,12 +333,14 @@ Generate events in JSON format:
 - **Streaming**: Optional for real-time narrative generation
 
 ### Performance Optimization
+
 - **Caching**: Cache AI responses for similar actions
 - **Debouncing**: Prevent rapid-fire action submissions
 - **Lazy Loading**: Load historical turns on demand
 - **Optimistic Updates**: Show immediate UI feedback
 
 ### Error Handling
+
 - **AI Unavailable**: Fallback to pre-generated responses
 - **Invalid Actions**: Provide helpful error messages
 - **Network Issues**: Queue actions for retry
@@ -328,12 +349,14 @@ Generate events in JSON format:
 ## User Interface Design
 
 ### Landing Page
+
 - Hero section with game description
 - Featured scenarios showcase
 - "Start New Game" CTA
 - Recent games list (if authenticated)
 
 ### Scenario Selection
+
 - Grid of scenario cards with:
   - Historical period image
   - Name and description
@@ -343,6 +366,7 @@ Generate events in JSON format:
 - Search functionality
 
 ### Main Game Interface
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ Header: [Nation Flag] [Nation Name] | Turn: X | Year: Y │
@@ -366,6 +390,7 @@ Generate events in JSON format:
 ```
 
 ### Turn Summary Modal
+
 - Displays after AI processes turn
 - Shows:
   - Player action recap
@@ -377,6 +402,7 @@ Generate events in JSON format:
 ## Key User Flows
 
 ### 1. Starting a New Game
+
 1. User lands on homepage
 2. Clicks "Start New Game"
 3. Selects a historical scenario
@@ -385,6 +411,7 @@ Generate events in JSON format:
 6. Game begins at turn 1
 
 ### 2. Taking a Turn
+
 1. User reads current world state
 2. Types action in natural language
 3. Clicks "Submit Turn"
@@ -395,6 +422,7 @@ Generate events in JSON format:
 8. User can take next turn
 
 ### 3. Viewing History
+
 1. User clicks "View Timeline"
 2. Chronological list of all turns
 3. Click any turn to see details
@@ -403,18 +431,21 @@ Generate events in JSON format:
 ## Security & Privacy
 
 ### Data Protection
+
 - All game data stored in Convex (encrypted at rest)
 - User authentication via Convex Auth (optional)
 - No sensitive data sent to AI model
 - Local AI processing ensures privacy
 
 ### Input Validation
+
 - Sanitize all user inputs
 - Limit action text length (max 1000 characters)
 - Rate limiting on turn submissions
 - Prevent injection attacks
 
 ### AI Safety
+
 - Content filtering for inappropriate actions
 - Moderation of generated narratives
 - Fallback responses for edge cases
@@ -423,18 +454,21 @@ Generate events in JSON format:
 ## Deployment Strategy
 
 ### Development Environment
+
 - Local Ollama instance for AI
 - Convex dev deployment
 - SvelteKit dev server
 - Hot module replacement enabled
 
 ### Production Environment
+
 - **Frontend**: Vercel or Netlify
 - **Backend**: Convex production deployment
 - **AI**: Self-hosted Ollama server or user's local instance
 - **CDN**: Static assets via Vercel Edge Network
 
 ### CI/CD Pipeline
+
 1. GitHub Actions for automated testing
 2. Type checking with TypeScript
 3. Linting with ESLint
@@ -445,18 +479,21 @@ Generate events in JSON format:
 ## Testing Strategy
 
 ### Unit Tests
+
 - Utility functions
 - Data transformations
 - Prompt generation logic
 - State management functions
 
 ### Integration Tests
+
 - Convex mutations and queries
 - AI API communication
 - Turn processing workflow
 - State persistence
 
 ### E2E Tests
+
 - Complete game flow
 - Scenario selection
 - Turn submission
@@ -464,6 +501,7 @@ Generate events in JSON format:
 - Error scenarios
 
 ### AI Quality Tests
+
 - Response consistency
 - Narrative coherence
 - Historical plausibility
@@ -472,6 +510,7 @@ Generate events in JSON format:
 ## Future Enhancements
 
 ### Phase 2 Features
+
 - [ ] Multiplayer support (multiple players in same game)
 - [ ] AI-controlled nations with autonomous actions
 - [ ] Advanced map visualization with territories
@@ -480,6 +519,7 @@ Generate events in JSON format:
 - [ ] Cultural and social dynamics
 
 ### Phase 3 Features
+
 - [ ] Scenario creation tools for community
 - [ ] Save/load game states
 - [ ] Export game history as narrative document
@@ -488,6 +528,7 @@ Generate events in JSON format:
 - [ ] Mobile app (React Native or Capacitor)
 
 ### Advanced AI Features
+
 - [ ] Multiple AI models for different aspects
 - [ ] Fine-tuned model on historical data
 - [ ] AI-generated maps and visualizations
@@ -495,6 +536,7 @@ Generate events in JSON format:
 - [ ] AI-generated character portraits
 
 ### Community Features
+
 - [ ] Share interesting game outcomes
 - [ ] Community scenario library
 - [ ] Discussion forums for strategies
@@ -504,18 +546,21 @@ Generate events in JSON format:
 ## Success Metrics
 
 ### Technical Metrics
+
 - AI response time < 5 seconds
 - 99.9% uptime for Convex backend
 - Page load time < 2 seconds
 - Zero data loss incidents
 
 ### User Engagement Metrics
+
 - Average session duration > 20 minutes
 - Turns per game > 10
 - Scenario completion rate > 30%
 - Return user rate > 40%
 
 ### Quality Metrics
+
 - AI response coherence score > 8/10
 - Historical plausibility rating > 7/10
 - User satisfaction score > 4/5
@@ -524,6 +569,7 @@ Generate events in JSON format:
 ## Development Resources
 
 ### Documentation
+
 - SvelteKit: https://kit.svelte.dev/docs
 - shadcn-svelte: https://www.shadcn-svelte.com/docs
 - Convex: https://docs.convex.dev
@@ -531,6 +577,7 @@ Generate events in JSON format:
 - Qwen3: https://huggingface.co/Qwen
 
 ### Tools & Libraries
+
 - **State Management**: Svelte stores + Convex reactive queries
 - **Form Handling**: Superforms
 - **Validation**: Zod
@@ -560,6 +607,7 @@ ChronoFlux represents an innovative approach to strategy gaming by combining nat
 The phased development approach allows for iterative testing and refinement, ensuring each component works well before moving to the next. The focus on AI prompt engineering and quality assurance will be critical to delivering engaging, plausible alternate history scenarios.
 
 Success will depend on:
+
 1. **AI Quality**: Consistent, plausible, and engaging responses
 2. **User Experience**: Intuitive interface and smooth gameplay
 3. **Performance**: Fast AI responses and responsive UI
