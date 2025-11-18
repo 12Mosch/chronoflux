@@ -7,3 +7,5 @@ bun.lockb
 
 # Miscellaneous
 /static/
+/convex/_generated/
+/src/convex/_generated/
