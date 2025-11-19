@@ -13,7 +13,7 @@
 	<Card.Header>
 		<Card.Title>Event Log</Card.Title>
 	</Card.Header>
-	<Card.Content class="overflow-y-auto max-h-[500px]">
+	<Card.Content class="max-h-[500px] overflow-y-auto">
 		{#if turns.isLoading}
 			<p class="text-muted-foreground">Loading events...</p>
 		{:else if turns.error}
@@ -25,7 +25,7 @@
 				<div class="space-y-4">
 					{#each turns.data as turn (turn._id)}
 						<div class="border-b pb-2 last:border-0">
-							<div class="flex justify-between items-center mb-1">
+							<div class="mb-1 flex items-center justify-between">
 								<span class="font-semibold">Turn {turn.turnNumber}</span>
 							</div>
 							<p class="text-sm">{turn.playerAction}</p>

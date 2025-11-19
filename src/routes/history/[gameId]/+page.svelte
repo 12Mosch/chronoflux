@@ -30,34 +30,35 @@
 				<div class="relative ml-4 space-y-8 border-l border-muted-foreground/20 py-4">
 					{#each turns.data as turn (turn._id)}
 						<div class="relative pl-8">
-							<span class="bg-primary absolute -left-1.5 top-1.5 h-3 w-3 rounded-full"></span>
+							<span class="absolute top-1.5 -left-1.5 h-3 w-3 rounded-full bg-primary"></span>
 							<div class="flex flex-col gap-2">
 								<div class="text-lg font-bold">Turn {turn.turnNumber}</div>
-								<div class="bg-muted rounded-lg p-4">
+								<div class="rounded-lg bg-muted p-4">
 									<div class="mb-1 font-semibold">Player Action</div>
 									<p>{turn.playerAction}</p>
 								</div>
 								{#if turn.aiResponse}
-								<div class="bg-secondary/20 rounded-lg p-4">
-									<div class="mb-1 font-semibold">AI Response</div>
-									{#if turn.aiResponse.narrative}
-										<p class="mb-2 italic">{turn.aiResponse.narrative}</p>
-									{/if}
-									{#if turn.aiResponse.consequences}
-										<p class="text-sm text-muted-foreground">{turn.aiResponse.consequences}</p>
-									{/if}
-									{#if turn.aiResponse.events?.length > 0}
-										<div class="mt-3">
-											<div class="text-sm font-semibold mb-1">Events:</div>
-											{#each turn.aiResponse.events as event (event.title)}
-												<div class="ml-2 text-sm">
-													<span class="font-medium">{event.title}:</span> {event.description}
-												</div>
-											{/each}
-										</div>
-									{/if}
-								</div>
-							{/if}
+									<div class="rounded-lg bg-secondary/20 p-4">
+										<div class="mb-1 font-semibold">AI Response</div>
+										{#if turn.aiResponse.narrative}
+											<p class="mb-2 italic">{turn.aiResponse.narrative}</p>
+										{/if}
+										{#if turn.aiResponse.consequences}
+											<p class="text-sm text-muted-foreground">{turn.aiResponse.consequences}</p>
+										{/if}
+										{#if turn.aiResponse.events?.length > 0}
+											<div class="mt-3">
+												<div class="mb-1 text-sm font-semibold">Events:</div>
+												{#each turn.aiResponse.events as event (event.title)}
+													<div class="ml-2 text-sm">
+														<span class="font-medium">{event.title}:</span>
+														{event.description}
+													</div>
+												{/each}
+											</div>
+										{/if}
+									</div>
+								{/if}
 							</div>
 						</div>
 					{/each}
