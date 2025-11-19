@@ -4,8 +4,14 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vitest/config';
 import { playwright } from '@vitest/browser-playwright';
 import { sveltekit } from '@sveltejs/kit/vite';
+import { fileURLToPath } from 'url';
 
 export default defineConfig({
+	resolve: {
+		alias: {
+			$convex: fileURLToPath(new URL('./src/convex', import.meta.url))
+		}
+	},
 	plugins: [
 		tailwindcss(),
 		sveltekit(),
