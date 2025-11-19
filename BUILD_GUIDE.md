@@ -49,7 +49,7 @@ Practical, step-by-step instructions for implementing the ChronoFlux website bas
 1. **Landing page (`/+page.svelte`)** ✅
    - Hero section (title, description).
    - "Start New Game" button → navigate to `/scenarios`.
-2. **Scenario selection (`/scenarios/+page.svelte`)**
+2. **Scenario selection (`/scenarios/+page.svelte`)** ✅
    - Create `src/lib/components/scenarios/ScenarioCard.svelte`.
    - On load, call Convex `listScenarios` and render cards.
    - On "Play": open nation selection (inline or dialog), then call `createGame`, redirect to `/game/[gameId]`.
