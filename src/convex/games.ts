@@ -105,3 +105,62 @@ export const listGamesForUser = query({
 		return games;
 	}
 });
+
+/**
+ * Get comprehensive world state for a game
+ * Combines game info, nations, relationships, and scenario data
+ */
+export const getWorldState = query({
+	args: {
+		gameId: v.id('games')
+	},
+	handler: async (ctx, args) => {
+		// Get game
+		const game = await ctx.db.get(args.gameId);
+		if (!game) {
+			throw new Error('Game not found');
+		}
+
+		// Get scenario
+		const scenario = await ctx.db.get(game.scenarioId);
+		if (!scenario) {
+			throw new Error('Scenario not found');
+		}
+
+		// Get all nations for this game
+		const nations = await ctx.db
+			.query('nations')
+			.filter((q) => q.eq(q.field('gameId'), args.gameId))
+			.collect();
+
+		// Get all relationships for this game
+		const relationships = await ctx.db
+			.query('relationships')
+			.filter((q) => q.eq(q.field('gameId'), args.gameId))
+			.collect();
+
+		// Get player nation
+		const playerNation = game.playerNationId ? await ctx.db.get(game.playerNationId) : null;
+
+		return {
+			game: {
+				_id: game._id,
+				scenarioId: game.scenarioId,
+				currentTurn: game.currentTurn,
+				status: game.status,
+				createdAt: game.createdAt,
+				updatedAt: game.updatedAt
+			},
+			scenario: {
+				_id: scenario._id,
+				name: scenario.name,
+				description: scenario.description,
+				historicalPeriod: scenario.historicalPeriod,
+				startYear: scenario.startYear
+			},
+			nations,
+			relationships,
+			playerNation
+		};
+	}
+});
