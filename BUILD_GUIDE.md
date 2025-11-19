@@ -65,20 +65,20 @@ Practical, step-by-step instructions for implementing the ChronoFlux website bas
 
 ---
 
-## 4. Turn System Without AI
+## 4. Turn System Without AI ✅
 
-1. **Turn storage (`convex/turns.ts`)**
+1. **Turn storage (`convex/turns.ts`)** ✅
    - Mutation: `submitTurn`:
      - Input: `gameId`, `playerAction` (string).
      - Create a `turns` document with placeholder `aiResponse`.
      - Increment `games.currentTurn`.
      - Optionally create a simple `events` entry for testing.
    - Query: `getTurnsForGame(gameId)` to power Event Log and History.
-2. **Wire `ActionInput` to Convex**
+2. **Wire `ActionInput` to Convex** ✅
    - In `ActionInput.svelte`, bind textarea to `playerAction`.
    - On submit, call `submitTurn` via Convex client.
    - After success, show `TurnSummary` with stub data and refresh turns.
-3. **Event Log & History**
+3. **Event Log & History** ✅
    - `EventLog.svelte`: display turns/events from `getTurnsForGame`.
    - `/history/[gameId]`: timeline view listing all turns with basic details.
 

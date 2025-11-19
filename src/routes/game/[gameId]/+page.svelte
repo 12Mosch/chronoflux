@@ -25,7 +25,7 @@
 			<WorldMap />
 		</div>
 		<div class="flex-none">
-			<ActionInput />
+			<ActionInput onturnsubmitted={() => (showTurnSummary = true)} />
 		</div>
 	</div>
 </div>

@@ -91,7 +91,7 @@ export default defineSchema({
 			worldStateChanges: v.any()
 		}),
 		timestamp: v.number()
-	}),
+	}).index('by_gameId', ['gameId']),
 
 	events: defineTable({
 		gameId: v.id('games'),
