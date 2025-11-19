@@ -4,7 +4,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Card from '$lib/components/ui/card';
-	import { Flag } from 'lucide-svelte';
+	import { Flag } from '@lucide/svelte';
 
 	// Subscribe to the store
 	$: ({ nationName, nationFlag, turn, year } = $gameState);
@@ -20,17 +20,17 @@
 						<Flag class="h-4 w-4" />
 					</Avatar.Fallback>
 				</Avatar.Root>
-				<div class="font-bold text-lg">{nationName}</div>
+				<div class="text-lg font-bold">{nationName}</div>
 			</div>
 
 			<div class="flex items-center gap-4">
 				<div class="flex items-center gap-2">
-					<span class="text-muted-foreground text-sm">Turn</span>
+					<span class="text-sm text-muted-foreground">Turn</span>
 					<Badge variant="secondary">{turn}</Badge>
 				</div>
 				<Separator orientation="vertical" class="h-6" />
 				<div class="flex items-center gap-2">
-					<span class="text-muted-foreground text-sm">Year</span>
+					<span class="text-sm text-muted-foreground">Year</span>
 					<Badge variant="outline">{year}</Badge>
 				</div>
 			</div>

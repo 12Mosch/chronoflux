@@ -9,9 +9,7 @@
 	<Dialog.Content>
 		<Dialog.Header>
 			<Dialog.Title>Turn Summary</Dialog.Title>
-			<Dialog.Description>
-				Here is what happened this turn.
-			</Dialog.Description>
+			<Dialog.Description>Here is what happened this turn.</Dialog.Description>
 		</Dialog.Header>
 		<div class="py-4">
 			<p>Summary details...</p>

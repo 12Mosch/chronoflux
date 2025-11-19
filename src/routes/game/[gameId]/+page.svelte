@@ -8,19 +8,19 @@
 	let showTurnSummary = false;
 </script>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full">
+<div class="grid h-full grid-cols-1 gap-4 lg:grid-cols-3">
 	<!-- Left Column: Nation Panel & Event Log -->
-	<div class="lg:col-span-1 flex flex-col gap-4">
+	<div class="flex flex-col gap-4 lg:col-span-1">
 		<div class="flex-none">
 			<NationPanel />
 		</div>
-		<div class="grow min-h-[300px]">
+		<div class="min-h-[300px] grow">
 			<EventLog />
 		</div>
 	</div>
 
 	<!-- Right Column: World Map & Action Input -->
-	<div class="lg:col-span-2 flex flex-col gap-4">
+	<div class="flex flex-col gap-4 lg:col-span-2">
 		<div class="grow">
 			<WorldMap />
 		</div>
