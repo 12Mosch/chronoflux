@@ -5,6 +5,7 @@
     "": {
       "name": "chronoflux",
       "dependencies": {
+        "@lucide/svelte": "^0.544.0",
         "convex": "^1.29.3",
         "convex-svelte": "^0.0.12",
       },
@@ -13,7 +14,6 @@
         "@eslint/js": "^9.38.0",
         "@inlang/paraglide-js": "^2.4.0",
         "@internationalized/date": "^3.8.1",
-        "@lucide/svelte": "^0.544.0",
         "@sveltejs/adapter-vercel": "^6.0.0",
         "@sveltejs/kit": "^2.47.1",
         "@sveltejs/vite-plugin-svelte": "^6.2.1",
