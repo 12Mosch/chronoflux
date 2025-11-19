@@ -1,4 +1,4 @@
-import { mutation, query } from './_generated/server';
+import { internalQuery, mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 
 const initialWorldStateValidator = v.object({
@@ -95,5 +95,14 @@ export const getScenario = query({
 	},
 	handler: async (ctx, args) => {
 		return await ctx.db.get(args.id);
+	}
+});
+
+export const getScenarioById = internalQuery({
+	args: {
+		scenarioId: v.id('scenarios')
+	},
+	handler: async (ctx, args) => {
+		return await ctx.db.get(args.scenarioId);
 	}
 });

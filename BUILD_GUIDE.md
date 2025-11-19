@@ -84,30 +84,33 @@ Practical, step-by-step instructions for implementing the ChronoFlux website bas
 
 ---
 
-## 5. Integrate Ollama & Qwen3
+## 5. Integrate Ollama & Qwen3 ✅
 
-1. **Verify Ollama locally**
+1. **Verify Ollama locally** ✅
    - Ensure `ollama serve` is running.
    - Test a simple request with Qwen3 from a terminal.
-2. **Ollama client (`src/lib/utils/ollama.ts`)**
+2. **Ollama client (`src/lib/utils/ollama.ts`)** ✅
    - Implement helper to call `http://localhost:11434/api/generate`:
      - Input: `prompt`, optional generation params.
      - Output: response text.
      - Add timeout (~30s) and basic retry (up to 3 times).
-3. **Convex AI integration (`convex/ai.ts`)**
-   - Action/mutation: `processTurnWithAI(gameId, playerAction)`:
+   - Test utility created in `src/lib/utils/testOllama.ts`.
+3. **Convex AI integration (`src/convex/ai.ts`)** ✅
+   - Action: `processTurnWithAI(gameId, playerAction)`:
      - Fetch world state (nations, relationships, recent events).
      - Build Action Interpretation prompt from `PROJECT_PLAN.md`.
-     - Call Ollama client; parse JSON result.
-     - Optionally send an Event Generation prompt.
+     - Call Ollama server-side; parse JSON result.
+     - Send Event Generation prompt.
      - Return events, resourceChanges, relationshipChanges, narrative.
-4. **Connect AI to `submitTurn`**
-   - Update `submitTurn` (or create `submitTurnWithAI`) to:
-     - Call `processTurnWithAI`.
-     - Persist `turns` document with full `aiResponse`.
-     - Create `events` documents.
-     - Update nations and relationships per AI output.
-     - Return data for `TurnSummary`.
+   - Internal queries created in `nations.ts`, `relationships.ts`, `scenarios.ts`.
+4. **Connect AI to `submitTurn`** ✅
+   - Created `submitTurnWithAI` action that:
+     - Calls `processTurnWithAI`.
+     - Persists `turns` document with full `aiResponse`.
+     - Creates `events` documents.
+     - Updates nations and relationships per AI output.
+     - Returns data for `TurnSummary`.
+   - Kept original `submitTurn` for backwards compatibility.
 
 ---
 

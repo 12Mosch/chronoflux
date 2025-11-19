@@ -327,7 +327,7 @@ Generate events in JSON format:
 ### Ollama Integration
 
 - **Endpoint**: `http://localhost:11434/api/generate`
-- **Model**: `qwen3:latest`
+- **Model**: `qwen3:8b`
 - **Timeout**: 30 seconds per request
 - **Retry Logic**: 3 attempts with exponential backoff
 - **Streaming**: Optional for real-time narrative generation
