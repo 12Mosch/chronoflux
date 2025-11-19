@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { api } from '../../convex/_generated/api.js';
 	import type { Doc } from '../../convex/_generated/dataModel';
@@ -50,7 +51,7 @@
 				playerNationId: selectedNationId
 			});
 
-			await goto(`/game/${gameId}`);
+			await goto(resolve(`/game/${gameId}`));
 		} catch (err) {
 			console.error(err);
 			createError = err instanceof Error ? err.message : 'Failed to create game';
@@ -77,8 +78,7 @@
 			</p>
 		{:else if !scenarios.data || scenarios.data.length === 0}
 			<p class="text-slate-300">
-				No scenarios are available yet. Seed scenarios in Convex or create one with the
-				editor.
+				No scenarios are available yet. Seed scenarios in Convex or create one with the editor.
 			</p>
 		{:else}
 			<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -107,12 +107,10 @@
 			{#if !selectedScenario}
 				<p class="text-sm text-muted-foreground">No scenario selected.</p>
 			{:else if availableNations.length === 0}
-				<p class="text-sm text-muted-foreground">
-					This scenario has no nations configured yet.
-				</p>
+				<p class="text-sm text-muted-foreground">This scenario has no nations configured yet.</p>
 			{:else}
 				<div class="mt-4 space-y-2">
-					{#each availableNations as nation}
+					{#each availableNations as nation (nation.id)}
 						<button
 							type="button"
 							class="w-full rounded-md border border-input bg-background px-3 py-2 text-left text-sm shadow-xs hover:bg-accent/60 data-[active=true]:bg-primary data-[active=true]:text-primary-foreground"
@@ -133,16 +131,15 @@
 			{/if}
 
 			<DialogFooter class="mt-6 flex justify-end gap-2">
-				<Button
-					variant="ghost"
-					onclick={() => (isNationDialogOpen = false)}
-					disabled={isCreating}
-				>
+				<Button variant="ghost" onclick={() => (isNationDialogOpen = false)} disabled={isCreating}>
 					Cancel
 				</Button>
 				<Button
 					onclick={startGame}
-					disabled={!selectedScenario || !selectedNationId || availableNations.length === 0 || isCreating}
+					disabled={!selectedScenario ||
+						!selectedNationId ||
+						availableNations.length === 0 ||
+						isCreating}
 				>
 					{#if isCreating}
 						Starting...

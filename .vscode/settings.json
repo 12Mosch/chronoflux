@@ -1,5 +1,6 @@
 {
 	"files.associations": {
 		"*.css": "tailwind"
-	}
+	},
+	"eslint.validate": ["javascript", "typescript", "svelte", "json", "jsonc"]
 }

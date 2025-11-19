@@ -27,7 +27,7 @@
 	const nationCount = $derived(scenario.initialWorldState.nations.length);
 </script>
 
-<Card class="h-full flex flex-col justify-between">
+<Card class="flex h-full flex-col justify-between">
 	<CardHeader class="space-y-1">
 		<CardTitle>{scenario.name}</CardTitle>
 		<CardDescription>
@@ -41,11 +41,7 @@
 		<p class="text-xs text-slate-400">Nations: {nationCount}</p>
 	</CardContent>
 	<CardFooter class="mt-auto flex justify-end">
-		<Button
-			size="sm"
-			onclick={() => onPlay?.(scenario)}
-			disabled={disabled || isCreating}
-		>
+		<Button size="sm" onclick={() => onPlay?.(scenario)} disabled={disabled || isCreating}>
 			{#if isCreating}
 				Starting...
 			{:else}
@@ -54,4 +50,3 @@
 		</Button>
 	</CardFooter>
 </Card>
-
