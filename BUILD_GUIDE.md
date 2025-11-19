@@ -53,10 +53,10 @@ Practical, step-by-step instructions for implementing the ChronoFlux website bas
    - Create `src/lib/components/scenarios/ScenarioCard.svelte`.
    - On load, call Convex `listScenarios` and render cards.
    - On "Play": open nation selection (inline or dialog), then call `createGame`, redirect to `/game/[gameId]`.
-3. **Game layout (`/game/+layout.svelte`)**
+3. **Game layout (`/game/+layout.svelte`)** ✅
    - Header with nation name/flag, current turn, year.
    - Slot for main game page content.
-4. **Main game page (`/game/[gameId]/+page.svelte`)**
+4. **Main game page (`/game/[gameId]/+page.svelte`)** ✅
    - Layout columns matching the plan:
      - Left: `NationPanel` + `EventLog`.
      - Right: `WorldMap` + `ActionInput` + `TurnSummary` dialog.

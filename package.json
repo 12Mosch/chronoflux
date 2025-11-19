@@ -55,6 +55,7 @@
 	},
 	"dependencies": {
 		"convex": "^1.29.3",
-		"convex-svelte": "^0.0.12"
+		"convex-svelte": "^0.0.12",
+		"lucide-svelte": "^0.554.0"
 	}
 }
