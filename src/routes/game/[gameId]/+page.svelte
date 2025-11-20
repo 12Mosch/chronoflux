@@ -11,7 +11,7 @@
 	import { gameState } from '$lib/stores/gameState';
 
 	const gameId = $derived(page.params.gameId as Id<'games'>);
-	const worldState = $derived(useQuery(api.games.getWorldState, gameId ? { gameId } : 'skip'));
+	const worldState = $derived(useQuery(api.world.getWorldState, gameId ? { gameId } : 'skip'));
 
 	let showTurnSummary = $state(false);
 
