@@ -37,6 +37,10 @@
 	<div class="flex h-full items-center justify-center">
 		<p class="text-destructive">Error loading game: {worldState.error.toString()}</p>
 	</div>
+{:else if worldState.data === null}
+	<div class="flex h-full items-center justify-center">
+		<p class="text-muted-foreground">Game not found.</p>
+	</div>
 {:else if worldState.data}
 	<div class="grid h-full grid-cols-1 gap-4 lg:grid-cols-3">
 		<!-- Left Column: Nation Panel & Event Log -->
