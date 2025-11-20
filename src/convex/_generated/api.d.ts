@@ -14,6 +14,7 @@ import type * as nations from "../nations.js";
 import type * as relationships from "../relationships.js";
 import type * as scenarios from "../scenarios.js";
 import type * as turns from "../turns.js";
+import type * as world from "../world.js";
 
 import type {
   ApiFromModules,
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   relationships: typeof relationships;
   scenarios: typeof scenarios;
   turns: typeof turns;
+  world: typeof world;
 }>;
 
 /**

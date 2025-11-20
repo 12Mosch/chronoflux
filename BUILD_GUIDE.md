@@ -114,15 +114,15 @@ Practical, step-by-step instructions for implementing the ChronoFlux website bas
 
 ---
 
-## 6. Game State Management
+## 6. Game State Management ✅
 
-1. **Nation updates (`convex/nations.ts`)**
+1. **Nation updates (`convex/nations.ts`)** ✅
    - Helpers to apply resource changes with clamping (e.g., 0–100).
    - Queries to fetch nations by `gameId`.
-2. **Relationships**
+2. **Relationships** ✅
    - Helpers to adjust `relationshipScore` (‑100 to 100) and set `status` (allied, at_war, etc.).
    - Query to fetch relationships by `gameId`.
-3. **World state query**
+3. **World state query** ✅
    - `getWorldState(gameId)` combining nations, relationships, maybe global state.
    - Use this in `/game/[gameId]` to populate `NationPanel` and `WorldMap`.
 

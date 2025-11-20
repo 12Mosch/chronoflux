@@ -11,7 +11,7 @@
 	import { gameState } from '$lib/stores/gameState';
 
 	const gameId = $derived(page.params.gameId as Id<'games'>);
-	const worldState = $derived(useQuery(api.games.getWorldState, gameId ? { gameId } : 'skip'));
+	const worldState = $derived(useQuery(api.world.getWorldState, gameId ? { gameId } : 'skip'));
 
 	let showTurnSummary = $state(false);
 
@@ -36,6 +36,10 @@
 {:else if worldState.error}
 	<div class="flex h-full items-center justify-center">
 		<p class="text-destructive">Error loading game: {worldState.error.toString()}</p>
+	</div>
+{:else if worldState.data === null}
+	<div class="flex h-full items-center justify-center">
+		<p class="text-muted-foreground">Game not found.</p>
 	</div>
 {:else if worldState.data}
 	<div class="grid h-full grid-cols-1 gap-4 lg:grid-cols-3">
