@@ -6,9 +6,23 @@
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
 	import { page } from '$app/state';
+	import { Loader2, Send } from '@lucide/svelte';
+
+	type TurnData = {
+		turnNumber: number;
+		playerAction: string;
+		narrative?: string;
+		consequences?: string;
+		events?: Array<{
+			type: string;
+			title: string;
+			description: string;
+		}>;
+		resourceChanges?: Record<string, number>;
+	} | null;
 
 	interface Props {
-		onturnsubmitted?: (event: { turnNumber: number }) => void;
+		onturnsubmitted?: (event: { turnData: TurnData }) => void;
 	}
 
 	let { onturnsubmitted }: Props = $props();
@@ -34,14 +48,19 @@
 		isSubmitting = true;
 		submitError = null; // Clear any previous errors
 		try {
-			const result = await convex.mutation(api.turns.submitTurn, {
+			// Use the AI action instead of the basic mutation
+			const result = await convex.action(api.turns.submitTurnWithAI, {
 				gameId,
 				playerAction
 			});
 
-			playerAction = '';
-			submitError = null; // Clear error on successful submission
-			onturnsubmitted?.({ turnNumber: result.turnNumber });
+			if (result.success) {
+				playerAction = '';
+				submitError = null; // Clear error on successful submission
+				onturnsubmitted?.({ turnData: result as TurnData });
+			} else {
+				throw new Error('Turn submission failed');
+			}
 		} catch (error) {
 			console.error('Failed to submit turn:', error);
 			// Set user-friendly error message
@@ -55,14 +74,17 @@
 	}
 </script>
 
-<Card.Root>
-	<Card.Header>
-		<Card.Title>Take Action</Card.Title>
+<Card.Root class="flex h-full flex-col">
+	<Card.Header class="pb-3">
+		<Card.Title class="flex items-center gap-2">
+			<Send class="h-5 w-5" />
+			Take Action
+		</Card.Title>
 	</Card.Header>
-	<Card.Content>
+	<Card.Content class="flex-1 pb-3">
 		<Textarea
-			placeholder="Describe your action..."
-			class="min-h-[100px]"
+			placeholder="Describe your action (e.g., 'Invest in military infrastructure', 'Propose a trade alliance with France')..."
+			class="h-full min-h-[100px] resize-none"
 			bind:value={playerAction}
 			disabled={isSubmitting}
 		/>
@@ -73,8 +95,13 @@
 		{/if}
 	</Card.Content>
 	<Card.Footer>
-		<Button onclick={handleSubmit} disabled={isSubmitting || !playerAction.trim()}>
-			{isSubmitting ? 'Submitting...' : 'Submit Turn'}
+		<Button onclick={handleSubmit} disabled={isSubmitting || !playerAction.trim()} class="w-full">
+			{#if isSubmitting}
+				<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+				Processing Turn...
+			{:else}
+				Submit Turn
+			{/if}
 		</Button>
 	</Card.Footer>
 </Card.Root>

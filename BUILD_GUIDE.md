@@ -128,17 +128,17 @@ Practical, step-by-step instructions for implementing the ChronoFlux website bas
 
 ---
 
-## 7. UI/UX Enhancements
+## 7. UI/UX Enhancements ✅
 
-1. **NationPanel**
+1. **NationPanel** ✅
    - Show government, resources (bars or badges), territories.
-2. **WorldMap**
+2. **WorldMap** ✅
    - Start with a static map or schematic; highlight player nation.
-3. **EventLog improvements**
+3. **EventLog improvements** ✅
    - Add filters by event type (political, military, etc.).
-4. **TurnSummary dialog**
+4. **TurnSummary dialog** ✅
    - Use shadcn Dialog to show action recap, events, resource deltas, narrative.
-5. **Polish**
+5. **Polish** ✅
    - Loading indicators during AI calls.
    - Responsive layout for mobile.
    - Dark/light theme via Tailwind + shadcn theme.

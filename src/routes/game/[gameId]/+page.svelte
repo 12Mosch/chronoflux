@@ -13,7 +13,21 @@
 	const gameId = $derived(page.params.gameId as Id<'games'>);
 	const worldState = $derived(useQuery(api.world.getWorldState, gameId ? { gameId } : 'skip'));
 
+	type TurnData = {
+		turnNumber: number;
+		playerAction: string;
+		narrative?: string;
+		consequences?: string;
+		events?: Array<{
+			type: string;
+			title: string;
+			description: string;
+		}>;
+		resourceChanges?: Record<string, number>;
+	} | null;
+
 	let showTurnSummary = $state(false);
+	let lastTurnData = $state<TurnData>(null);
 
 	// Update game state store when world state loads
 	$effect(() => {
@@ -27,6 +41,11 @@
 			});
 		}
 	});
+
+	function handleTurnSubmitted(event: { turnData: TurnData }) {
+		lastTurnData = event.turnData;
+		showTurnSummary = true;
+	}
 </script>
 
 {#if worldState.isLoading}
@@ -44,21 +63,21 @@
 {:else if worldState.data}
 	<div class="grid h-full grid-cols-1 gap-4 lg:grid-cols-3">
 		<!-- Left Column: Nation Panel & Event Log -->
-		<div class="flex flex-col gap-4 lg:col-span-1">
-			<div class="flex-none">
+		<div class="flex flex-col gap-4 lg:col-span-1 h-[calc(100vh-5rem)]">
+			<div class="flex-none h-1/2">
 				<NationPanel
 					playerNation={worldState.data.playerNation}
 					allNations={worldState.data.nations}
 				/>
 			</div>
-			<div class="min-h-[300px] grow">
+			<div class="flex-none h-1/2">
 				<EventLog />
 			</div>
 		</div>
 
 		<!-- Right Column: World Map & Action Input -->
-		<div class="flex flex-col gap-4 lg:col-span-2">
-			<div class="grow">
+		<div class="flex flex-col gap-4 lg:col-span-2 h-[calc(100vh-5rem)]">
+			<div class="flex-1 min-h-0">
 				<WorldMap
 					nations={worldState.data.nations}
 					relationships={worldState.data.relationships}
@@ -66,10 +85,10 @@
 				/>
 			</div>
 			<div class="flex-none">
-				<ActionInput onturnsubmitted={() => (showTurnSummary = true)} />
+				<ActionInput onturnsubmitted={handleTurnSubmitted} />
 			</div>
 		</div>
 	</div>
 
-	<TurnSummary bind:open={showTurnSummary} />
+	<TurnSummary bind:open={showTurnSummary} turnData={lastTurnData} />
 {/if}

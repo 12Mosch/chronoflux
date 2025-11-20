@@ -1,7 +1,7 @@
 import { action, mutation, query } from './_generated/server';
 import { api as fullApi } from './_generated/api';
 import { v } from 'convex/values';
-import { Id } from './_generated/dataModel';
+import type { Id } from './_generated/dataModel';
 
 // Use an untyped alias for `api` here to avoid circular type inference issues (TS7022/TS7023).
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,0 +1,31 @@
+
+> chronoflux@0.0.1 check
+> svelte-kit sync && svelte-check --tsconfig ./tsconfig.json
+
+Loading svelte-check in workspace: /home/moritz/Dokumente/repos/chronoflux
+Getting Svelte diagnostics...
+
+/home/moritz/Dokumente/repos/chronoflux/src/convex/games.ts:1:10
+Error: 'Id' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled. 
+import { Id } from './_generated/dataModel';
+import { mutation, query } from './_generated/server';
+
+/home/moritz/Dokumente/repos/chronoflux/src/convex/turns.ts:4:10
+Error: 'Id' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled. 
+import { v } from 'convex/values';
+import { Id } from './_generated/dataModel';
+
+/home/moritz/Dokumente/repos/chronoflux/src/lib/components/game/EventLog.svelte:159:9
+Error: `{@const}` must be the immediate child of `{#snippet}`, `{#if}`, `{:else if}`, `{:else}`, `{#each}`, `{:then}`, `{:catch}`, `<svelte:fragment>`, `<svelte:boundary` or `<Component>`
+https://svelte.dev/e/const_tag_invalid_placement (svelte)
+							<div class="ml-4 rounded-lg border bg-card p-3 shadow-sm">
+								{@const Icon = getEventTypeIcon(item.eventType)}
+								<div class="mb-1 flex items-center gap-2">
+
+/home/moritz/Dokumente/repos/chronoflux/src/routes/history/[gameId]/+page.svelte:8:28
+Error: Cannot find module 'lucide-svelte' or its corresponding type declarations. (ts)
+	import { Button } from '$lib/components/ui/button';
+	import { ArrowLeft } from 'lucide-svelte';
+
+====================================
+svelte-check found 4 errors and 0 warnings in 4 files
