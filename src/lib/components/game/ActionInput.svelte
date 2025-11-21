@@ -64,11 +64,12 @@
 					playerAction: currentAction,
 					narrative: result.narrative,
 					consequences: result.consequences,
-					events: result.events.map((e: { type: string; title: string; description: string }) => ({
-						type: e.type,
-						title: e.title,
-						description: e.description
-					})),
+					events:
+						result.events?.map((e: { type: string; title: string; description: string }) => ({
+							type: e.type,
+							title: e.title,
+							description: e.description
+						})) ?? [],
 					resourceChanges: result.resourceChanges
 				};
 

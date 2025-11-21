@@ -23,6 +23,8 @@
 	let { open = $bindable(false), turnData = null }: { open: boolean; turnData: TurnData } =
 		$props();
 
+	let activeTab: 'narrative' | 'events' | 'changes' = 'narrative';
+
 	function getChangeIcon(value: number) {
 		if (value > 0) return TrendingUp;
 		if (value < 0) return TrendingDown;
@@ -48,7 +50,7 @@
 		{#if !turnData}
 			<div class="py-8 text-center text-muted-foreground">Loading turn data...</div>
 		{:else}
-			<Tabs value="narrative" class="flex flex-1 flex-col overflow-hidden">
+			<Tabs bind:value={activeTab} class="flex flex-1 flex-col overflow-hidden">
 				<TabsList class="grid w-full grid-cols-3">
 					<TabsTrigger value="narrative">Narrative</TabsTrigger>
 					<TabsTrigger value="events">Events ({turnData.events?.length || 0})</TabsTrigger>

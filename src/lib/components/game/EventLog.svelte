@@ -65,6 +65,7 @@
 		playerAction: string;
 		narrative?: string;
 		id: string;
+		timestamp: number;
 	};
 
 	type EventItem = {
@@ -91,7 +92,8 @@
 				turnNumber: turn.turnNumber,
 				playerAction: turn.playerAction,
 				narrative: turn.aiResponse?.narrative,
-				id: `turn-${turn._id}`
+				id: `turn-${turn._id}`,
+				timestamp: turn.timestamp ?? turn._creationTime
 			});
 
 			// Add individual events
@@ -166,7 +168,7 @@
 								<div class="mb-1 flex items-center gap-2">
 									<span class="text-sm font-bold text-primary">Turn {item.turnNumber}</span>
 									<span class="text-xs text-muted-foreground">
-										{new Date().toLocaleDateString()}
+										{new Date(item.timestamp).toLocaleDateString()}
 									</span>
 								</div>
 								{#if activeFilter === 'all'}

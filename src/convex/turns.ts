@@ -168,19 +168,25 @@ export const persistTurnWithAIResponse = mutation({
 			const newResources = {
 				military: Math.max(
 					0,
-					currentResources.military + (args.aiResponse.resourceChanges.military || 0)
+					Math.min(100, currentResources.military + (args.aiResponse.resourceChanges.military || 0))
 				),
 				economy: Math.max(
 					0,
-					currentResources.economy + (args.aiResponse.resourceChanges.economy || 0)
+					Math.min(100, currentResources.economy + (args.aiResponse.resourceChanges.economy || 0))
 				),
 				stability: Math.max(
 					0,
-					currentResources.stability + (args.aiResponse.resourceChanges.stability || 0)
+					Math.min(
+						100,
+						currentResources.stability + (args.aiResponse.resourceChanges.stability || 0)
+					)
 				),
 				influence: Math.max(
 					0,
-					currentResources.influence + (args.aiResponse.resourceChanges.influence || 0)
+					Math.min(
+						100,
+						currentResources.influence + (args.aiResponse.resourceChanges.influence || 0)
+					)
 				)
 			};
 
