@@ -12,6 +12,16 @@ export const getNationById = internalQuery({
 });
 
 /**
+ * Get a specific nation by ID (public)
+ */
+export const getNation = query({
+	args: { nationId: v.id('nations') },
+	handler: async (ctx, args) => {
+		return await ctx.db.get(args.nationId);
+	}
+});
+
+/**
  * Get all nations for a game (internal)
  */
 export const getNationsForGame = internalQuery({
