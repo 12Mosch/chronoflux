@@ -145,7 +145,7 @@ Practical, step-by-step instructions for implementing the ChronoFlux website bas
 
 ---
 
-## 8. Scenario System
+## 8. Scenario System ✅
 
 1. **Scenario editor**
    - Optional internal route (e.g., `/scenarios/editor`).
