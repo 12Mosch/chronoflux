@@ -151,7 +151,7 @@ function parseAIJSON<T>(response: string): T {
 async function callOllama(prompt: string, temperature = 0.7): Promise<string> {
 	// Default to localhost, but allow override via localStorage for advanced users if needed
 	const OLLAMA_URL = localStorage.getItem('OLLAMA_URL') || 'http://localhost:11434';
-	const MODEL = localStorage.getItem('OLLAMA_MODEL') || 'qwen2.5:14b';
+	const MODEL = localStorage.getItem('OLLAMA_MODEL') || 'qwen3:8b';
 
 	try {
 		const response = await fetch(`${OLLAMA_URL}/api/generate`, {
@@ -179,7 +179,7 @@ async function callOllama(prompt: string, temperature = 0.7): Promise<string> {
 	} catch (error: unknown) {
 		if (error instanceof Error && error.message.includes('Failed to fetch')) {
 			throw new Error(
-				'Could not connect to Ollama. Please ensure:\n1. Ollama is running (`ollama serve`)\n2. CORS is enabled (`OLLAMA_ORIGINS="*"`)\n3. The model is pulled (`ollama pull qwen2.5:14b`)'
+				'Could not connect to Ollama. Please ensure:\n1. Ollama is running (`ollama serve`)\n2. CORS is enabled (`OLLAMA_ORIGINS="*"`)\n3. The model is pulled (`ollama pull qwen3:8b`)'
 			);
 		}
 		throw error;
