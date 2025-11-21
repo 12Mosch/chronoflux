@@ -1,3 +1,4 @@
+import convexPlugin from '@convex-dev/eslint-plugin';
 import prettier from 'eslint-config-prettier';
 import { fileURLToPath } from 'node:url';
 import { includeIgnoreFile } from '@eslint/compat';
@@ -9,6 +10,8 @@ import ts from 'typescript-eslint';
 import svelteConfig from './svelte.config.js';
 
 const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
+const recommendedConfig = convexPlugin.configs.recommended[0];
+const recommendedRules = recommendedConfig.rules;
 
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
@@ -37,5 +40,12 @@ export default defineConfig(
 				svelteConfig
 			}
 		}
+	},
+	{
+		files: ['**/src/convex/**/*.ts'],
+		plugins: {
+			'@convex-dev': convexPlugin
+		},
+		rules: recommendedRules
 	}
 );
