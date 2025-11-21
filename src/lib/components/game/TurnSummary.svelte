@@ -23,7 +23,7 @@
 	let { open = $bindable(false), turnData = null }: { open: boolean; turnData: TurnData } =
 		$props();
 
-	let activeTab: 'narrative' | 'events' | 'changes' = 'narrative';
+	let activeTab: 'narrative' | 'events' | 'changes' = $state('narrative');
 
 	function getChangeIcon(value: number) {
 		if (value > 0) return TrendingUp;
