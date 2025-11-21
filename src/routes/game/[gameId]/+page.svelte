@@ -63,21 +63,21 @@
 {:else if worldState.data}
 	<div class="grid h-full grid-cols-1 gap-4 lg:grid-cols-3">
 		<!-- Left Column: Nation Panel & Event Log -->
-		<div class="flex flex-col gap-4 lg:col-span-1 h-[calc(100vh-5rem)]">
-			<div class="flex-none h-1/2">
+		<div class="flex h-[calc(100vh-5rem)] flex-col gap-4 lg:col-span-1">
+			<div class="h-1/2 flex-none">
 				<NationPanel
 					playerNation={worldState.data.playerNation}
 					allNations={worldState.data.nations}
 				/>
 			</div>
-			<div class="flex-none h-1/2">
+			<div class="h-1/2 flex-none">
 				<EventLog />
 			</div>
 		</div>
 
 		<!-- Right Column: World Map & Action Input -->
-		<div class="flex flex-col gap-4 lg:col-span-2 h-[calc(100vh-5rem)]">
-			<div class="flex-1 min-h-0">
+		<div class="flex h-[calc(100vh-5rem)] flex-col gap-4 lg:col-span-2">
+			<div class="min-h-0 flex-1">
 				<WorldMap
 					nations={worldState.data.nations}
 					relationships={worldState.data.relationships}

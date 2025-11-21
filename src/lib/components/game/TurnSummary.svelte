@@ -20,7 +20,8 @@
 		resourceChanges?: Record<string, number>;
 	} | null;
 
-	let { open = $bindable(false), turnData = null }: { open: boolean; turnData: TurnData } = $props();
+	let { open = $bindable(false), turnData = null }: { open: boolean; turnData: TurnData } =
+		$props();
 
 	function getChangeIcon(value: number) {
 		if (value > 0) return TrendingUp;
@@ -36,7 +37,7 @@
 </script>
 
 <Dialog.Root bind:open>
-	<Dialog.Content class="max-w-3xl max-h-[90vh] flex flex-col">
+	<Dialog.Content class="flex max-h-[90vh] max-w-3xl flex-col">
 		<Dialog.Header>
 			<Dialog.Title class="text-2xl">Turn Complete</Dialog.Title>
 			<Dialog.Description>
@@ -47,31 +48,35 @@
 		{#if !turnData}
 			<div class="py-8 text-center text-muted-foreground">Loading turn data...</div>
 		{:else}
-			<Tabs value="narrative" class="flex-1 overflow-hidden flex flex-col">
+			<Tabs value="narrative" class="flex flex-1 flex-col overflow-hidden">
 				<TabsList class="grid w-full grid-cols-3">
 					<TabsTrigger value="narrative">Narrative</TabsTrigger>
 					<TabsTrigger value="events">Events ({turnData.events?.length || 0})</TabsTrigger>
 					<TabsTrigger value="changes">Changes</TabsTrigger>
 				</TabsList>
 
-				<div class="flex-1 overflow-hidden mt-4">
+				<div class="mt-4 flex-1 overflow-hidden">
 					<ScrollArea class="h-[400px] pr-4">
 						<!-- Narrative Tab -->
 						<TabsContent value="narrative" class="mt-0 space-y-4">
 							<div class="rounded-md bg-secondary/20 p-4">
-								<h4 class="mb-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+								<h4
+									class="mb-2 text-sm font-semibold tracking-wider text-muted-foreground uppercase"
+								>
 									Your Action
 								</h4>
-								<p class="italic text-foreground/80">"{turnData.playerAction}"</p>
+								<p class="text-foreground/80 italic">"{turnData.playerAction}"</p>
 							</div>
-							
+
 							<Separator />
 
 							<div>
-								<h4 class="mb-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+								<h4
+									class="mb-2 text-sm font-semibold tracking-wider text-muted-foreground uppercase"
+								>
 									Outcome
 								</h4>
-								<div class="prose prose-sm dark:prose-invert max-w-none">
+								<div class="prose prose-sm max-w-none dark:prose-invert">
 									<p class="leading-relaxed">{turnData.narrative}</p>
 								</div>
 							</div>
@@ -110,17 +115,21 @@
 							<!-- Resource Changes -->
 							{#if turnData.resourceChanges}
 								<div>
-									<h4 class="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+									<h4
+										class="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase"
+									>
 										Resource Updates
 									</h4>
 									<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
 										{#each Object.entries(turnData.resourceChanges) as [resource, change] (resource)}
 											{@const Icon = getChangeIcon(change as number)}
 											<div class="rounded-lg border bg-card p-3 text-center">
-												<div class="mb-1 text-xs font-medium uppercase text-muted-foreground">
+												<div class="mb-1 text-xs font-medium text-muted-foreground uppercase">
 													{resource}
 												</div>
-												<div class={`flex items-center justify-center gap-1 text-lg font-bold ${getChangeColor(change as number)}`}>
+												<div
+													class={`flex items-center justify-center gap-1 text-lg font-bold ${getChangeColor(change as number)}`}
+												>
 													<Icon class="h-4 w-4" />
 													<span>{(change as number) > 0 ? '+' : ''}{change}</span>
 												</div>
@@ -150,4 +159,3 @@
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>
-

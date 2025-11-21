@@ -55,9 +55,24 @@
 			});
 
 			if (result.success) {
+				const currentAction = playerAction;
 				playerAction = '';
 				submitError = null; // Clear error on successful submission
-				onturnsubmitted?.({ turnData: result as TurnData });
+
+				const turnData: TurnData = {
+					turnNumber: result.turnNumber,
+					playerAction: currentAction,
+					narrative: result.narrative,
+					consequences: result.consequences,
+					events: result.events.map((e: { type: string; title: string; description: string }) => ({
+						type: e.type,
+						title: e.title,
+						description: e.description
+					})),
+					resourceChanges: result.resourceChanges
+				};
+
+				onturnsubmitted?.({ turnData });
 			} else {
 				throw new Error('Turn submission failed');
 			}

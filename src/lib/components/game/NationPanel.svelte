@@ -13,9 +13,7 @@
 
 	let { playerNation, allNations }: Props = $props();
 
-	const otherNations = $derived(
-		allNations.filter((nation) => nation._id !== playerNation?._id)
-	);
+	const otherNations = $derived(allNations.filter((nation) => nation._id !== playerNation?._id));
 
 	function getResourceColor(value: number): string {
 		if (value >= 70) return 'bg-green-500';
@@ -52,7 +50,7 @@
 
 					<!-- Resources -->
 					<div class="space-y-4">
-						<h4 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+						<h4 class="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
 							Resources
 						</h4>
 
@@ -133,7 +131,7 @@
 					<div class="space-y-3">
 						<div class="flex items-center gap-2">
 							<MapPin class="h-4 w-4 text-muted-foreground" />
-							<h4 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+							<h4 class="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
 								Territories
 							</h4>
 						</div>
@@ -144,7 +142,7 @@
 								{/each}
 							</div>
 						{:else}
-							<p class="text-sm italic text-muted-foreground">No territories held.</p>
+							<p class="text-sm text-muted-foreground italic">No territories held.</p>
 						{/if}
 					</div>
 
@@ -153,7 +151,7 @@
 					<!-- Other Nations (Mini List) -->
 					{#if otherNations.length > 0}
 						<div class="space-y-3">
-							<h4 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+							<h4 class="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
 								Known World
 							</h4>
 							<div class="grid gap-2">
@@ -171,4 +169,3 @@
 		</ScrollArea>
 	</Card.Content>
 </Card.Root>
-

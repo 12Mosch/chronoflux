@@ -77,22 +77,10 @@ export const updateNationResources = internalMutation({
 
 		const currentResources = nation.resources;
 		const newResources = {
-			military: clamp(
-				currentResources.military + (args.resourceChanges.military || 0),
-				0,
-				100
-			),
+			military: clamp(currentResources.military + (args.resourceChanges.military || 0), 0, 100),
 			economy: clamp(currentResources.economy + (args.resourceChanges.economy || 0), 0, 100),
-			stability: clamp(
-				currentResources.stability + (args.resourceChanges.stability || 0),
-				0,
-				100
-			),
-			influence: clamp(
-				currentResources.influence + (args.resourceChanges.influence || 0),
-				0,
-				100
-			)
+			stability: clamp(currentResources.stability + (args.resourceChanges.stability || 0), 0, 100),
+			influence: clamp(currentResources.influence + (args.resourceChanges.influence || 0), 0, 100)
 		};
 
 		await ctx.db.patch(args.nationId, {

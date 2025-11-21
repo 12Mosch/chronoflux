@@ -129,40 +129,40 @@ export const seedScenarios = mutation({
 							name: 'Germany',
 							government: 'Empire',
 							resources: { military: 80, economy: 70, stability: 60, influence: 70 },
-							territories: ['Germany'],
+							territories: ['Germany']
 						},
 						{
 							id: 'france',
 							name: 'France',
 							government: 'Republic',
 							resources: { military: 70, economy: 60, stability: 50, influence: 60 },
-							territories: ['France'],
+							territories: ['France']
 						},
 						{
 							id: 'russia',
 							name: 'Russia',
 							government: 'Empire',
 							resources: { military: 60, economy: 40, stability: 30, influence: 50 },
-							territories: ['Russia'],
+							territories: ['Russia']
 						},
 						{
 							id: 'uk',
 							name: 'United Kingdom',
 							government: 'Monarchy',
 							resources: { military: 90, economy: 80, stability: 80, influence: 90 },
-							territories: ['UK'],
+							territories: ['UK']
 						},
 						{
 							id: 'austria',
 							name: 'Austria-Hungary',
 							government: 'Empire',
 							resources: { military: 50, economy: 40, stability: 20, influence: 40 },
-							territories: ['Austria'],
-						},
+							territories: ['Austria']
+						}
 					],
 					relationships: [],
-					globalEvents: ['Assassination of Archduke Franz Ferdinand'],
-				},
+					globalEvents: ['Assassination of Archduke Franz Ferdinand']
+				}
 			},
 			{
 				name: 'Cold War',
@@ -177,19 +177,19 @@ export const seedScenarios = mutation({
 							name: 'USA',
 							government: 'Democracy',
 							resources: { military: 90, economy: 95, stability: 80, influence: 90 },
-							territories: ['USA'],
+							territories: ['USA']
 						},
 						{
 							id: 'ussr',
 							name: 'USSR',
 							government: 'Communist State',
 							resources: { military: 90, economy: 60, stability: 50, influence: 80 },
-							territories: ['USSR'],
-						},
+							territories: ['USSR']
+						}
 					],
 					relationships: [],
-					globalEvents: ['Truman Doctrine'],
-				},
+					globalEvents: ['Truman Doctrine']
+				}
 			},
 			{
 				name: 'Ancient Rome',
@@ -204,19 +204,19 @@ export const seedScenarios = mutation({
 							name: 'Rome (Octavian)',
 							government: 'Republic',
 							resources: { military: 70, economy: 60, stability: 40, influence: 70 },
-							territories: ['Italy'],
+							territories: ['Italy']
 						},
 						{
 							id: 'rome_antony',
 							name: 'Rome (Antony)',
 							government: 'Republic',
 							resources: { military: 70, economy: 50, stability: 40, influence: 60 },
-							territories: ['Egypt'],
-						},
+							territories: ['Egypt']
+						}
 					],
 					relationships: [],
-					globalEvents: ['Ides of March'],
-				},
+					globalEvents: ['Ides of March']
+				}
 			},
 			{
 				name: 'Custom',
@@ -227,15 +227,21 @@ export const seedScenarios = mutation({
 				initialWorldState: {
 					nations: [],
 					relationships: [],
-					globalEvents: [],
-				},
-			},
+					globalEvents: []
+				}
+			}
 		];
 
-		for (const scenario of scenarios) {
-			await ctx.db.insert('scenarios', scenario);
-		}
+		await Promise.all(
+			scenarios.map(async (scenario) => {
+				try {
+					await ctx.db.insert('scenarios', scenario);
+				} catch (error) {
+					console.error(`Failed to seed scenario ${scenario.name}:`, error);
+				}
+			})
+		);
 
 		return 'Scenarios seeded';
-	},
+	}
 });

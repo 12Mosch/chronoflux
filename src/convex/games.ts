@@ -48,7 +48,11 @@ export const createGame = mutation({
 			relationshipScore: number;
 		};
 
-		const world = (scenario as unknown as { initialWorldState?: { nations?: unknown[]; relationships?: unknown[] } }).initialWorldState ?? { nations: [], relationships: [] };
+		const world = (
+			scenario as unknown as {
+				initialWorldState?: { nations?: unknown[]; relationships?: unknown[] };
+			}
+		).initialWorldState ?? { nations: [], relationships: [] };
 		const nations = (world.nations ?? []) as NationData[];
 		const relationships = (world.relationships ?? []) as RelationshipData[];
 
@@ -100,7 +104,7 @@ export const createGame = mutation({
 			updatedAt: Date.now()
 		});
 
-		return await ctx.db.get(gameId);
+		return gameId;
 	}
 });
 

@@ -66,9 +66,7 @@
 		}
 	}
 
-	const otherNations = $derived(
-		nations.filter((nation) => nation._id !== playerNation?._id)
-	);
+	const otherNations = $derived(nations.filter((nation) => nation._id !== playerNation?._id));
 </script>
 
 <Card.Root class="flex h-full min-h-[400px] flex-col overflow-hidden">
@@ -82,12 +80,12 @@
 		<div class="relative h-full w-full bg-secondary/20 p-6">
 			<!-- Central Player Node -->
 			{#if playerNation}
-				<div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform z-10">
+				<div class="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 transform">
 					<div
 						class="flex h-32 w-32 flex-col items-center justify-center rounded-full border-4 border-primary bg-background p-4 text-center shadow-xl ring-4 ring-primary/20"
 					>
 						<Crown class="mb-1 h-6 w-6 text-primary" />
-						<span class="font-bold leading-tight">{playerNation.name}</span>
+						<span class="leading-tight font-bold">{playerNation.name}</span>
 						<Badge variant="secondary" class="mt-1 text-[10px]">You</Badge>
 					</div>
 				</div>
@@ -100,7 +98,7 @@
 						{@const status = getRelationshipStatus(nation._id)}
 						{@const score = getRelationshipScore(nation._id)}
 						{@const StatusIcon = getStatusIcon(status)}
-						
+
 						<div class="flex items-center justify-center p-2">
 							<div
 								class={`flex h-24 w-24 flex-col items-center justify-center rounded-xl border-2 bg-background p-2 text-center shadow-sm transition-all hover:scale-105 hover:shadow-md ${getStatusColor(status)}`}
@@ -110,7 +108,9 @@
 									<StatusIcon class="h-3 w-3" />
 									<span class="text-[10px] font-medium capitalize">{status.replace('_', ' ')}</span>
 								</div>
-								<span class={`text-[10px] font-bold ${score >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+								<span
+									class={`text-[10px] font-bold ${score >= 0 ? 'text-green-600' : 'text-red-600'}`}
+								>
 									{score > 0 ? '+' : ''}{score}
 								</span>
 							</div>
@@ -125,4 +125,3 @@
 		</div>
 	</Card.Content>
 </Card.Root>
-

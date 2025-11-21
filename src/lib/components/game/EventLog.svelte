@@ -7,7 +7,14 @@
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
 	import { page } from '$app/state';
-	import { ListFilter, Newspaper, Swords, Handshake, TrendingUp, CircleAlert } from '@lucide/svelte';
+	import {
+		ListFilter,
+		Newspaper,
+		Swords,
+		Handshake,
+		TrendingUp,
+		CircleAlert
+	} from '@lucide/svelte';
 
 	const gameId = $derived(page.params.gameId as Id<'games'>);
 	const turns = $derived(useQuery(api.turns.getTurnsForGame, gameId ? { gameId } : 'skip'));
@@ -119,7 +126,7 @@
 				Event Log
 			</Card.Title>
 		</div>
-		
+
 		<!-- Filter Tabs -->
 		<div class="mt-2 flex gap-1 overflow-x-auto pb-1">
 			{#each filters as filter (filter.id)}
@@ -154,8 +161,8 @@
 				<div class="space-y-4 pt-2">
 					{#each displayItems as item (item.id)}
 						{#if item.type === 'turn_header'}
-							<div class="relative border-l-2 border-primary/20 pl-4 pt-2">
-								<div class="absolute -left-[5px] top-3 h-2.5 w-2.5 rounded-full bg-primary"></div>
+							<div class="relative border-l-2 border-primary/20 pt-2 pl-4">
+								<div class="absolute top-3 -left-[5px] h-2.5 w-2.5 rounded-full bg-primary"></div>
 								<div class="mb-1 flex items-center gap-2">
 									<span class="text-sm font-bold text-primary">Turn {item.turnNumber}</span>
 									<span class="text-xs text-muted-foreground">
@@ -163,7 +170,9 @@
 									</span>
 								</div>
 								{#if activeFilter === 'all'}
-									<div class="mb-2 rounded-md bg-secondary/30 p-2 text-xs italic text-muted-foreground">
+									<div
+										class="mb-2 rounded-md bg-secondary/30 p-2 text-xs text-muted-foreground italic"
+									>
 										"{item.playerAction}"
 									</div>
 									{#if item.narrative}
@@ -175,11 +184,14 @@
 							{@const Icon = getEventTypeIcon(item.eventType)}
 							<div class="ml-4 rounded-lg border bg-card p-3 shadow-sm">
 								<div class="mb-1 flex items-center gap-2">
-									<Badge variant="outline" class={`${getEventTypeColor(item.eventType)} capitalize`}>
+									<Badge
+										variant="outline"
+										class={`${getEventTypeColor(item.eventType)} capitalize`}
+									>
 										<Icon class="mr-1 h-3 w-3" />
 										{item.eventType}
 									</Badge>
-									<span class="font-semibold text-sm">{item.title}</span>
+									<span class="text-sm font-semibold">{item.title}</span>
 								</div>
 								<p class="text-xs text-muted-foreground">{item.description}</p>
 							</div>
@@ -190,4 +202,3 @@
 		</ScrollArea>
 	</Card.Content>
 </Card.Root>
-
