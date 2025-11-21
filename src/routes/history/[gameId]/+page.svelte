@@ -5,7 +5,7 @@
 	import type { Id } from '$convex/_generated/dataModel';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
-	import { ArrowLeft } from 'lucide-svelte';
+	import { ArrowLeft } from '@lucide/svelte';
 
 	const gameId = $derived(page.params.gameId as Id<'games'>);
 	const turns = $derived(useQuery(api.turns.getTurnsForGame, gameId ? { gameId } : 'skip'));

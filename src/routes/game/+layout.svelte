@@ -4,6 +4,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Separator } from '$lib/components/ui/separator';
 	import * as Card from '$lib/components/ui/card';
+	import ThemeToggle from '$lib/components/ui/ThemeToggle.svelte';
 	import { Flag } from '@lucide/svelte';
 
 	// Subscribe to the store
@@ -33,6 +34,8 @@
 					<span class="text-sm text-muted-foreground">Year</span>
 					<Badge variant="outline">{year}</Badge>
 				</div>
+				<Separator orientation="vertical" class="h-6" />
+				<ThemeToggle />
 			</div>
 		</Card.Content>
 	</Card.Root>

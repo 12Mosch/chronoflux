@@ -106,3 +106,142 @@ export const getScenarioById = internalQuery({
 		return await ctx.db.get(args.scenarioId);
 	}
 });
+
+export const seedScenarios = mutation({
+	args: {},
+	handler: async (ctx) => {
+		const existing = await ctx.db.query('scenarios').collect();
+		if (existing.length > 0) {
+			return 'Scenarios already seeded';
+		}
+
+		const scenarios = [
+			{
+				name: 'World War I',
+				description: 'The Great War begins in Europe.',
+				historicalPeriod: 'Early 20th Century',
+				startYear: 1914,
+				aiContext: 'Europe is a powder keg. Alliances are rigid. Nationalism is high.',
+				initialWorldState: {
+					nations: [
+						{
+							id: 'germany',
+							name: 'Germany',
+							government: 'Empire',
+							resources: { military: 80, economy: 70, stability: 60, influence: 70 },
+							territories: ['Germany']
+						},
+						{
+							id: 'france',
+							name: 'France',
+							government: 'Republic',
+							resources: { military: 70, economy: 60, stability: 50, influence: 60 },
+							territories: ['France']
+						},
+						{
+							id: 'russia',
+							name: 'Russia',
+							government: 'Empire',
+							resources: { military: 60, economy: 40, stability: 30, influence: 50 },
+							territories: ['Russia']
+						},
+						{
+							id: 'uk',
+							name: 'United Kingdom',
+							government: 'Monarchy',
+							resources: { military: 90, economy: 80, stability: 80, influence: 90 },
+							territories: ['UK']
+						},
+						{
+							id: 'austria',
+							name: 'Austria-Hungary',
+							government: 'Empire',
+							resources: { military: 50, economy: 40, stability: 20, influence: 40 },
+							territories: ['Austria']
+						}
+					],
+					relationships: [],
+					globalEvents: ['Assassination of Archduke Franz Ferdinand']
+				}
+			},
+			{
+				name: 'Cold War',
+				description: 'The world is divided between East and West.',
+				historicalPeriod: 'Post-WWII',
+				startYear: 1947,
+				aiContext: 'The Iron Curtain has descended. Nuclear proliferation is a threat.',
+				initialWorldState: {
+					nations: [
+						{
+							id: 'usa',
+							name: 'USA',
+							government: 'Democracy',
+							resources: { military: 90, economy: 95, stability: 80, influence: 90 },
+							territories: ['USA']
+						},
+						{
+							id: 'ussr',
+							name: 'USSR',
+							government: 'Communist State',
+							resources: { military: 90, economy: 60, stability: 50, influence: 80 },
+							territories: ['USSR']
+						}
+					],
+					relationships: [],
+					globalEvents: ['Truman Doctrine']
+				}
+			},
+			{
+				name: 'Ancient Rome',
+				description: 'The Republic is crumbling.',
+				historicalPeriod: 'Antiquity',
+				startYear: -44,
+				aiContext: 'Caesar has been assassinated. Civil war looms.',
+				initialWorldState: {
+					nations: [
+						{
+							id: 'rome_octavian',
+							name: 'Rome (Octavian)',
+							government: 'Republic',
+							resources: { military: 70, economy: 60, stability: 40, influence: 70 },
+							territories: ['Italy']
+						},
+						{
+							id: 'rome_antony',
+							name: 'Rome (Antony)',
+							government: 'Republic',
+							resources: { military: 70, economy: 50, stability: 40, influence: 60 },
+							territories: ['Egypt']
+						}
+					],
+					relationships: [],
+					globalEvents: ['Ides of March']
+				}
+			},
+			{
+				name: 'Custom',
+				description: 'A blank slate for your own history.',
+				historicalPeriod: 'Custom',
+				startYear: 2000,
+				aiContext: 'A custom scenario.',
+				initialWorldState: {
+					nations: [],
+					relationships: [],
+					globalEvents: []
+				}
+			}
+		];
+
+		await Promise.all(
+			scenarios.map(async (scenario) => {
+				try {
+					await ctx.db.insert('scenarios', scenario);
+				} catch (error) {
+					console.error(`Failed to seed scenario ${scenario.name}:`, error);
+				}
+			})
+		);
+
+		return 'Scenarios seeded';
+	}
+});

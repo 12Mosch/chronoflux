@@ -1,4 +1,4 @@
-import { Id } from './_generated/dataModel';
+import type { Id } from './_generated/dataModel';
 import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 
@@ -26,12 +26,38 @@ export const createGame = mutation({
 			updatedAt: now
 		});
 
-		const world = (scenario as any).initialWorldState ?? {};
-		const nations = (world.nations ?? []) as any[];
-		const relationships = (world.relationships ?? []) as any[];
+		type NationData = {
+			id?: string;
+			name: string;
+			government: string;
+			resources: {
+				military: number;
+				economy: number;
+				stability: number;
+				influence: number;
+			};
+			territories?: string[];
+		};
+
+		type RelationshipData = {
+			nation1Id?: string;
+			nation2Id?: string;
+			status: 'allied' | 'neutral' | 'hostile' | 'at_war';
+			tradeAgreements: boolean;
+			militaryAlliance: boolean;
+			relationshipScore: number;
+		};
+
+		const world = (
+			scenario as unknown as {
+				initialWorldState?: { nations?: unknown[]; relationships?: unknown[] };
+			}
+		).initialWorldState ?? { nations: [], relationships: [] };
+		const nations = (world.nations ?? []) as NationData[];
+		const relationships = (world.relationships ?? []) as RelationshipData[];
 
 		const nationIdMap: Record<string, Id<'nations'>> = {};
-		let playerNationDocId: any = null;
+		let playerNationDocId: Id<'nations'> | null = null;
 
 		for (const nation of nations) {
 			const insertedNationId = await ctx.db.insert('nations', {
@@ -78,7 +104,7 @@ export const createGame = mutation({
 			updatedAt: Date.now()
 		});
 
-		return await ctx.db.get(gameId);
+		return gameId;
 	}
 });
 

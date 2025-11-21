@@ -1,7 +1,7 @@
 import { action, mutation, query } from './_generated/server';
 import { api as fullApi } from './_generated/api';
 import { v } from 'convex/values';
-import { Id } from './_generated/dataModel';
+import type { Id } from './_generated/dataModel';
 
 // Use an untyped alias for `api` here to avoid circular type inference issues (TS7022/TS7023).
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -168,19 +168,25 @@ export const persistTurnWithAIResponse = mutation({
 			const newResources = {
 				military: Math.max(
 					0,
-					currentResources.military + (args.aiResponse.resourceChanges.military || 0)
+					Math.min(100, currentResources.military + (args.aiResponse.resourceChanges.military || 0))
 				),
 				economy: Math.max(
 					0,
-					currentResources.economy + (args.aiResponse.resourceChanges.economy || 0)
+					Math.min(100, currentResources.economy + (args.aiResponse.resourceChanges.economy || 0))
 				),
 				stability: Math.max(
 					0,
-					currentResources.stability + (args.aiResponse.resourceChanges.stability || 0)
+					Math.min(
+						100,
+						currentResources.stability + (args.aiResponse.resourceChanges.stability || 0)
+					)
 				),
 				influence: Math.max(
 					0,
-					currentResources.influence + (args.aiResponse.resourceChanges.influence || 0)
+					Math.min(
+						100,
+						currentResources.influence + (args.aiResponse.resourceChanges.influence || 0)
+					)
 				)
 			};
 

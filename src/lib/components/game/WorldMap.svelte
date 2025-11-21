@@ -1,6 +1,8 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
+	import { Badge } from '$lib/components/ui/badge';
 	import type { Doc } from '$convex/_generated/dataModel';
+	import { Crown, Users, Swords, Handshake, ShieldAlert } from '@lucide/svelte';
 
 	interface Props {
 		nations: Doc<'nations'>[];
@@ -37,112 +39,89 @@
 	function getStatusColor(status: string): string {
 		switch (status) {
 			case 'allied':
-				return 'bg-green-500';
+				return 'bg-green-500/10 border-green-500 text-green-700 dark:text-green-400';
 			case 'neutral':
-				return 'bg-gray-500';
+				return 'bg-gray-500/10 border-gray-500 text-gray-700 dark:text-gray-400';
 			case 'hostile':
-				return 'bg-orange-500';
+				return 'bg-orange-500/10 border-orange-500 text-orange-700 dark:text-orange-400';
 			case 'at_war':
-				return 'bg-red-500';
+				return 'bg-red-500/10 border-red-500 text-red-700 dark:text-red-400';
 			default:
-				return 'bg-gray-400';
+				return 'bg-gray-400/10 border-gray-400 text-gray-600';
 		}
 	}
 
-	function getStatusLabel(status: string): string {
+	function getStatusIcon(status: string) {
 		switch (status) {
 			case 'allied':
-				return 'Allied';
+				return Handshake;
 			case 'neutral':
-				return 'Neutral';
+				return Users;
 			case 'hostile':
-				return 'Hostile';
+				return ShieldAlert;
 			case 'at_war':
-				return 'At War';
+				return Swords;
 			default:
-				return 'Unknown';
+				return Users;
 		}
 	}
 
-	const otherNations = $derived(
-		nations.filter((nation) => nation._id !== playerNation?._id)
-	);
+	const otherNations = $derived(nations.filter((nation) => nation._id !== playerNation?._id));
 </script>
 
-<Card.Root class="h-full min-h-[400px]">
-	<Card.Header>
-		<Card.Title>World Overview</Card.Title>
+<Card.Root class="flex h-full min-h-[400px] flex-col overflow-hidden">
+	<Card.Header class="pb-2">
+		<Card.Title class="flex items-center gap-2">
+			<Users class="h-5 w-5" />
+			World Schematic
+		</Card.Title>
 	</Card.Header>
-	<Card.Content>
-		{#if nations.length === 0}
-			<div class="flex h-full items-center justify-center">
-				<p class="text-muted-foreground">No nations data available.</p>
-			</div>
-		{:else}
-			<div class="space-y-4">
-				<!-- Player Nation -->
-				{#if playerNation}
-					<div class="rounded-lg border-2 border-primary bg-primary/10 p-3">
-						<div class="mb-2 flex items-center justify-between">
-							<h3 class="font-bold">{playerNation.name}</h3>
-							<span class="rounded-md bg-primary px-2 py-1 text-xs text-primary-foreground">
-								You
-							</span>
-						</div>
-						<p class="text-xs text-muted-foreground">{playerNation.government}</p>
-						{#if playerNation.territories.length > 0}
-							<div class="mt-2 flex flex-wrap gap-1">
-								{#each playerNation.territories.slice(0, 3) as territory (territory)}
-									<span class="rounded bg-secondary px-1.5 py-0.5 text-xs">{territory}</span>
-								{/each}
-								{#if playerNation.territories.length > 3}
-									<span class="rounded bg-secondary px-1.5 py-0.5 text-xs">
-										+{playerNation.territories.length - 3} more
-									</span>
-								{/if}
-							</div>
-						{/if}
-					</div>
-				{/if}
-
-				<!-- Other Nations -->
-				<div>
-					<h4 class="mb-2 text-sm font-semibold">Other Nations</h4>
-					<div class="space-y-2">
-						{#each otherNations as nation (nation._id)}
-							{@const status = getRelationshipStatus(nation._id)}
-							{@const score = getRelationshipScore(nation._id)}
-							<div class="rounded-lg border border-border p-3">
-								<div class="mb-2 flex items-center justify-between">
-									<h4 class="font-medium">{nation.name}</h4>
-									<span class={`rounded-md px-2 py-1 text-xs text-white ${getStatusColor(status)}`}>
-										{getStatusLabel(status)}
-									</span>
-								</div>
-								<p class="text-xs text-muted-foreground">{nation.government}</p>
-								<div class="mt-2 flex items-center gap-2 text-xs">
-									<span class="text-muted-foreground">Relationship:</span>
-									<span class={score >= 0 ? 'text-green-600' : 'text-red-600'}>
-										{score > 0 ? '+' : ''}{score}
-									</span>
-								</div>
-								{#if nation.territories.length > 0}
-									<div class="mt-2 flex flex-wrap gap-1">
-										{#each nation.territories.slice(0, 2) as territory (territory)}
-											<span class="rounded bg-secondary px-1.5 py-0.5 text-xs">{territory}</span>
-										{/each}
-										{#if nation.territories.length > 2}
-											<span class="rounded bg-secondary px-1.5 py-0.5 text-xs">
-												+{nation.territories.length - 2} more
-											</span>
-										{/if}
-									</div>
-								{/if}
-							</div>
-						{/each}
+	<Card.Content class="flex-1 overflow-hidden p-0">
+		<div class="relative h-full w-full bg-secondary/20 p-6">
+			<!-- Central Player Node -->
+			{#if playerNation}
+				<div class="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 transform">
+					<div
+						class="flex h-32 w-32 flex-col items-center justify-center rounded-full border-4 border-primary bg-background p-4 text-center shadow-xl ring-4 ring-primary/20"
+					>
+						<Crown class="mb-1 h-6 w-6 text-primary" />
+						<span class="leading-tight font-bold">{playerNation.name}</span>
+						<Badge variant="secondary" class="mt-1 text-[10px]">You</Badge>
 					</div>
 				</div>
-			</div>
-		{/if}
+			{/if}
+
+			<!-- Other Nations in a Circle/Grid -->
+			{#if otherNations.length > 0}
+				<div class="grid h-full w-full grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+					{#each otherNations as nation (nation._id)}
+						{@const status = getRelationshipStatus(nation._id)}
+						{@const score = getRelationshipScore(nation._id)}
+						{@const StatusIcon = getStatusIcon(status)}
+
+						<div class="flex items-center justify-center p-2">
+							<div
+								class={`flex h-24 w-24 flex-col items-center justify-center rounded-xl border-2 bg-background p-2 text-center shadow-sm transition-all hover:scale-105 hover:shadow-md ${getStatusColor(status)}`}
+							>
+								<span class="line-clamp-2 text-xs font-bold">{nation.name}</span>
+								<div class="mt-1 flex items-center gap-1">
+									<StatusIcon class="h-3 w-3" />
+									<span class="text-[10px] font-medium capitalize">{status.replace('_', ' ')}</span>
+								</div>
+								<span
+									class={`text-[10px] font-bold ${score >= 0 ? 'text-green-600' : 'text-red-600'}`}
+								>
+									{score > 0 ? '+' : ''}{score}
+								</span>
+							</div>
+						</div>
+					{/each}
+				</div>
+			{:else}
+				<div class="flex h-full items-center justify-center text-muted-foreground">
+					No other nations known.
+				</div>
+			{/if}
+		</div>
 	</Card.Content>
 </Card.Root>
