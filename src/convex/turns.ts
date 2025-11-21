@@ -238,12 +238,15 @@ export const persistTurnWithAIResponse = mutation({
 		}
 
 		// Convert AI events to database events with nation IDs
-		const eventsForDB = args.aiResponse.events.map((event) => ({
-			...event,
-			affectedNations: event.affected_nations
-				.map((name) => nationNameToId.get(name))
-				.filter((id): id is Id<'nations'> => id !== undefined)
-		}));
+		const eventsForDB = args.aiResponse.events.map((event) => {
+			const { affected_nations, ...rest } = event;
+			return {
+				...rest,
+				affectedNations: affected_nations
+					.map((name) => nationNameToId.get(name))
+					.filter((id): id is Id<'nations'> => id !== undefined)
+			};
+		});
 
 		// Insert turn document
 		const turnId = await ctx.db.insert('turns', {
