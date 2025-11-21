@@ -1,5 +1,46 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
+	import { useConvexClient } from 'convex-svelte';
+	import { api } from '../convex/_generated/api';
+	import { onMount } from 'svelte';
+	import { getOrCreateUserId } from '$lib/utils';
+	import GameCard from '$lib/components/game/GameCard.svelte';
+	import type { Doc } from '../convex/_generated/dataModel';
+
+	const client = useConvexClient();
+	let games = $state<Doc<'games'>[]>([]);
+	let scenarios = $state<Record<string, Doc<'scenarios'>>>({});
+	let nations = $state<Record<string, Doc<'nations'>>>({});
+	let loading = $state(true);
+
+	onMount(async () => {
+		const userId = getOrCreateUserId();
+		if (userId) {
+			// Fetch games
+			const userGames = await client.query(api.games.listGamesForUser, { playerId: userId });
+			games = userGames;
+
+			// Fetch related data for each game
+			for (const game of userGames) {
+				// Fetch scenario if not already cached
+				if (!scenarios[game.scenarioId]) {
+					const scenario = await client.query(api.scenarios.getScenario, { id: game.scenarioId });
+					if (scenario) {
+						scenarios[game.scenarioId] = scenario;
+					}
+				}
+
+				// Fetch player nation if applicable
+				if (game.playerNationId && !nations[game.playerNationId]) {
+					const nation = await client.query(api.nations.getNation, { id: game.playerNationId });
+					if (nation) {
+						nations[game.playerNationId] = nation;
+					}
+				}
+			}
+		}
+		loading = false;
+	});
 </script>
 
 <div class="min-h-screen bg-linear-to-b from-slate-900 to-slate-800 text-white">
@@ -21,6 +62,25 @@
 			</Button>
 		</div>
 	</div>
+
+	<!-- Continue Game Section -->
+	{#if !loading && games.length > 0}
+		<div class="container mx-auto px-4 py-8">
+			<div class="mb-6 flex items-center justify-between">
+				<h2 class="text-2xl font-bold">Continue Playing</h2>
+			</div>
+
+			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+				{#each games as game (game._id)}
+					<GameCard
+						{game}
+						scenarioName={scenarios[game.scenarioId]?.name || 'Unknown Scenario'}
+						nationName={nations[game.playerNationId || '']?.name}
+					/>
+				{/each}
+			</div>
+		</div>
+	{/if}
 
 	<!-- Features Section -->
 	<div class="container mx-auto px-4 py-16">
