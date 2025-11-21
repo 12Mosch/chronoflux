@@ -190,3 +190,74 @@ export const getWorldState = query({
 		};
 	}
 });
+
+/**
+ * Get context for AI processing
+ * Fetches player nation, resources, relationships, and recent events
+ */
+export const getGameContext = query({
+	args: {
+		gameId: v.id('games')
+	},
+	handler: async (ctx, args) => {
+		const game = await ctx.db.get(args.gameId);
+		if (!game) throw new Error('Game not found');
+
+		const scenario = await ctx.db.get(game.scenarioId);
+		if (!scenario) throw new Error('Scenario not found');
+
+		const playerNation = game.playerNationId ? await ctx.db.get(game.playerNationId) : null;
+		if (!playerNation) throw new Error('Player nation not found');
+
+		// Get all nations for name resolution
+		const allNations = await ctx.db
+			.query('nations')
+			.filter((q) => q.eq(q.field('gameId'), args.gameId))
+			.collect();
+
+		// Get relationships involving player
+		const relationships = await ctx.db
+			.query('relationships')
+			.filter((q) =>
+				q.and(
+					q.eq(q.field('gameId'), args.gameId),
+					q.or(
+						q.eq(q.field('nation1Id'), playerNation._id),
+						q.eq(q.field('nation2Id'), playerNation._id)
+					)
+				)
+			)
+			.collect();
+
+		// Get recent turns for events
+		const recentTurns = await ctx.db
+			.query('turns')
+			.withIndex('by_gameId', (q) => q.eq('gameId', args.gameId))
+			.order('desc')
+			.take(3);
+
+		const recentEvents = recentTurns.flatMap((turn) => turn.aiResponse.events.map((e) => e.title));
+
+		// Format relationships for AI
+		const formattedRelationships = relationships.map((rel) => {
+			const otherNationId = rel.nation1Id === playerNation._id ? rel.nation2Id : rel.nation1Id;
+			const otherNation = allNations.find((n) => n._id === otherNationId);
+			return {
+				name: otherNation?.name || 'Unknown',
+				status: rel.status,
+				score: rel.relationshipScore
+			};
+		});
+
+		return {
+			playerNationName: playerNation.name,
+			currentYear: scenario.startYear + game.currentTurn - 1,
+			turnNumber: game.currentTurn,
+			worldState: {
+				playerResources: playerNation.resources,
+				relationships: formattedRelationships,
+				recentEvents
+			}
+		};
+	}
+});

@@ -1,11 +1,6 @@
-import { action, mutation, query } from './_generated/server';
-import { api as fullApi } from './_generated/api';
+import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
-
-// Use an untyped alias for `api` here to avoid circular type inference issues (TS7022/TS7023).
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const api: any = fullApi;
 
 export const submitTurn = mutation({
 	args: { gameId: v.id('games'), playerAction: v.string() },
@@ -54,35 +49,6 @@ export const getTurnsForGame = query({
 			.withIndex('by_gameId', (q) => q.eq('gameId', args.gameId))
 			.order('desc')
 			.collect();
-	}
-});
-
-/**
- * Submit turn with AI processing
- * This action:
- * 1. Calls AI to process the player action
- * 2. Creates events based on AI response
- * 3. Updates nation resources
- * 4. Updates relationships
- * 5. Persists the turn with full AI response
- */
-export const submitTurnWithAI = action({
-	args: { gameId: v.id('games'), playerAction: v.string() },
-	handler: async (ctx, args) => {
-		// Get AI response
-		const aiResponse = await ctx.runAction(api.ai.processTurnWithAI, {
-			gameId: args.gameId,
-			playerAction: args.playerAction
-		});
-
-		// Call mutation to persist the turn and update state
-		const result = await ctx.runMutation(api.turns.persistTurnWithAIResponse, {
-			gameId: args.gameId,
-			playerAction: args.playerAction,
-			aiResponse
-		});
-
-		return result;
 	}
 });
 

@@ -6,7 +6,9 @@
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
 	import { page } from '$app/state';
-	import { Loader2, Send } from '@lucide/svelte';
+	import { LoaderCircle, Send } from '@lucide/svelte';
+
+	import { processTurnWithLocalAI } from '$lib/ai';
 
 	type TurnData = {
 		turnNumber: number;
@@ -48,10 +50,18 @@
 		isSubmitting = true;
 		submitError = null; // Clear any previous errors
 		try {
-			// Use the AI action instead of the basic mutation
-			const result = await convex.action(api.turns.submitTurnWithAI, {
+			// 1. Fetch game context
+			const gameContext = await convex.query(api.games.getGameContext, { gameId });
+			if (!gameContext) throw new Error('Failed to load game context');
+
+			// 2. Process with local AI
+			const aiResponse = await processTurnWithLocalAI(playerAction, gameContext);
+
+			// 3. Persist results
+			const result = await convex.mutation(api.turns.persistTurnWithAIResponse, {
 				gameId,
-				playerAction
+				playerAction,
+				aiResponse
 			});
 
 			if (result.success) {
@@ -113,7 +123,7 @@
 	<Card.Footer>
 		<Button onclick={handleSubmit} disabled={isSubmitting || !playerAction.trim()} class="w-full">
 			{#if isSubmitting}
-				<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
 				Processing Turn...
 			{:else}
 				Submit Turn
