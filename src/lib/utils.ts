@@ -15,10 +15,27 @@ export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?:
 export function getOrCreateUserId(): string {
 	if (typeof window === 'undefined') return '';
 
-	let userId = localStorage.getItem('chronoflux_user_id');
-	if (!userId) {
-		userId = crypto.randomUUID();
-		localStorage.setItem('chronoflux_user_id', userId);
+	let userId: string | null = null;
+	try {
+		userId = localStorage.getItem('chronoflux_user_id');
+		if (!userId) {
+			try {
+				userId = crypto.randomUUID();
+			} catch {
+				userId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+			}
+			localStorage.setItem('chronoflux_user_id', userId);
+		}
+		return userId;
+	} catch {
+		// If we have a generated userId (e.g. setItem failed), return it.
+		if (userId) return userId;
+
+		// Otherwise (e.g. getItem failed), generate a temporary one.
+		try {
+			return crypto.randomUUID();
+		} catch {
+			return Math.random().toString(36).substring(2) + Date.now().toString(36);
+		}
 	}
-	return userId;
 }

@@ -5,41 +5,79 @@
 	import { onMount } from 'svelte';
 	import { getOrCreateUserId } from '$lib/utils';
 	import GameCard from '$lib/components/game/GameCard.svelte';
-	import type { Doc } from '../convex/_generated/dataModel';
+	import type { Doc, Id } from '../convex/_generated/dataModel';
 
 	const client = useConvexClient();
 	let games = $state<Doc<'games'>[]>([]);
 	let scenarios = $state<Record<string, Doc<'scenarios'>>>({});
 	let nations = $state<Record<string, Doc<'nations'>>>({});
 	let loading = $state(true);
+	let error = $state<string | null>(null);
 
 	onMount(async () => {
-		const userId = getOrCreateUserId();
-		if (userId) {
-			// Fetch games
-			const userGames = await client.query(api.games.listGamesForUser, { playerId: userId });
-			games = userGames;
+		try {
+			const userId = getOrCreateUserId();
+			if (userId) {
+				// Fetch games
+				const userGames = await client.query(api.games.listGamesForUser, { playerId: userId });
+				games = userGames;
 
-			// Fetch related data for each game
-			for (const game of userGames) {
-				// Fetch scenario if not already cached
-				if (!scenarios[game.scenarioId]) {
-					const scenario = await client.query(api.scenarios.getScenario, { id: game.scenarioId });
-					if (scenario) {
-						scenarios[game.scenarioId] = scenario;
+				// Fetch related data for each game
+				const scenarioIds: Record<string, boolean> = {};
+				const nationIds: Record<string, boolean> = {};
+
+				for (const game of userGames) {
+					if (!scenarios[game.scenarioId]) {
+						scenarioIds[game.scenarioId] = true;
+					}
+					if (game.playerNationId && !nations[game.playerNationId]) {
+						nationIds[game.playerNationId] = true;
 					}
 				}
 
-				// Fetch player nation if applicable
-				if (game.playerNationId && !nations[game.playerNationId]) {
-					const nation = await client.query(api.nations.getNation, { id: game.playerNationId });
-					if (nation) {
-						nations[game.playerNationId] = nation;
-					}
+				const [fetchedScenarios, fetchedNations] = await Promise.all([
+					Promise.all(
+						Object.keys(scenarioIds).map(async (id) => {
+							try {
+								const scenario = await client.query(api.scenarios.getScenario, {
+									id: id as Id<'scenarios'>
+								});
+								return { id, scenario };
+							} catch (e) {
+								console.error(`Failed to fetch scenario ${id}`, e);
+								return { id, scenario: null };
+							}
+						})
+					),
+					Promise.all(
+						Object.keys(nationIds).map(async (id) => {
+							try {
+								const nation = await client.query(api.nations.getNation, {
+									nationId: id as Id<'nations'>
+								});
+								return { id, nation };
+							} catch (e) {
+								console.error(`Failed to fetch nation ${id}`, e);
+								return { id, nation: null };
+							}
+						})
+					)
+				]);
+
+				for (const { id, scenario } of fetchedScenarios) {
+					if (scenario) scenarios[id] = scenario;
+				}
+
+				for (const { id, nation } of fetchedNations) {
+					if (nation) nations[id] = nation;
 				}
 			}
+		} catch (e) {
+			console.error('Failed to load user games', e);
+			error = 'Failed to load your games. Please try again later.';
+		} finally {
+			loading = false;
 		}
-		loading = false;
 	});
 </script>
 
@@ -61,6 +99,12 @@
 				Start New Game
 			</Button>
 		</div>
+
+		{#if error}
+			<div class="mt-8 rounded bg-red-900/50 p-4 text-red-200">
+				{error}
+			</div>
+		{/if}
 	</div>
 
 	<!-- Continue Game Section -->
