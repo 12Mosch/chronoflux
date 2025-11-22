@@ -48,6 +48,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>ChronoFlux - {worldState.data?.scenario?.name || 'Game'}</title>
+</svelte:head>
+
 {#if worldState.isLoading}
 	<div class="flex h-full items-center justify-center">
 		<p class="text-muted-foreground">Loading game state...</p>

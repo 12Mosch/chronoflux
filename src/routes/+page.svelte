@@ -81,6 +81,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>ChronoFlux</title>
+</svelte:head>
+
 <div class="min-h-screen bg-linear-to-b from-slate-900 to-slate-800 text-white">
 	<!-- Hero Section -->
 	<div class="container mx-auto px-4 py-20 text-center">

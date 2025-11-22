@@ -11,6 +11,10 @@
 	const turns = $derived(useQuery(api.turns.getTurnsForGame, gameId ? { gameId } : 'skip'));
 </script>
 
+<svelte:head>
+	<title>ChronoFlux - History</title>
+</svelte:head>
+
 <div class="container mx-auto p-4">
 	<Button variant="ghost" class="mb-4" onclick={() => history.back()}>
 		<ArrowLeft class="mr-2 h-4 w-4" />

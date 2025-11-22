@@ -112,6 +112,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>ChronoFlux - Scenarios</title>
+</svelte:head>
+
 <div class="min-h-screen bg-slate-950 text-white">
 	<div class="container mx-auto px-4 py-10">
 		<div class="mb-12 text-center">
