@@ -9,6 +9,7 @@
 	import { LoaderCircle, Send } from '@lucide/svelte';
 
 	import { processTurnWithLocalAI } from '$lib/ai';
+	import OllamaErrorDialog from './OllamaErrorDialog.svelte';
 
 	type TurnData = {
 		turnNumber: number;
@@ -34,6 +35,8 @@
 	let playerAction = $state('');
 	let isSubmitting = $state(false);
 	let submitError = $state<string | null>(null);
+	let showOllamaErrorDialog = $state(false);
+	let ollamaErrorMessage = $state('');
 
 	const gameId = $derived(page.params.gameId as Id<'games'>);
 
@@ -89,11 +92,20 @@
 			}
 		} catch (error) {
 			console.error('Failed to submit turn:', error);
-			// Set user-friendly error message
-			submitError =
-				error instanceof Error
-					? `Failed to submit turn: ${error.message}`
-					: 'An unexpected error occurred while submitting your turn. Please try again.';
+
+			// Check if this is an Ollama connection error
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			if (errorMessage.includes('Could not connect to Ollama')) {
+				// Show the friendly Ollama error dialog
+				ollamaErrorMessage = errorMessage;
+				showOllamaErrorDialog = true;
+			} else {
+				// Set user-friendly error message for other errors
+				submitError =
+					error instanceof Error
+						? `Failed to submit turn: ${error.message}`
+						: 'An unexpected error occurred while submitting your turn. Please try again.';
+			}
 		} finally {
 			isSubmitting = false;
 		}
@@ -131,3 +143,6 @@
 		</Button>
 	</Card.Footer>
 </Card.Root>
+
+<!-- Ollama Error Dialog -->
+<OllamaErrorDialog bind:open={showOllamaErrorDialog} errorMessage={ollamaErrorMessage} />

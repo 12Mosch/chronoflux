@@ -216,7 +216,11 @@ export async function processTurnWithLocalAI(
 		actionResponse = parseAIJSON<AIActionResponse>(rawActionResponse);
 	} catch (error) {
 		console.error('Failed to parse AI action response:', error);
-		// Fallback response
+		// Re-throw connection errors - user needs to fix their Ollama setup
+		if (error instanceof Error && error.message.includes('Could not connect to Ollama')) {
+			throw error;
+		}
+		// For other errors (like JSON parsing), use fallback response
 		actionResponse = {
 			feasibility: 'medium',
 			immediate_consequences: ['Action being evaluated...'],
@@ -240,7 +244,11 @@ export async function processTurnWithLocalAI(
 		events = parseAIJSON<AIEventResponse[]>(rawEventResponse);
 	} catch (error) {
 		console.error('Failed to parse AI event response:', error);
-		// Generate a basic event as fallback
+		// Re-throw connection errors
+		if (error instanceof Error && error.message.includes('Could not connect to Ollama')) {
+			throw error;
+		}
+		// For other errors (like JSON parsing), generate a basic event as fallback
 		events = [
 			{
 				type: 'other',
