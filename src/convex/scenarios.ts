@@ -74,7 +74,8 @@ export const createOrUpdateScenario = mutation({
 			historicalPeriod: args.period,
 			startYear: args.startYear,
 			initialWorldState: args.initialWorldState,
-			aiContext: args.aiContext
+			aiContext: args.aiContext,
+			isUserCreated: true
 		});
 
 		return await ctx.db.get(id);
@@ -243,5 +244,39 @@ export const seedScenarios = mutation({
 		);
 
 		return 'Scenarios seeded';
+	}
+});
+
+export const deleteScenario = mutation({
+	args: {
+		id: v.id('scenarios')
+	},
+	handler: async (ctx, args) => {
+		// Get the scenario to check if it's user-created
+		const scenario = await ctx.db.get(args.id);
+
+		if (!scenario) {
+			throw new Error('Scenario not found');
+		}
+
+		// Only allow deletion of user-created scenarios
+		if (!scenario.isUserCreated) {
+			throw new Error('Cannot delete pre-defined scenarios');
+		}
+
+		// Check if there are any games using this scenario
+		const gamesUsingScenario = await ctx.db
+			.query('games')
+			.filter((q) => q.eq(q.field('scenarioId'), args.id))
+			.collect();
+
+		if (gamesUsingScenario.length > 0) {
+			throw new Error('Cannot delete scenario that is being used in active games');
+		}
+
+		// Delete the scenario
+		await ctx.db.delete(args.id);
+
+		return { success: true };
 	}
 });
