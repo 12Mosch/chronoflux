@@ -49,7 +49,8 @@ export default defineSchema({
 			),
 			globalEvents: v.array(v.string())
 		}),
-		aiContext: v.string()
+		aiContext: v.string(),
+		isUserCreated: v.optional(v.boolean())
 	}),
 
 	nations: defineTable({
