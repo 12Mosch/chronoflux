@@ -267,11 +267,13 @@ export const deleteScenario = mutation({
 		// Check if there are any games using this scenario
 		const gamesUsingScenario = await ctx.db
 			.query('games')
-			.filter((q) => q.eq(q.field('scenarioId'), args.id))
+			.filter((q) =>
+				q.and(q.eq(q.field('scenarioId'), args.id), q.neq(q.field('status'), 'completed'))
+			)
 			.collect();
 
 		if (gamesUsingScenario.length > 0) {
-			throw new Error('Cannot delete scenario that is being used in active games');
+			throw new Error('Cannot delete scenario that is being used in active or paused games');
 		}
 
 		// Delete the scenario

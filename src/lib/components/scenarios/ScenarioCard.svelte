@@ -51,6 +51,7 @@
 					}}
 					class="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 opacity-20 transition-all hover:bg-red-900/20 hover:text-red-400 hover:opacity-100"
 					title="Delete scenario"
+					aria-label="Delete scenario"
 				>
 					<Trash2 class="h-4 w-4" />
 				</button>

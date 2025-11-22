@@ -31,6 +31,8 @@
 	let createError = $state<string | null>(null);
 	let isCreating = $state(false);
 	let deleteError = $state<string | null>(null);
+	let scenarioToDelete = $state<ScenarioDoc | null>(null);
+	let isDeleteDialogOpen = $state(false);
 
 	let searchQuery = $state('');
 	let selectedEra = $state('All Eras');
@@ -61,17 +63,23 @@
 		isNationDialogOpen = true;
 	}
 
-	async function handleDelete(scenario: ScenarioDoc) {
-		if (!confirm(`Are you sure you want to delete "${scenario.name}"?`)) {
-			return;
-		}
+	function handleDelete(scenario: ScenarioDoc) {
+		scenarioToDelete = scenario;
+		deleteError = null;
+		isDeleteDialogOpen = true;
+	}
+
+	async function confirmDelete() {
+		if (!scenarioToDelete) return;
 
 		try {
 			deleteError = null;
 			await client.mutation(api.scenarios.deleteScenario, {
-				id: scenario._id
+				id: scenarioToDelete._id
 			});
 			// The query will automatically refetch and update the UI
+			isDeleteDialogOpen = false;
+			scenarioToDelete = null;
 		} catch (err) {
 			console.error(err);
 			deleteError = err instanceof Error ? err.message : 'Failed to delete scenario';
@@ -140,6 +148,7 @@
 							class="rounded-full border border-slate-700 bg-slate-900/50 px-4 py-1.5 text-sm text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
 							class:bg-slate-700={selectedEra === era}
 							class:text-white={selectedEra === era}
+							aria-pressed={selectedEra === era}
 							onclick={() => (selectedEra = era)}
 						>
 							{era}
@@ -282,6 +291,41 @@
 					{:else}
 						Start Game
 					{/if}
+				</Button>
+			</DialogFooter>
+		</DialogContent>
+	</Dialog>
+
+	<!-- Delete Confirmation Dialog -->
+	<Dialog bind:open={isDeleteDialogOpen}>
+		<DialogContent class="max-w-md border-slate-700 bg-slate-900 text-white">
+			<DialogHeader>
+				<DialogTitle class="text-xl">Delete Scenario</DialogTitle>
+				<DialogDescription class="text-slate-400">
+					Are you sure you want to delete "{scenarioToDelete?.name}"? This action cannot be undone.
+				</DialogDescription>
+			</DialogHeader>
+
+			{#if deleteError}
+				<div class="rounded-lg border border-red-900/50 bg-red-950/30 p-3 text-sm text-red-400">
+					{deleteError}
+				</div>
+			{/if}
+
+			<DialogFooter class="flex justify-end gap-2">
+				<Button
+					variant="ghost"
+					class="text-slate-300 hover:bg-slate-800 hover:text-white"
+					onclick={() => {
+						isDeleteDialogOpen = false;
+						scenarioToDelete = null;
+						deleteError = null;
+					}}
+				>
+					Cancel
+				</Button>
+				<Button class="bg-red-600 text-white hover:bg-red-700" onclick={confirmDelete}>
+					Delete
 				</Button>
 			</DialogFooter>
 		</DialogContent>
