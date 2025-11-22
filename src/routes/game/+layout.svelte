@@ -6,6 +6,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import ThemeToggle from '$lib/components/ui/ThemeToggle.svelte';
 	import { Flag } from '@lucide/svelte';
+	import * as m from '$lib/paraglide/messages';
 
 	// Subscribe to the store
 	$: ({ nationName, nationFlag, turn, year } = $gameState);
@@ -26,12 +27,12 @@
 
 			<div class="flex items-center gap-4">
 				<div class="flex items-center gap-2">
-					<span class="text-sm text-muted-foreground">Turn</span>
+					<span class="text-sm text-muted-foreground">{m.turn()}</span>
 					<Badge variant="secondary">{turn}</Badge>
 				</div>
 				<Separator orientation="vertical" class="h-6" />
 				<div class="flex items-center gap-2">
-					<span class="text-sm text-muted-foreground">Year</span>
+					<span class="text-sm text-muted-foreground">{m.year()}</span>
 					<Badge variant="outline">{year}</Badge>
 				</div>
 				<Separator orientation="vertical" class="h-6" />

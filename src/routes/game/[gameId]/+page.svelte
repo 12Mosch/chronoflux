@@ -9,6 +9,7 @@
 	import type { Id } from '$convex/_generated/dataModel';
 	import { page } from '$app/state';
 	import { gameState } from '$lib/stores/gameState';
+	import * as m from '$lib/paraglide/messages';
 
 	const gameId = $derived(page.params.gameId as Id<'games'>);
 	const worldState = $derived(useQuery(api.world.getWorldState, gameId ? { gameId } : 'skip'));
@@ -49,20 +50,20 @@
 </script>
 
 <svelte:head>
-	<title>ChronoFlux - {worldState.data?.scenario?.name || 'Game'}</title>
+	<title>ChronoFlux - {worldState.data?.scenario?.name || m.game_default_title()}</title>
 </svelte:head>
 
 {#if worldState.isLoading}
 	<div class="flex h-full items-center justify-center">
-		<p class="text-muted-foreground">Loading game state...</p>
+		<p class="text-muted-foreground">{m.loading_game_state()}</p>
 	</div>
 {:else if worldState.error}
 	<div class="flex h-full items-center justify-center">
-		<p class="text-destructive">Error loading game: {worldState.error.toString()}</p>
+		<p class="text-destructive">{m.error_loading_game({ error: worldState.error.toString() })}</p>
 	</div>
 {:else if worldState.data === null}
 	<div class="flex h-full items-center justify-center">
-		<p class="text-muted-foreground">Game not found.</p>
+		<p class="text-muted-foreground">{m.game_not_found()}</p>
 	</div>
 {:else if worldState.data}
 	<div class="grid h-full grid-cols-1 gap-4 lg:grid-cols-3">

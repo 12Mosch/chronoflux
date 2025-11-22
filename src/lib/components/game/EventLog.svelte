@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as m from '$lib/paraglide/messages';
 	import * as Card from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
@@ -21,13 +22,13 @@
 
 	let activeFilter = $state('all');
 
-	const filters = [
-		{ id: 'all', label: 'All', icon: ListFilter },
-		{ id: 'political', label: 'Political', icon: Newspaper },
-		{ id: 'military', label: 'Military', icon: Swords },
-		{ id: 'diplomatic', label: 'Diplomatic', icon: Handshake },
-		{ id: 'economic', label: 'Economic', icon: TrendingUp }
-	];
+	const filters = $derived([
+		{ id: 'all', label: m.filter_all(), icon: ListFilter },
+		{ id: 'political', label: m.filter_political(), icon: Newspaper },
+		{ id: 'military', label: m.filter_military(), icon: Swords },
+		{ id: 'diplomatic', label: m.filter_diplomatic(), icon: Handshake },
+		{ id: 'economic', label: m.filter_economic(), icon: TrendingUp }
+	]);
 
 	function getEventTypeIcon(type: string) {
 		switch (type) {
@@ -125,7 +126,7 @@
 		<div class="flex items-center justify-between">
 			<Card.Title class="flex items-center gap-2">
 				<Newspaper class="h-5 w-5" />
-				Event Log
+				{m.event_log_title()}
 			</Card.Title>
 		</div>
 
@@ -149,15 +150,15 @@
 		<ScrollArea class="h-full px-6 pb-6">
 			{#if turns.isLoading}
 				<div class="flex h-20 items-center justify-center text-muted-foreground">
-					Loading events...
+					{m.loading_events()}
 				</div>
 			{:else if turns.error}
 				<div class="flex h-20 items-center justify-center text-destructive">
-					Error loading events.
+					{m.error_loading_events()}
 				</div>
 			{:else if displayItems.length === 0}
 				<div class="flex h-20 items-center justify-center text-muted-foreground">
-					No events found.
+					{m.no_events_found()}
 				</div>
 			{:else}
 				<div class="space-y-4 pt-2">
@@ -166,7 +167,9 @@
 							<div class="relative border-l-2 border-primary/20 pt-2 pl-4">
 								<div class="absolute top-3 -left-[5px] h-2.5 w-2.5 rounded-full bg-primary"></div>
 								<div class="mb-1 flex items-center gap-2">
-									<span class="text-sm font-bold text-primary">Turn {item.turnNumber}</span>
+									<span class="text-sm font-bold text-primary"
+										>{m.turn_header({ turnNumber: item.turnNumber })}</span
+									>
 									<span class="text-xs text-muted-foreground">
 										{new Date(item.timestamp).toLocaleDateString()}
 									</span>

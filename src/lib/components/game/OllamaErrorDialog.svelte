@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as m from '$lib/paraglide/messages';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Button } from '$lib/components/ui/button';
 	import { TriangleAlert, ExternalLink, Check } from '@lucide/svelte';
@@ -15,16 +16,20 @@
 	const helpSteps = $derived(() => {
 		if (errorMessage.includes('Could not connect to Ollama')) {
 			return [
-				{ label: 'Start Ollama', command: 'ollama serve', description: 'Ensure Ollama is running' },
 				{
-					label: 'Enable CORS',
-					command: 'OLLAMA_ORIGINS="*"',
-					description: 'Allow browser connections'
+					label: m.step_start_ollama(),
+					command: 'ollama serve',
+					description: m.step_start_ollama_desc()
 				},
 				{
-					label: 'Pull the model',
+					label: m.step_enable_cors(),
+					command: 'OLLAMA_ORIGINS="*"',
+					description: m.step_enable_cors_desc()
+				},
+				{
+					label: m.step_pull_model(),
 					command: 'ollama pull qwen3:8b',
-					description: 'Download the required AI model'
+					description: m.step_pull_model_desc()
 				}
 			];
 		}
@@ -50,9 +55,9 @@
 					<TriangleAlert class="h-6 w-6 text-red-600 dark:text-red-500" />
 				</div>
 				<div>
-					<Dialog.Title class="text-xl">Unable to Connect to Ollama</Dialog.Title>
+					<Dialog.Title class="text-xl">{m.ollama_error_title()}</Dialog.Title>
 					<Dialog.Description>
-						ChronoFlux needs a local Ollama instance to process AI turns
+						{m.ollama_error_desc()}
 					</Dialog.Description>
 				</div>
 			</div>
@@ -69,7 +74,7 @@
 			<!-- Steps to Fix -->
 			{#if helpSteps().length > 0}
 				<div>
-					<h4 class="mb-3 font-semibold text-foreground">How to Fix:</h4>
+					<h4 class="mb-3 font-semibold text-foreground">{m.how_to_fix()}</h4>
 					<ol class="space-y-3">
 						{#each helpSteps() as step, index (step.label)}
 							<li class="flex gap-3">
@@ -96,9 +101,9 @@
 											>
 												{#if copiedCommand === step.command}
 													<Check class="mr-1 h-3 w-3" />
-													Copied!
+													{m.copied()}
 												{:else}
-													Copy
+													{m.copy()}
 												{/if}
 											</Button>
 										</div>
@@ -112,24 +117,23 @@
 
 			<!-- Additional Resources -->
 			<div class="rounded-md border bg-muted/50 p-4">
-				<h4 class="mb-2 font-semibold text-foreground">Need More Help?</h4>
+				<h4 class="mb-2 font-semibold text-foreground">{m.need_more_help()}</h4>
 				<p class="mb-3 text-sm text-muted-foreground">
-					Check the official Ollama documentation for detailed setup instructions and
-					troubleshooting.
+					{m.ollama_docs_desc()}
 				</p>
 				<Button variant="outline" size="sm" onclick={() => window.open(OLLAMA_DOCS_URL, '_blank')}>
 					<ExternalLink class="mr-2 h-4 w-4" />
-					Open Ollama Documentation
+					{m.open_ollama_docs()}
 				</Button>
 			</div>
 		</div>
 
 		<Dialog.Footer>
 			<Button onclick={() => (open = false)} variant="outline" class="w-full sm:w-auto">
-				Close
+				{m.close()}
 			</Button>
 			<Button onclick={() => window.location.reload()} class="w-full sm:w-auto">
-				Retry Connection
+				{m.retry_connection()}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>

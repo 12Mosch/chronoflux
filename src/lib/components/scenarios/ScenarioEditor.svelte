@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as m from '$lib/paraglide/messages';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
@@ -41,63 +42,63 @@
 				aiContext,
 				initialWorldState
 			});
-			alert('Scenario saved!');
+			alert(m.scenario_saved());
 			await goto(resolve('/scenarios'));
 		} catch (e: unknown) {
 			const errorMessage = e instanceof Error ? e.message : String(e);
-			alert('Error saving scenario: ' + errorMessage);
+			alert(m.error_saving_scenario({ error: errorMessage }));
 		}
 	}
 </script>
 
 <Card class="mx-auto mt-8 w-full max-w-2xl">
 	<CardHeader>
-		<CardTitle>{scenario ? 'Edit Scenario' : 'Create New Scenario'}</CardTitle>
+		<CardTitle>{scenario ? m.edit_scenario_title() : m.create_scenario_title()}</CardTitle>
 	</CardHeader>
 	<CardContent class="space-y-4">
 		<div class="space-y-2">
-			<label for="name" class="text-sm font-medium">Name</label>
-			<Input id="name" bind:value={name} placeholder="Scenario Name" />
+			<label for="name" class="text-sm font-medium">{m.name_label()}</label>
+			<Input id="name" bind:value={name} placeholder={m.scenario_name_placeholder()} />
 		</div>
 
 		<div class="space-y-2">
-			<label for="description" class="text-sm font-medium">Description</label>
+			<label for="description" class="text-sm font-medium">{m.description_label()}</label>
 			<Textarea
 				id="description"
 				bind:value={description}
-				placeholder="Brief description of the scenario"
+				placeholder={m.scenario_desc_placeholder()}
 			/>
 		</div>
 
 		<div class="grid grid-cols-2 gap-4">
 			<div class="space-y-2">
-				<label for="period" class="text-sm font-medium">Historical Period</label>
-				<Input id="period" bind:value={historicalPeriod} placeholder="e.g. Cold War" />
+				<label for="period" class="text-sm font-medium">{m.period_label()}</label>
+				<Input id="period" bind:value={historicalPeriod} placeholder={m.period_placeholder()} />
 			</div>
 			<div class="space-y-2">
-				<label for="year" class="text-sm font-medium">Start Year</label>
+				<label for="year" class="text-sm font-medium">{m.start_year_label()}</label>
 				<Input id="year" type="number" bind:value={startYear} />
 			</div>
 		</div>
 
 		<div class="space-y-2">
-			<label for="aiContext" class="text-sm font-medium">AI Context</label>
+			<label for="aiContext" class="text-sm font-medium">{m.ai_context_label()}</label>
 			<Textarea
 				id="aiContext"
 				bind:value={aiContext}
-				placeholder="Historical context for the AI..."
+				placeholder={m.ai_context_placeholder()}
 				class="h-24"
 			/>
 		</div>
 
 		<div class="space-y-2">
-			<label for="worldState" class="text-sm font-medium">Initial World State (JSON)</label>
+			<label for="worldState" class="text-sm font-medium">{m.initial_world_state_label()}</label>
 			<Textarea id="worldState" bind:value={initialWorldStateJSON} class="h-64 font-mono text-xs" />
 			<p class="text-xs text-muted-foreground">
-				Edit the JSON directly to configure nations and relationships.
+				{m.json_edit_hint()}
 			</p>
 		</div>
 
-		<Button onclick={saveScenario} class="w-full">Save Scenario</Button>
+		<Button onclick={saveScenario} class="w-full">{m.save_scenario_button()}</Button>
 	</CardContent>
 </Card>
