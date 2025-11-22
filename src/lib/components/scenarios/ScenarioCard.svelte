@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as m from '$lib/paraglide/messages';
 	import type { Doc } from '../../../convex/_generated/dataModel';
 	import {
 		Card,
@@ -50,8 +51,8 @@
 						onDelete?.(scenario);
 					}}
 					class="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 opacity-20 transition-all hover:bg-red-900/20 hover:text-red-400 hover:opacity-100"
-					title="Delete scenario"
-					aria-label="Delete scenario"
+					title={m.delete_scenario_label()}
+					aria-label={m.delete_scenario_label()}
 				>
 					<Trash2 class="h-4 w-4" />
 				</button>
@@ -63,7 +64,7 @@
 			{scenario.description}
 		</p>
 		<div class="flex items-center gap-2 text-sm text-slate-400">
-			<span>Nations: {nationCount}</span>
+			<span>{m.nations_count({ count: nationCount })}</span>
 		</div>
 	</CardContent>
 	<CardFooter class="mt-auto pt-4">
@@ -74,9 +75,9 @@
 			disabled={disabled || isCreating}
 		>
 			{#if isCreating}
-				Starting...
+				{m.starting()}
 			{:else}
-				PLAY
+				{m.play_button()}
 			{/if}
 		</Button>
 	</CardFooter>

@@ -13,7 +13,8 @@
 		"format": "prettier --write .",
 		"lint": "bun run format && eslint --fix .",
 		"test:unit": "vitest",
-		"test": "bun run test:unit -- --run"
+		"test": "bun run test:unit -- --run",
+		"translate": "bunx @inlang/paraglide-js compile"
 	},
 	"devDependencies": {
 		"@convex-dev/eslint-plugin": "^1.0.0",

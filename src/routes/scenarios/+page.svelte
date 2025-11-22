@@ -5,6 +5,7 @@
 	import { api } from '../../convex/_generated/api.js';
 	import type { Doc } from '../../convex/_generated/dataModel';
 	import { Search, Plus } from '@lucide/svelte';
+	import * as m from '$lib/paraglide/messages';
 
 	import ScenarioCard from '$lib/components/scenarios/ScenarioCard.svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -35,7 +36,7 @@
 	let isDeleteDialogOpen = $state(false);
 
 	let searchQuery = $state('');
-	let selectedEra = $state('All Eras');
+	let selectedEra = $state(m.all_eras());
 
 	const availableNations = $derived<NationConfig[]>(
 		selectedScenario?.initialWorldState.nations ?? []
@@ -46,13 +47,13 @@
 			const matchesSearch =
 				scenario.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
 				scenario.description.toLowerCase().includes(searchQuery.toLowerCase());
-			const matchesEra = selectedEra === 'All Eras' || scenario.historicalPeriod === selectedEra;
+			const matchesEra = selectedEra === m.all_eras() || scenario.historicalPeriod === selectedEra;
 			return matchesSearch && matchesEra;
 		}) ?? []
 	);
 
 	const uniqueEras = $derived([
-		'All Eras',
+		m.all_eras(),
 		...Array.from(new Set(scenarios.data?.map((s) => s.historicalPeriod) ?? []))
 	]);
 
@@ -82,7 +83,7 @@
 			scenarioToDelete = null;
 		} catch (err) {
 			console.error(err);
-			deleteError = err instanceof Error ? err.message : 'Failed to delete scenario';
+			deleteError = err instanceof Error ? err.message : m.failed_delete_scenario();
 			// Show error for 5 seconds
 			setTimeout(() => {
 				deleteError = null;
@@ -105,7 +106,7 @@
 			await goto(resolve(`/game/${gameId}`));
 		} catch (err) {
 			console.error(err);
-			createError = err instanceof Error ? err.message : 'Failed to create game';
+			createError = err instanceof Error ? err.message : m.failed_create_game();
 		} finally {
 			isCreating = false;
 		}
@@ -113,19 +114,19 @@
 </script>
 
 <svelte:head>
-	<title>ChronoFlux - Scenarios</title>
+	<title>ChronoFlux - {m.scenarios_title()}</title>
 </svelte:head>
 
 <div class="min-h-screen bg-slate-950 text-white">
 	<div class="container mx-auto px-4 py-10">
 		<div class="mb-12 text-center">
-			<h1 class="mb-8 text-5xl font-bold tracking-tight md:text-6xl">Choose Your History</h1>
+			<h1 class="mb-8 text-5xl font-bold tracking-tight md:text-6xl">{m.scenarios_title()}</h1>
 
 			<div class="relative mx-auto mb-8 max-w-2xl">
 				<Search class="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-400" />
 				<Input
 					type="search"
-					placeholder="Search Scenarios..."
+					placeholder={m.search_placeholder()}
 					class="h-12 rounded-full border-slate-700 bg-slate-900/50 pl-10 text-lg text-white placeholder:text-slate-500 focus-visible:ring-slate-600"
 					bind:value={searchQuery}
 				/>
@@ -133,10 +134,10 @@
 
 			<div class="flex flex-wrap items-center justify-center gap-4">
 				<div class="flex items-center gap-2">
-					<span class="text-slate-400">Era</span>
+					<span class="text-slate-400">{m.era_label()}</span>
 					<Select type="single" bind:value={selectedEra}>
 						<SelectTrigger class="w-[180px] border-slate-700 bg-slate-900/50 text-white">
-							{selectedEra || 'Select Era'}
+							{selectedEra || m.select_era()}
 						</SelectTrigger>
 						<SelectContent class="border-slate-700 bg-slate-900 text-white">
 							{#each uniqueEras as era (era)}
@@ -147,7 +148,7 @@
 				</div>
 
 				<div class="flex flex-wrap gap-2">
-					{#each uniqueEras.filter((e) => e !== 'All Eras').slice(0, 3) as era (era)}
+					{#each uniqueEras.filter((e) => e !== m.all_eras()).slice(0, 3) as era (era)}
 						<button
 							class="rounded-full border border-slate-700 bg-slate-900/50 px-4 py-1.5 text-sm text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
 							class:bg-slate-700={selectedEra === era}
@@ -178,26 +179,26 @@
 			</div>
 		{:else if scenarios.error}
 			<div class="rounded-lg border border-red-900/50 bg-red-950/30 p-6 text-center text-red-400">
-				<p>Failed to load scenarios: {scenarios.error.toString()}</p>
+				<p>{m.failed_load_scenarios({ error: scenarios.error.toString() })}</p>
 			</div>
 		{:else if !scenarios.data || scenarios.data.length === 0}
 			<div
 				class="rounded-lg border border-slate-800 bg-slate-900/50 p-12 text-center text-slate-400"
 			>
-				<p class="text-xl">No scenarios found.</p>
-				<p class="mt-2">Seed the database to get started.</p>
+				<p class="text-xl">{m.no_scenarios_found()}</p>
+				<p class="mt-2">{m.seed_database()}</p>
 			</div>
 		{:else if filteredScenarios.length === 0}
 			<div class="py-20 text-center text-slate-400">
-				<p class="text-xl">No scenarios match your search.</p>
+				<p class="text-xl">{m.no_matches()}</p>
 				<Button
 					variant="link"
 					onclick={() => {
 						searchQuery = '';
-						selectedEra = 'All Eras';
+						selectedEra = m.all_eras();
 					}}
 				>
-					Clear filters
+					{m.clear_filters()}
 				</Button>
 			</div>
 		{:else}
@@ -214,8 +215,8 @@
 							<Plus class="h-8 w-8 text-slate-400 transition-colors group-hover:text-blue-400" />
 						</div>
 						<div>
-							<h3 class="text-xl font-bold text-white">Create New Scenario</h3>
-							<p class="mt-2 text-sm text-slate-400">Design your own historical scenario</p>
+							<h3 class="text-xl font-bold text-white">{m.create_new_scenario()}</h3>
+							<p class="mt-2 text-sm text-slate-400">{m.create_scenario_desc()}</p>
 						</div>
 					</div>
 				</a>
@@ -236,18 +237,18 @@
 	<Dialog bind:open={isNationDialogOpen}>
 		<DialogContent class="max-w-lg border-slate-700 bg-slate-900 text-white">
 			<DialogHeader>
-				<DialogTitle class="text-xl">Select Nation</DialogTitle>
+				<DialogTitle class="text-xl">{m.select_nation_title()}</DialogTitle>
 				{#if selectedScenario}
 					<DialogDescription class="text-slate-400">
-						Choose a nation to play in "{selectedScenario.name}".
+						{m.choose_nation_desc({ scenarioName: selectedScenario.name })}
 					</DialogDescription>
 				{/if}
 			</DialogHeader>
 
 			{#if !selectedScenario}
-				<p class="text-sm text-slate-400">No scenario selected.</p>
+				<p class="text-sm text-slate-400">{m.no_scenario_selected()}</p>
 			{:else if availableNations.length === 0}
-				<p class="text-sm text-slate-400">This scenario has no nations configured yet.</p>
+				<p class="text-sm text-slate-400">{m.no_nations_configured()}</p>
 			{:else}
 				<div class="mt-4 max-h-[60vh] space-y-2 overflow-y-auto pr-2">
 					{#each availableNations as nation (nation.id)}
@@ -280,7 +281,7 @@
 					onclick={() => (isNationDialogOpen = false)}
 					disabled={isCreating}
 				>
-					Cancel
+					{m.cancel()}
 				</Button>
 				<Button
 					class="bg-blue-600 text-white hover:bg-blue-700"
@@ -291,9 +292,9 @@
 						isCreating}
 				>
 					{#if isCreating}
-						Starting...
+						{m.starting()}
 					{:else}
-						Start Game
+						{m.start_game()}
 					{/if}
 				</Button>
 			</DialogFooter>
@@ -304,9 +305,9 @@
 	<Dialog bind:open={isDeleteDialogOpen}>
 		<DialogContent class="max-w-md border-slate-700 bg-slate-900 text-white">
 			<DialogHeader>
-				<DialogTitle class="text-xl">Delete Scenario</DialogTitle>
+				<DialogTitle class="text-xl">{m.delete_scenario_title()}</DialogTitle>
 				<DialogDescription class="text-slate-400">
-					Are you sure you want to delete "{scenarioToDelete?.name}"? This action cannot be undone.
+					{m.delete_scenario_confirm({ scenarioName: scenarioToDelete?.name || '' })}
 				</DialogDescription>
 			</DialogHeader>
 
@@ -326,10 +327,10 @@
 						deleteError = null;
 					}}
 				>
-					Cancel
+					{m.cancel()}
 				</Button>
 				<Button class="bg-red-600 text-white hover:bg-red-700" onclick={confirmDelete}>
-					Delete
+					{m.delete()}
 				</Button>
 			</DialogFooter>
 		</DialogContent>

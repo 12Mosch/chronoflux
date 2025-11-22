@@ -6,6 +6,7 @@
 	import { getOrCreateUserId } from '$lib/utils';
 	import GameCard from '$lib/components/game/GameCard.svelte';
 	import type { Doc, Id } from '../convex/_generated/dataModel';
+	import * as m from '$lib/paraglide/messages';
 
 	const client = useConvexClient();
 	let games = $state<Doc<'games'>[]>([]);
@@ -74,7 +75,7 @@
 			}
 		} catch (e) {
 			console.error('Failed to load user games', e);
-			error = 'Failed to load your games. Please try again later.';
+			error = m.error_loading_games();
 		} finally {
 			loading = false;
 		}
@@ -88,19 +89,18 @@
 <div class="min-h-screen bg-linear-to-b from-slate-900 to-slate-800 text-white">
 	<!-- Hero Section -->
 	<div class="container mx-auto px-4 py-20 text-center">
-		<h1 class="mb-6 text-5xl font-bold md:text-6xl">ChronoFlux</h1>
+		<h1 class="mb-6 text-5xl font-bold md:text-6xl">{m.hero_title()}</h1>
 		<p class="mx-auto mb-8 max-w-2xl text-xl text-slate-300 md:text-2xl">
-			Shape history through natural language. Control nations, make decisions, and watch the AI
-			simulate the consequences of your choices.
+			{m.hero_description()}
 		</p>
 		<p class="mx-auto mb-12 max-w-2xl text-lg text-slate-400">
-			An AI-powered alternate history simulation game where every action matters.
+			{m.hero_subtitle()}
 		</p>
 
 		<!-- CTA Button -->
 		<div class="flex justify-center gap-4">
 			<Button href="/scenarios" size="lg" class="bg-blue-600 hover:bg-blue-700">
-				Start New Game
+				{m.start_new_game()}
 			</Button>
 		</div>
 
@@ -115,14 +115,14 @@
 	{#if !loading && games.length > 0}
 		<div class="container mx-auto px-4 py-8">
 			<div class="mb-6 flex items-center justify-between">
-				<h2 class="text-2xl font-bold">Continue Playing</h2>
+				<h2 class="text-2xl font-bold">{m.continue_playing()}</h2>
 			</div>
 
 			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 				{#each games as game (game._id)}
 					<GameCard
 						{game}
-						scenarioName={scenarios[game.scenarioId]?.name || 'Unknown Scenario'}
+						scenarioName={scenarios[game.scenarioId]?.name || m.unknown_scenario()}
 						nationName={nations[game.playerNationId || '']?.name}
 					/>
 				{/each}
@@ -134,23 +134,21 @@
 	<div class="container mx-auto px-4 py-16">
 		<div class="grid gap-8 md:grid-cols-3">
 			<div class="rounded-lg bg-slate-700 p-6">
-				<h3 class="mb-3 text-xl font-bold">Natural Language Actions</h3>
+				<h3 class="mb-3 text-xl font-bold">{m.feature_natural_language_title()}</h3>
 				<p class="text-slate-300">
-					Describe your actions in free-form text. The AI understands context and generates
-					plausible consequences.
+					{m.feature_natural_language_desc()}
 				</p>
 			</div>
 			<div class="rounded-lg bg-slate-700 p-6">
-				<h3 class="mb-3 text-xl font-bold">Historical Scenarios</h3>
+				<h3 class="mb-3 text-xl font-bold">{m.feature_historical_scenarios_title()}</h3>
 				<p class="text-slate-300">
-					Choose from pre-configured historical periods like WWI, Cold War, and Ancient Rome.
+					{m.feature_historical_scenarios_desc()}
 				</p>
 			</div>
 			<div class="rounded-lg bg-slate-700 p-6">
-				<h3 class="mb-3 text-xl font-bold">Persistent World State</h3>
+				<h3 class="mb-3 text-xl font-bold">{m.feature_persistent_world_title()}</h3>
 				<p class="text-slate-300">
-					Every decision shapes the world. Watch relationships evolve and resources change based on
-					your choices.
+					{m.feature_persistent_world_desc()}
 				</p>
 			</div>
 		</div>

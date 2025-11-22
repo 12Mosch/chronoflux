@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as m from '$lib/paraglide/messages';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Textarea } from '$lib/components/ui/textarea';
@@ -55,7 +56,7 @@
 		try {
 			// 1. Fetch game context
 			const gameContext = await convex.query(api.games.getGameContext, { gameId });
-			if (!gameContext) throw new Error('Failed to load game context');
+			if (!gameContext) throw new Error(m.failed_load_game_context());
 
 			// 2. Process with local AI
 			const aiResponse = await processTurnWithLocalAI(playerAction, gameContext);
@@ -88,7 +89,7 @@
 
 				onturnsubmitted?.({ turnData });
 			} else {
-				throw new Error('Turn submission failed');
+				throw new Error(m.turn_submission_failed());
 			}
 		} catch (error) {
 			console.error('Failed to submit turn:', error);
@@ -103,8 +104,8 @@
 				// Set user-friendly error message for other errors
 				submitError =
 					error instanceof Error
-						? `Failed to submit turn: ${error.message}`
-						: 'An unexpected error occurred while submitting your turn. Please try again.';
+						? m.failed_submit_turn({ error: error.message })
+						: m.unexpected_error_submit();
 			}
 		} finally {
 			isSubmitting = false;
@@ -116,12 +117,12 @@
 	<Card.Header class="pb-3">
 		<Card.Title class="flex items-center gap-2">
 			<Send class="h-5 w-5" />
-			Take Action
+			{m.take_action()}
 		</Card.Title>
 	</Card.Header>
 	<Card.Content class="flex-1 pb-3">
 		<Textarea
-			placeholder="Describe your action (e.g., 'Invest in military infrastructure', 'Propose a trade alliance with France')..."
+			placeholder={m.action_placeholder()}
 			class="h-full min-h-[100px] resize-none"
 			bind:value={playerAction}
 			disabled={isSubmitting}
@@ -136,9 +137,9 @@
 		<Button onclick={handleSubmit} disabled={isSubmitting || !playerAction.trim()} class="w-full">
 			{#if isSubmitting}
 				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
-				Processing Turn...
+				{m.processing_turn()}
 			{:else}
-				Submit Turn
+				{m.submit_turn()}
 			{/if}
 		</Button>
 	</Card.Footer>
