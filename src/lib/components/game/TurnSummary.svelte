@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as m from '$lib/paraglide/messages';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Button } from '$lib/components/ui/button';
 	import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
@@ -41,20 +42,22 @@
 <Dialog.Root bind:open>
 	<Dialog.Content class="flex max-h-[90vh] max-w-3xl flex-col">
 		<Dialog.Header>
-			<Dialog.Title class="text-2xl">Turn Complete</Dialog.Title>
+			<Dialog.Title class="text-2xl">{m.turn_complete()}</Dialog.Title>
 			<Dialog.Description>
-				Review the consequences of your actions for Turn {turnData?.turnNumber || '...'}
+				{m.turn_complete_desc({ turnNumber: turnData?.turnNumber || '...' })}
 			</Dialog.Description>
 		</Dialog.Header>
 
 		{#if !turnData}
-			<div class="py-8 text-center text-muted-foreground">Loading turn data...</div>
+			<div class="py-8 text-center text-muted-foreground">{m.loading_turn_data()}</div>
 		{:else}
 			<Tabs bind:value={activeTab} class="flex flex-1 flex-col overflow-hidden">
 				<TabsList class="grid w-full grid-cols-3">
-					<TabsTrigger value="narrative">Narrative</TabsTrigger>
-					<TabsTrigger value="events">Events ({turnData.events?.length || 0})</TabsTrigger>
-					<TabsTrigger value="changes">Changes</TabsTrigger>
+					<TabsTrigger value="narrative">{m.tab_narrative()}</TabsTrigger>
+					<TabsTrigger value="events"
+						>{m.tab_events({ count: turnData.events?.length || 0 })}</TabsTrigger
+					>
+					<TabsTrigger value="changes">{m.tab_changes()}</TabsTrigger>
 				</TabsList>
 
 				<div class="mt-4 flex-1 overflow-hidden">
@@ -65,7 +68,7 @@
 								<h4
 									class="mb-2 text-sm font-semibold tracking-wider text-muted-foreground uppercase"
 								>
-									Your Action
+									{m.your_action()}
 								</h4>
 								<p class="text-foreground/80 italic">"{turnData.playerAction}"</p>
 							</div>
@@ -76,7 +79,7 @@
 								<h4
 									class="mb-2 text-sm font-semibold tracking-wider text-muted-foreground uppercase"
 								>
-									Outcome
+									{m.outcome()}
 								</h4>
 								<div class="prose prose-sm max-w-none dark:prose-invert">
 									<p class="leading-relaxed">{turnData.narrative}</p>
@@ -86,7 +89,7 @@
 							{#if turnData.consequences}
 								<div class="rounded-md border border-yellow-500/20 bg-yellow-500/5 p-4">
 									<h4 class="mb-2 text-sm font-semibold text-yellow-600 dark:text-yellow-500">
-										Immediate Consequences
+										{m.immediate_consequences()}
 									</h4>
 									<p class="text-sm">{turnData.consequences}</p>
 								</div>
@@ -97,7 +100,7 @@
 						<TabsContent value="events" class="mt-0 space-y-3">
 							{#if !turnData.events || turnData.events.length === 0}
 								<div class="py-8 text-center text-muted-foreground">
-									No significant events occurred this turn.
+									{m.no_significant_events()}
 								</div>
 							{:else}
 								{#each turnData.events as event (event.title)}
@@ -120,7 +123,7 @@
 									<h4
 										class="mb-3 text-sm font-semibold tracking-wider text-muted-foreground uppercase"
 									>
-										Resource Updates
+										{m.resource_updates()}
 									</h4>
 									<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
 										{#each Object.entries(turnData.resourceChanges) as [resource, change] (resource)}
@@ -145,7 +148,7 @@
 
 							<!-- Relationship Changes could go here if available in turnData -->
 							<div class="text-center text-sm text-muted-foreground">
-								Check the World Map for updated relationships.
+								{m.check_world_map()}
 							</div>
 						</TabsContent>
 					</ScrollArea>
@@ -155,7 +158,7 @@
 
 		<Dialog.Footer class="mt-6">
 			<Button onclick={() => (open = false)} class="w-full sm:w-auto">
-				Continue to Turn {(turnData?.turnNumber || 0) + 1}
+				{m.continue_to_turn({ nextTurnNumber: (turnData?.turnNumber || 0) + 1 })}
 				<ArrowRight class="ml-2 h-4 w-4" />
 			</Button>
 		</Dialog.Footer>

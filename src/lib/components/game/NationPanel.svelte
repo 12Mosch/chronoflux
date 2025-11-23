@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as m from '$lib/paraglide/messages';
 	import * as Card from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Separator } from '$lib/components/ui/separator';
@@ -26,14 +27,14 @@
 	<Card.Header class="pb-2">
 		<Card.Title class="flex items-center gap-2">
 			<Flag class="h-5 w-5" />
-			Your Nation
+			{m.your_nation()}
 		</Card.Title>
 	</Card.Header>
 	<Card.Content class="flex-1 overflow-hidden p-0">
 		<ScrollArea class="h-full px-6 pb-6">
 			{#if !playerNation}
 				<div class="flex h-20 items-center justify-center text-muted-foreground">
-					Loading nation data...
+					{m.loading_nation_data()}
 				</div>
 			{:else}
 				<div class="space-y-6">
@@ -51,7 +52,7 @@
 					<!-- Resources -->
 					<div class="space-y-4">
 						<h4 class="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-							Resources
+							{m.resources_title()}
 						</h4>
 
 						<div class="grid gap-4">
@@ -60,7 +61,7 @@
 								<div class="flex items-center justify-between text-sm">
 									<div class="flex items-center gap-2">
 										<Shield class="h-4 w-4 text-red-500" />
-										<span class="font-medium">Military</span>
+										<span class="font-medium">{m.resource_military()}</span>
 									</div>
 									<span class="font-mono font-bold">{playerNation.resources.military}</span>
 								</div>
@@ -77,7 +78,7 @@
 								<div class="flex items-center justify-between text-sm">
 									<div class="flex items-center gap-2">
 										<Coins class="h-4 w-4 text-yellow-500" />
-										<span class="font-medium">Economy</span>
+										<span class="font-medium">{m.resource_economy()}</span>
 									</div>
 									<span class="font-mono font-bold">{playerNation.resources.economy}</span>
 								</div>
@@ -94,7 +95,7 @@
 								<div class="flex items-center justify-between text-sm">
 									<div class="flex items-center gap-2">
 										<Scale class="h-4 w-4 text-blue-500" />
-										<span class="font-medium">Stability</span>
+										<span class="font-medium">{m.resource_stability()}</span>
 									</div>
 									<span class="font-mono font-bold">{playerNation.resources.stability}</span>
 								</div>
@@ -111,7 +112,7 @@
 								<div class="flex items-center justify-between text-sm">
 									<div class="flex items-center gap-2">
 										<Crown class="h-4 w-4 text-purple-500" />
-										<span class="font-medium">Influence</span>
+										<span class="font-medium">{m.resource_influence()}</span>
 									</div>
 									<span class="font-mono font-bold">{playerNation.resources.influence}</span>
 								</div>
@@ -132,7 +133,7 @@
 						<div class="flex items-center gap-2">
 							<MapPin class="h-4 w-4 text-muted-foreground" />
 							<h4 class="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-								Territories
+								{m.territories_title()}
 							</h4>
 						</div>
 						{#if playerNation.territories.length > 0}
@@ -142,7 +143,7 @@
 								{/each}
 							</div>
 						{:else}
-							<p class="text-sm text-muted-foreground italic">No territories held.</p>
+							<p class="text-sm text-muted-foreground italic">{m.no_territories()}</p>
 						{/if}
 					</div>
 
@@ -152,7 +153,7 @@
 					{#if otherNations.length > 0}
 						<div class="space-y-3">
 							<h4 class="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-								Known World
+								{m.known_world()}
 							</h4>
 							<div class="grid gap-2">
 								{#each otherNations as nation (nation._id)}

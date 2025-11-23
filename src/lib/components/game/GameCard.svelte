@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as m from '$lib/paraglide/messages';
 	import {
 		Card,
 		CardContent,
@@ -42,7 +43,7 @@
 				</CardTitle>
 				<CardDescription class="flex items-center gap-2 text-xs">
 					<Calendar class="h-3 w-3" />
-					Last played {formatDate(game.updatedAt)}
+					{m.last_played({ date: formatDate(game.updatedAt) })}
 				</CardDescription>
 			</div>
 			<Badge variant={game.status === 'active' ? 'default' : 'secondary'} class="capitalize">
@@ -53,9 +54,9 @@
 	<CardContent>
 		<div class="mb-4 flex items-center gap-2 text-sm text-slate-300">
 			<Flag class="h-4 w-4 text-blue-400" />
-			<span>{nationName || 'Unknown Nation'}</span>
+			<span>{nationName || m.unknown_nation()}</span>
 			<span class="text-slate-500">•</span>
-			<span class="text-slate-400">Turn {game.currentTurn}</span>
+			<span class="text-slate-400">{m.turn_header({ turnNumber: game.currentTurn })}</span>
 		</div>
 
 		<Button
@@ -64,7 +65,7 @@
 			variant="secondary"
 			size="sm"
 		>
-			Continue Game
+			{m.continue_playing()}
 			<ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
 		</Button>
 	</CardContent>

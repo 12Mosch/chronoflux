@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as m from '$lib/paraglide/messages';
 	import * as Card from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import type { Doc } from '$convex/_generated/dataModel';
@@ -73,7 +74,7 @@
 	<Card.Header class="pb-2">
 		<Card.Title class="flex items-center gap-2">
 			<Users class="h-5 w-5" />
-			World Schematic
+			{m.world_schematic()}
 		</Card.Title>
 	</Card.Header>
 	<Card.Content class="flex-1 overflow-hidden p-0">
@@ -86,7 +87,7 @@
 					>
 						<Crown class="mb-1 h-6 w-6 text-primary" />
 						<span class="leading-tight font-bold">{playerNation.name}</span>
-						<Badge variant="secondary" class="mt-1 text-[10px]">You</Badge>
+						<Badge variant="secondary" class="mt-1 text-[10px]">{m.you_badge()}</Badge>
 					</div>
 				</div>
 			{/if}
@@ -119,7 +120,7 @@
 				</div>
 			{:else}
 				<div class="flex h-full items-center justify-center text-muted-foreground">
-					No other nations known.
+					{m.no_other_nations()}
 				</div>
 			{/if}
 		</div>
