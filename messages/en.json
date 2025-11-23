@@ -123,7 +123,6 @@
 	"initial_world_state_label": "Initial World State (JSON)",
 	"json_edit_hint": "Edit the JSON directly to configure nations and relationships.",
 	"save_scenario_button": "Save Scenario",
-	"silly_seemly_wallaby_clasp": "turn",
 	"turn": "Turn",
 	"year": "Year"
 }
