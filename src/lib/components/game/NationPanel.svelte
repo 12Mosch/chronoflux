@@ -5,7 +5,7 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import type { Doc } from '$convex/_generated/dataModel';
-	import { Shield, Coins, Scale, Crown, MapPin, Flag } from '@lucide/svelte';
+	import { Crown, MapPin, Flag } from '@lucide/svelte';
 
 	interface Props {
 		playerNation: Doc<'nations'> | null;
@@ -15,15 +15,11 @@
 	let { playerNation, allNations }: Props = $props();
 
 	const otherNations = $derived(allNations.filter((nation) => nation._id !== playerNation?._id));
-
-	function getResourceColor(value: number): string {
-		if (value >= 70) return 'bg-green-500';
-		if (value >= 40) return 'bg-yellow-500';
-		return 'bg-red-500';
-	}
 </script>
 
-<Card.Root class="flex h-full flex-col overflow-hidden">
+<Card.Root
+	class="flex h-full flex-col overflow-hidden rounded-xl border bg-background/95 shadow-lg backdrop-blur-sm"
+>
 	<Card.Header class="pb-2">
 		<Card.Title class="flex items-center gap-2">
 			<Flag class="h-5 w-5" />
@@ -46,87 +42,6 @@
 							<span>{playerNation.government}</span>
 						</div>
 					</div>
-
-					<Separator />
-
-					<!-- Resources -->
-					<div class="space-y-4">
-						<h4 class="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-							{m.resources_title()}
-						</h4>
-
-						<div class="grid gap-4">
-							<!-- Military -->
-							<div class="space-y-1.5">
-								<div class="flex items-center justify-between text-sm">
-									<div class="flex items-center gap-2">
-										<Shield class="h-4 w-4 text-red-500" />
-										<span class="font-medium">{m.resource_military()}</span>
-									</div>
-									<span class="font-mono font-bold">{playerNation.resources.military}</span>
-								</div>
-								<div class="h-2.5 w-full overflow-hidden rounded-full bg-secondary/50">
-									<div
-										class={`h-full transition-all duration-500 ${getResourceColor(playerNation.resources.military)}`}
-										style="width: {playerNation.resources.military}%"
-									></div>
-								</div>
-							</div>
-
-							<!-- Economy -->
-							<div class="space-y-1.5">
-								<div class="flex items-center justify-between text-sm">
-									<div class="flex items-center gap-2">
-										<Coins class="h-4 w-4 text-yellow-500" />
-										<span class="font-medium">{m.resource_economy()}</span>
-									</div>
-									<span class="font-mono font-bold">{playerNation.resources.economy}</span>
-								</div>
-								<div class="h-2.5 w-full overflow-hidden rounded-full bg-secondary/50">
-									<div
-										class={`h-full transition-all duration-500 ${getResourceColor(playerNation.resources.economy)}`}
-										style="width: {playerNation.resources.economy}%"
-									></div>
-								</div>
-							</div>
-
-							<!-- Stability -->
-							<div class="space-y-1.5">
-								<div class="flex items-center justify-between text-sm">
-									<div class="flex items-center gap-2">
-										<Scale class="h-4 w-4 text-blue-500" />
-										<span class="font-medium">{m.resource_stability()}</span>
-									</div>
-									<span class="font-mono font-bold">{playerNation.resources.stability}</span>
-								</div>
-								<div class="h-2.5 w-full overflow-hidden rounded-full bg-secondary/50">
-									<div
-										class={`h-full transition-all duration-500 ${getResourceColor(playerNation.resources.stability)}`}
-										style="width: {playerNation.resources.stability}%"
-									></div>
-								</div>
-							</div>
-
-							<!-- Influence -->
-							<div class="space-y-1.5">
-								<div class="flex items-center justify-between text-sm">
-									<div class="flex items-center gap-2">
-										<Crown class="h-4 w-4 text-purple-500" />
-										<span class="font-medium">{m.resource_influence()}</span>
-									</div>
-									<span class="font-mono font-bold">{playerNation.resources.influence}</span>
-								</div>
-								<div class="h-2.5 w-full overflow-hidden rounded-full bg-secondary/50">
-									<div
-										class={`h-full transition-all duration-500 ${getResourceColor(playerNation.resources.influence)}`}
-										style="width: {playerNation.resources.influence}%"
-									></div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<Separator />
 
 					<!-- Territories -->
 					<div class="space-y-3">

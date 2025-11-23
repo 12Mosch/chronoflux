@@ -124,5 +124,9 @@
 	"json_edit_hint": "Edit the JSON directly to configure nations and relationships.",
 	"save_scenario_button": "Save Scenario",
 	"turn": "Turn",
-	"year": "Year"
+	"year": "Year",
+	"end_turn": "End Turn",
+	"search_nation": "Search Nation",
+	"settings": "Settings",
+	"menu": "Menu"
 }
