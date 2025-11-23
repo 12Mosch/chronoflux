@@ -14,7 +14,7 @@
 	<header class="z-50 flex h-14 items-center justify-between border-b bg-card px-4 py-2 shadow-sm">
 		<!-- Left: Stats -->
 		<Tooltip.Provider>
-			<div class="flex items-center gap-6">
+			<div class="flex flex-1 items-center gap-6">
 				<Tooltip.Root>
 					<Tooltip.Trigger class="flex items-center gap-2 text-sm font-medium">
 						<Sword class="h-4 w-4 text-muted-foreground" />
@@ -58,13 +58,13 @@
 		</Tooltip.Provider>
 
 		<!-- Center: Turn Info -->
-		<div class="flex flex-col items-center">
+		<div class="flex flex-1 flex-col items-center justify-center">
 			<span class="text-sm font-bold">{m.turn()}: {turn}</span>
 			<span class="text-xs text-muted-foreground">{year} AD</span>
 		</div>
 
 		<!-- Right: Actions -->
-		<div class="flex items-center gap-2">
+		<div class="flex flex-1 items-center justify-end gap-2">
 			<Button variant="ghost" size="icon">
 				<Settings class="h-5 w-5" />
 			</Button>
