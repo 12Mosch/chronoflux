@@ -65,9 +65,6 @@
 
 		<!-- Right: Actions -->
 		<div class="flex items-center gap-2">
-			<Button variant="default" class="bg-yellow-500 text-black hover:bg-yellow-600">
-				{m.end_turn()}
-			</Button>
 			<Button variant="ghost" size="icon">
 				<Settings class="h-5 w-5" />
 			</Button>

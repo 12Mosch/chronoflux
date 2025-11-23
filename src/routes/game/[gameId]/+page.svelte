@@ -1,6 +1,8 @@
 <script lang="ts">
 	import ActionInput from '$lib/components/game/ActionInput.svelte';
 	import TurnSummary from '$lib/components/game/TurnSummary.svelte';
+	import NationPanel from '$lib/components/game/NationPanel.svelte';
+	import EventLog from '$lib/components/game/EventLog.svelte';
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
@@ -9,6 +11,7 @@
 	import * as m from '$lib/paraglide/messages';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
+	import * as Sheet from '$lib/components/ui/sheet';
 	import {
 		Search,
 		Globe,
@@ -38,6 +41,8 @@
 	} | null;
 
 	let showTurnSummary = $state(false);
+	let showNationPanel = $state(false);
+	let showEventLog = $state(false);
 	let lastTurnData = $state<TurnData>(null);
 
 	// Update game state store when world state loads
@@ -117,7 +122,12 @@
 			<Button variant="ghost" size="icon" class="hover:bg-accent">
 				<Layers class="h-5 w-5" />
 			</Button>
-			<Button variant="ghost" size="icon" class="hover:bg-accent">
+			<Button
+				variant="ghost"
+				size="icon"
+				class="hover:bg-accent {showNationPanel ? 'bg-accent text-accent-foreground' : ''}"
+				onclick={() => (showNationPanel = true)}
+			>
 				<Flag class="h-5 w-5" />
 			</Button>
 		</div>
@@ -126,7 +136,12 @@
 		<div
 			class="absolute top-1/2 right-4 z-10 flex -translate-y-1/2 flex-col gap-2 rounded-lg bg-background/80 p-2 backdrop-blur-sm"
 		>
-			<Button variant="ghost" size="icon" class="hover:bg-accent">
+			<Button
+				variant="ghost"
+				size="icon"
+				class="hover:bg-accent {showEventLog ? 'bg-accent text-accent-foreground' : ''}"
+				onclick={() => (showEventLog = true)}
+			>
 				<History class="h-5 w-5" />
 			</Button>
 			<Button variant="ghost" size="icon" class="hover:bg-accent">
@@ -156,6 +171,23 @@
 			<ActionInput onturnsubmitted={handleTurnSubmitted} />
 		</div>
 	</div>
+
+	<!-- Nation Panel Sheet -->
+	<Sheet.Root bind:open={showNationPanel}>
+		<Sheet.Content side="left" class="w-[400px] p-0 sm:w-[540px]">
+			<NationPanel
+				playerNation={worldState.data.playerNation}
+				allNations={worldState.data.nations}
+			/>
+		</Sheet.Content>
+	</Sheet.Root>
+
+	<!-- Event Log Sheet -->
+	<Sheet.Root bind:open={showEventLog}>
+		<Sheet.Content side="right" class="w-[400px] p-0 sm:w-[540px]">
+			<EventLog />
+		</Sheet.Content>
+	</Sheet.Root>
 
 	<TurnSummary bind:open={showTurnSummary} turnData={lastTurnData} />
 {/if}
