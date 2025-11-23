@@ -124,5 +124,9 @@
 	"json_edit_hint": "Bearbeite das JSON direkt, um Nationen und Beziehungen zu konfigurieren.",
 	"save_scenario_button": "Szenario speichern",
 	"turn": "Runde",
-	"year": "Jahr\n"
+	"year": "Jahr",
+	"end_turn": "Runde beenden",
+	"search_nation": "Nation suchen",
+	"settings": "Einstellungen",
+	"menu": "Menü"
 }
