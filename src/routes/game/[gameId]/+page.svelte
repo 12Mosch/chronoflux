@@ -174,7 +174,10 @@
 
 	<!-- Nation Panel Sheet -->
 	<Sheet.Root bind:open={showNationPanel}>
-		<Sheet.Content side="left" class="w-[400px] p-0 sm:w-[540px]">
+		<Sheet.Content
+			side="left"
+			class="w-[400px] border-none bg-transparent p-4 shadow-none sm:w-[540px]"
+		>
 			<NationPanel
 				playerNation={worldState.data.playerNation}
 				allNations={worldState.data.nations}
@@ -184,7 +187,10 @@
 
 	<!-- Event Log Sheet -->
 	<Sheet.Root bind:open={showEventLog}>
-		<Sheet.Content side="right" class="w-[400px] p-0 sm:w-[540px]">
+		<Sheet.Content
+			side="right"
+			class="w-[400px] border-none bg-transparent p-4 shadow-none sm:w-[540px]"
+		>
 			<EventLog />
 		</Sheet.Content>
 	</Sheet.Root>

@@ -121,7 +121,9 @@
 	});
 </script>
 
-<Card.Root class="flex h-full flex-col overflow-hidden">
+<Card.Root
+	class="flex h-full flex-col overflow-hidden rounded-xl border bg-background/95 shadow-lg backdrop-blur-sm"
+>
 	<Card.Header class="pb-2">
 		<div class="flex items-center justify-between">
 			<Card.Title class="flex items-center gap-2">
