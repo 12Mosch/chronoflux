@@ -17,8 +17,6 @@
 				zoom: 2
 			});
 
-			map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
-
 			map.on('load', () => {
 				console.log('Map loaded successfully');
 			});
@@ -41,6 +39,18 @@
 			if (map) map.remove();
 		};
 	});
+
+	export function zoomIn() {
+		map?.zoomIn();
+	}
+
+	export function zoomOut() {
+		map?.zoomOut();
+	}
+
+	export function resetNorth() {
+		map?.resetNorthPitch();
+	}
 </script>
 
 {#if error}

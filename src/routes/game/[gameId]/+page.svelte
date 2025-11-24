@@ -13,17 +13,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import {
-		Search,
-		Globe,
-		Layers,
-		Flag,
-		History,
-		Bell,
-		Plus,
-		Minus,
-		Navigation
-	} from '@lucide/svelte';
+	import { Search, Globe, Layers, Flag, History, Bell, Plus, Minus, Compass } from '@lucide/svelte';
 
 	const gameId = $derived(page.params.gameId as Id<'games'>);
 	const worldState = $derived(useQuery(api.world.getWorldState, gameId ? { gameId } : 'skip'));
@@ -41,10 +31,17 @@
 		resourceChanges?: Record<string, number>;
 	} | null;
 
+	type MapComponent = {
+		zoomIn: () => void;
+		zoomOut: () => void;
+		resetNorth: () => void;
+	};
+
 	let showTurnSummary = $state(false);
 	let showNationPanel = $state(false);
 	let showEventLog = $state(false);
 	let lastTurnData = $state<TurnData>(null);
+	let mapComponent = $state<MapComponent | null>(null);
 
 	// Update game state store when world state loads
 	$effect(() => {
@@ -89,7 +86,7 @@
 	<div class="relative h-full w-full bg-slate-900">
 		<!-- Full Screen Map -->
 		<div class="absolute inset-0 z-0">
-			<Map />
+			<Map bind:this={mapComponent} />
 		</div>
 
 		<!-- Top Left: Search -->
@@ -144,14 +141,29 @@
 		<div
 			class="absolute right-4 bottom-4 z-10 flex flex-col gap-1 rounded-lg bg-background/80 p-1 backdrop-blur-sm"
 		>
-			<Button variant="ghost" size="icon" class="h-8 w-8 hover:bg-accent">
+			<Button
+				variant="ghost"
+				size="icon"
+				class="h-8 w-8 hover:bg-accent"
+				onclick={() => mapComponent?.zoomIn()}
+			>
 				<Plus class="h-4 w-4" />
 			</Button>
-			<Button variant="ghost" size="icon" class="h-8 w-8 hover:bg-accent">
+			<Button
+				variant="ghost"
+				size="icon"
+				class="h-8 w-8 hover:bg-accent"
+				onclick={() => mapComponent?.zoomOut()}
+			>
 				<Minus class="h-4 w-4" />
 			</Button>
-			<Button variant="ghost" size="icon" class="h-8 w-8 hover:bg-accent">
-				<Navigation class="h-4 w-4" />
+			<Button
+				variant="ghost"
+				size="icon"
+				class="h-8 w-8 hover:bg-accent"
+				onclick={() => mapComponent?.resetNorth()}
+			>
+				<Compass class="h-4 w-4" />
 			</Button>
 		</div>
 
