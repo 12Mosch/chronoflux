@@ -128,5 +128,16 @@
 	"end_turn": "End Turn",
 	"search_nation": "Search Nation",
 	"settings": "Settings",
-	"menu": "Menu"
+	"menu": "Menu",
+	"settings_title": "Settings",
+	"settings_description": "Configure your local Ollama instance connection details.",
+	"ollama_url_label": "Ollama URL",
+	"model_name_label": "Model Name",
+	"reset_button": "Reset",
+	"checking_button": "Checking...",
+	"save_changes_button": "Save changes",
+	"error_failed_to_connect": "Failed to connect: {statusText}",
+	"error_model_not_found": "Model '{modelName}' not found. Installed models: {installedModels}",
+	"error_failed_connect_ollama": "Failed to connect to Ollama",
+	"error_cors_issue": "Could not connect. Check URL and ensure OLLAMA_ORIGINS=\"*\" is set."
 }

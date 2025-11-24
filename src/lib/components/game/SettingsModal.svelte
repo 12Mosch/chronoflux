@@ -3,6 +3,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
 	import { onMount } from 'svelte';
+	import * as m from '$lib/paraglide/messages';
 
 	let { open = $bindable(false) } = $props();
 
@@ -30,7 +31,7 @@
 			const response = await fetch(`${cleanUrl}/api/tags`);
 
 			if (!response.ok) {
-				throw new Error(`Failed to connect: ${response.statusText}`);
+				throw new Error(m.error_failed_to_connect({ statusText: response.statusText }));
 			}
 
 			const data = await response.json();
@@ -51,7 +52,10 @@
 			});
 
 			if (!modelExists) {
-				errorMessage = `Model '${modelName}' not found. Installed models: ${models.map((m: { name: string }) => m.name).join(', ')}`;
+				errorMessage = m.error_model_not_found({
+					modelName,
+					installedModels: models.map((m: { name: string }) => m.name).join(', ')
+				});
 				return;
 			}
 
@@ -60,9 +64,9 @@
 			open = false;
 		} catch (error) {
 			console.error('Settings validation error:', error);
-			errorMessage = error instanceof Error ? error.message : 'Failed to connect to Ollama';
+			errorMessage = error instanceof Error ? error.message : m.error_failed_connect_ollama();
 			if (errorMessage.includes('Failed to fetch')) {
-				errorMessage = 'Could not connect. Check URL and ensure OLLAMA_ORIGINS="*" is set.';
+				errorMessage = m.error_cors_issue();
 			}
 		} finally {
 			isChecking = false;
@@ -78,9 +82,9 @@
 <Dialog.Root bind:open>
 	<Dialog.Content class="sm:max-w-[425px]">
 		<Dialog.Header>
-			<Dialog.Title>Settings</Dialog.Title>
+			<Dialog.Title>{m.settings_title()}</Dialog.Title>
 			<Dialog.Description>
-				Configure your local Ollama instance connection details.
+				{m.settings_description()}
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="grid gap-4 py-4">
@@ -91,24 +95,26 @@
 			{/if}
 			<div class="grid grid-cols-4 items-center gap-4">
 				<label for="ollama-url" class="text-right text-sm font-medium text-foreground">
-					Ollama URL
+					{m.ollama_url_label()}
 				</label>
 				<Input id="ollama-url" bind:value={ollamaUrl} class="col-span-3" disabled={isChecking} />
 			</div>
 			<div class="grid grid-cols-4 items-center gap-4">
 				<label for="model-name" class="text-right text-sm font-medium text-foreground">
-					Model Name
+					{m.model_name_label()}
 				</label>
 				<Input id="model-name" bind:value={modelName} class="col-span-3" disabled={isChecking} />
 			</div>
 		</div>
 		<Dialog.Footer>
-			<Button variant="outline" onclick={resetDefaults} disabled={isChecking}>Reset</Button>
+			<Button variant="outline" onclick={resetDefaults} disabled={isChecking}
+				>{m.reset_button()}</Button
+			>
 			<Button onclick={saveSettings} disabled={isChecking}>
 				{#if isChecking}
-					Checking...
+					{m.checking_button()}
 				{:else}
-					Save changes
+					{m.save_changes_button()}
 				{/if}
 			</Button>
 		</Dialog.Footer>

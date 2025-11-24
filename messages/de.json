@@ -128,5 +128,16 @@
 	"end_turn": "Runde beenden",
 	"search_nation": "Nation suchen",
 	"settings": "Einstellungen",
-	"menu": "Menü"
+	"menu": "Menü",
+	"settings_title": "Einstellungen",
+	"settings_description": "Konfiguriere die Verbindungsdetails deiner lokalen Ollama-Instanz.",
+	"ollama_url_label": "Ollama URL",
+	"model_name_label": "Modellname",
+	"reset_button": "Zurücksetzen",
+	"checking_button": "Prüfe...",
+	"save_changes_button": "Änderungen speichern",
+	"error_failed_to_connect": "Verbindung fehlgeschlagen: {statusText}",
+	"error_model_not_found": "Modell '{modelName}' nicht gefunden. Installierte Modelle: {installedModels}",
+	"error_failed_connect_ollama": "Verbindung zu Ollama fehlgeschlagen",
+	"error_cors_issue": "Verbindung konnte nicht hergestellt werden. Überprüfe die URL und stelle sicher, dass OLLAMA_ORIGINS=\"*\" gesetzt ist."
 }
