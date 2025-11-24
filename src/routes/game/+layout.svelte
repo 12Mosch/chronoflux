@@ -1,12 +1,22 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { gameState } from '$lib/stores/gameState';
 	import { Button } from '$lib/components/ui/button';
 	import { Sword, Coins, Scale, Crown, Settings, Menu } from '@lucide/svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import * as m from '$lib/paraglide/messages';
+	import SettingsModal from '$lib/components/game/SettingsModal.svelte';
 
-	// Subscribe to the store
-	$: ({ turn, year, military, economy, stability, influence } = $gameState);
+	// Derive values from the store
+	const turn = $derived($gameState.turn);
+	const year = $derived($gameState.year);
+	const military = $derived($gameState.military);
+	const economy = $derived($gameState.economy);
+	const stability = $derived($gameState.stability);
+	const influence = $derived($gameState.influence);
+
+	let { children }: { children: Snippet } = $props();
+	let showSettings = $state(false);
 </script>
 
 <div class="flex h-screen w-full flex-col overflow-hidden bg-background text-foreground">
@@ -65,7 +75,7 @@
 
 		<!-- Right: Actions -->
 		<div class="flex flex-1 items-center justify-end gap-2">
-			<Button variant="ghost" size="icon">
+			<Button variant="ghost" size="icon" onclick={() => (showSettings = true)}>
 				<Settings class="h-5 w-5" />
 			</Button>
 			<Button variant="ghost" size="icon">
@@ -76,6 +86,8 @@
 
 	<!-- Main Content -->
 	<main class="relative flex-1 overflow-hidden">
-		<slot />
+		{@render children()}
 	</main>
 </div>
+
+<SettingsModal bind:open={showSettings} />

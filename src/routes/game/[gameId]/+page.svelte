@@ -167,9 +167,7 @@
 			</Button>
 		</div>
 
-		<!-- Action Input (Floating/Hidden for now, or maybe a drawer) -->
-		<!-- The design doesn't explicitly show where the action input goes, 
-		     but it's critical for gameplay. I'll place it at the bottom center for now. -->
+		<!-- Action Input -->
 		<div class="absolute bottom-8 left-1/2 z-10 w-full max-w-2xl -translate-x-1/2 px-4">
 			<ActionInput onturnsubmitted={handleTurnSubmitted} />
 		</div>
