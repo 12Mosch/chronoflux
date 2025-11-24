@@ -3,6 +3,7 @@
 	import TurnSummary from '$lib/components/game/TurnSummary.svelte';
 	import NationPanel from '$lib/components/game/NationPanel.svelte';
 	import EventLog from '$lib/components/game/EventLog.svelte';
+	import Map from '$lib/components/game/Map.svelte';
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
@@ -86,19 +87,9 @@
 	</div>
 {:else if worldState.data}
 	<div class="relative h-full w-full bg-slate-900">
-		<!-- Full Screen Map Placeholder -->
+		<!-- Full Screen Map -->
 		<div class="absolute inset-0 z-0">
-			<!-- In a real implementation, this would be the interactive map -->
-			<!-- Using a placeholder image or color for now as requested -->
-			<div
-				class="h-full w-full bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop')] bg-cover bg-center opacity-50"
-			></div>
-
-			<!-- We can still render the actual WorldMap component if it supports full screen, 
-			     or keep it hidden/overlayed. For now, let's keep the logic but maybe hide it 
-			     or render it in a way that fits the new design if possible. 
-			     Since the user asked for a placeholder, I'll stick to the visual placeholder above 
-			     but keep the data ready. -->
+			<Map />
 		</div>
 
 		<!-- Top Left: Search -->
