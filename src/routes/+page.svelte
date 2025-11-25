@@ -18,11 +18,9 @@
 	onMount(async () => {
 		try {
 			const userId = getOrCreateUserId();
-			console.log('User ID:', userId);
 			if (userId) {
 				// Fetch games
 				const userGames = await client.query(api.games.listGamesForUser, { playerId: userId });
-				console.log('Fetched games:', userGames);
 				games = userGames;
 
 				// Fetch related data for each game

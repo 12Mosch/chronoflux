@@ -139,7 +139,8 @@ export const updateGamePlayerId = mutation({
 	},
 	handler: async (ctx, args) => {
 		await ctx.db.patch(args.gameId, {
-			playerId: args.playerId
+			playerId: args.playerId,
+			updatedAt: Date.now()
 		});
 	}
 });
