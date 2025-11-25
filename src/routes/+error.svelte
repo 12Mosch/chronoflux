@@ -4,7 +4,6 @@
 	import * as m from '$lib/paraglide/messages';
 
 	import { page } from '$app/state';
-
 </script>
 
 <svelte:head>
