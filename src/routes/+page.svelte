@@ -18,9 +18,11 @@
 	onMount(async () => {
 		try {
 			const userId = getOrCreateUserId();
+			console.log('User ID:', userId);
 			if (userId) {
 				// Fetch games
 				const userGames = await client.query(api.games.listGamesForUser, { playerId: userId });
+				console.log('Fetched games:', userGames);
 				games = userGames;
 
 				// Fetch related data for each game
@@ -99,6 +101,11 @@
 
 		<!-- CTA Button -->
 		<div class="flex justify-center gap-4">
+			{#if !loading && games.length > 0}
+				<Button href="/game/{games[0]._id}" size="lg" class="bg-green-600 hover:bg-green-700">
+					{m.continue_playing()}
+				</Button>
+			{/if}
 			<Button href="/scenarios" size="lg" class="bg-blue-600 hover:bg-blue-700">
 				{m.start_new_game()}
 			</Button>

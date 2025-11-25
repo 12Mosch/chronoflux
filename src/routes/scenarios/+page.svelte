@@ -6,6 +6,7 @@
 	import type { Doc } from '../../convex/_generated/dataModel';
 	import { Search, Plus } from '@lucide/svelte';
 	import * as m from '$lib/paraglide/messages';
+	import { getOrCreateUserId } from '$lib/utils';
 
 	import ScenarioCard from '$lib/components/scenarios/ScenarioCard.svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -98,9 +99,11 @@
 			isCreating = true;
 			createError = null;
 
+			const playerId = getOrCreateUserId();
 			const gameId = await client.mutation(api.games.createGame, {
 				scenarioId: selectedScenario._id,
-				playerNationId: selectedNationId
+				playerNationId: selectedNationId,
+				playerId
 			});
 
 			await goto(resolve(`/game/${gameId}`));

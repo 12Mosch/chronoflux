@@ -127,8 +127,20 @@ export const listGamesForUser = query({
 			.filter((q) => q.eq(q.field('playerId'), args.playerId))
 			.collect();
 
-		games.sort((a, b) => b.createdAt - a.createdAt);
+		games.sort((a, b) => b.updatedAt - a.updatedAt);
 		return games;
+	}
+});
+
+export const updateGamePlayerId = mutation({
+	args: {
+		gameId: v.id('games'),
+		playerId: v.string()
+	},
+	handler: async (ctx, args) => {
+		await ctx.db.patch(args.gameId, {
+			playerId: args.playerId
+		});
 	}
 });
 
