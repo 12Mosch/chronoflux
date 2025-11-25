@@ -3,12 +3,12 @@
 	import { TriangleAlert, House, ArrowLeft } from '@lucide/svelte';
 	import * as m from '$lib/paraglide/messages';
 
-	let { data, errors } = $props();
-	const status = data?.status || 500;
+	import { page } from '$app/state';
+
 </script>
 
 <svelte:head>
-	<title>{status} - Chronoflux</title>
+	<title>{page.status} - Chronoflux</title>
 </svelte:head>
 
 <div
@@ -30,11 +30,11 @@
 		</div>
 
 		<h1 class="mb-2 text-8xl font-bold tracking-tighter text-foreground/90">
-			{status}
+			{page.status}
 		</h1>
 
 		<h2 class="mb-6 text-2xl font-medium text-muted-foreground">
-			{errors?.message || m.error_page_default_message()}
+			{page.error?.message || m.error_page_default_message()}
 		</h2>
 
 		<p class="mb-8 text-muted-foreground/80">
@@ -52,7 +52,13 @@
 				{m.error_page_return_home()}
 			</Button>
 			<Button
-				onclick={() => history.back()}
+				onclick={() => {
+					if (window.history.length > 2) {
+						history.back();
+					} else {
+						window.location.href = '/';
+					}
+				}}
 				variant="outline"
 				size="lg"
 				class="gap-2 backdrop-blur-sm hover:bg-accent/10"
