@@ -61,11 +61,36 @@
 			// 2. Process with local AI
 			const aiResponse = await processTurnWithLocalAI(playerAction, gameContext);
 
-			// 3. Persist results
+			// 3. Sanitize AI response to ensure event types are valid
+			const validEventTypes = ['political', 'military', 'diplomatic', 'economic', 'other'] as const;
+			const sanitizedEvents = aiResponse.events.map((event) => {
+				const isValidType = validEventTypes.includes(
+					event.type as (typeof validEventTypes)[number]
+				);
+				if (!isValidType) {
+					console.warn(
+						`Invalid event type "${event.type}" sanitized to "other" for event: ${event.title}`
+					);
+				}
+				return {
+					...event,
+					type: isValidType ? event.type : 'other'
+				};
+			});
+
+			// 4. Persist results
+			// Extract historySummary from aiResponse since it's a separate argument in the mutation
+			// Note: We use sanitizedEvents instead of the original events from aiResponse
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { historySummary, events: _, ...restOfResponse } = aiResponse;
 			const result = await convex.mutation(api.turns.persistTurnWithAIResponse, {
 				gameId,
 				playerAction,
-				aiResponse
+				aiResponse: {
+					...restOfResponse,
+					events: sanitizedEvents
+				},
+				historySummary
 			});
 
 			if (result.success) {

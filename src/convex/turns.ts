@@ -245,7 +245,8 @@ export const persistTurnWithAIResponse = mutation({
 		// Update game state
 		await ctx.db.patch(args.gameId, {
 			currentTurn: turnNumber,
-			updatedAt: Date.now()
+			updatedAt: Date.now(),
+			...(args.historySummary && { historySummary: args.historySummary })
 		});
 
 		// Return turn summary data
