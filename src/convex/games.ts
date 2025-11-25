@@ -242,14 +242,26 @@ export const getGameContext = query({
 			)
 			.collect();
 
-		// Get recent turns for events
-		const recentTurns = await ctx.db
-			.query('turns')
-			.withIndex('by_gameId', (q) => q.eq('gameId', args.gameId))
-			.order('desc')
-			.take(3);
+		// Get recent turns for historical context (last 5 turns)
+	const recentTurns = await ctx.db
+		.query('turns')
+		.withIndex('by_gameId', (q) => q.eq('gameId', args.gameId))
+		.order('desc')
+		.take(5);
 
-		const recentEvents = recentTurns.flatMap((turn) => turn.aiResponse.events.map((e) => e.title));
+	// Build comprehensive turn history for AI
+	const turnHistory = recentTurns.reverse().map((turn) => ({
+		turnNumber: turn.turnNumber,
+		playerAction: turn.playerAction,
+		narrative: turn.aiResponse.narrative,
+		consequences: turn.aiResponse.consequences,
+		events: turn.aiResponse.events.map((e) => ({
+			title: e.title,
+			description: e.description,
+			type: e.type
+		})),
+		worldStateChanges: turn.aiResponse.worldStateChanges
+	}));
 
 		// Format relationships for AI
 		const formattedRelationships = relationships.map((rel) => {
@@ -269,7 +281,7 @@ export const getGameContext = query({
 			worldState: {
 				playerResources: playerNation.resources,
 				relationships: formattedRelationships,
-				recentEvents
+				turnHistory
 			}
 		};
 	}

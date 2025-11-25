@@ -52,10 +52,33 @@ function buildActionInterpretationPrompt(
 	worldState: {
 		playerResources: Record<string, number>;
 		relationships: Array<{ name: string; status: string; score: number }>;
-		recentEvents: string[];
+		turnHistory: Array<{
+			turnNumber: number;
+			playerAction: string;
+			narrative: string;
+			consequences: string;
+			events: Array<{ title: string; description: string; type: string }>;
+			worldStateChanges: any;
+		}>;
 	}
 ): string {
-	const { playerResources, relationships, recentEvents } = worldState;
+	const { playerResources, relationships, turnHistory } = worldState;
+
+	// Format turn history for the prompt
+	const historyText =
+		turnHistory.length > 0
+			? turnHistory
+					.map(
+						(turn) => `
+Turn ${turn.turnNumber}:
+  Action: ${turn.playerAction}
+  Outcome: ${turn.narrative}
+  Consequences: ${turn.consequences}
+  Events: ${turn.events.map((e) => `\n    - ${e.title}: ${e.description}`).join('')}
+  Resource Changes: ${JSON.stringify(turn.worldStateChanges || {})}`
+					)
+					.join('\n')
+			: '  No previous turns';
 
 	return `You are a historical simulation AI. A player controlling ${playerNationName} in ${currentYear} has taken the following action:
 
@@ -71,14 +94,15 @@ Current World State:
 - Relationships:
 ${relationships.map((r) => `  - ${r.name}: ${r.status} (score: ${r.score})`).join('\n')}
 
-- Recent Events:
-${recentEvents.length > 0 ? recentEvents.map((e) => `  - ${e}`).join('\n') : '  - None'}
+- Recent Turn History (Last 5 Turns):
+${historyText}
 
-Analyze this action and determine:
+Analyze this action IN THE CONTEXT OF THE RECENT HISTORY and determine:
 1. Is it feasible given the nation's current state?
 2. What are the immediate consequences?
 3. How will other nations react?
 4. What resources are required/affected?
+5. How does this build upon or contradict recent actions?
 
 Respond in JSON format:
 {
@@ -138,7 +162,14 @@ function parseAIJSON<T>(response: string): T {
 		// Try to find JSON in response
 		const objectMatch = response.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
 		if (objectMatch) {
-			return JSON.parse(objectMatch[0]);
+			let jsonStr = objectMatch[0];
+			// Sanitize: Remove leading '+' from numbers (e.g. "+5" -> "5")
+			// This regex looks for:
+			// 1. A colon or whitespace preceding the number
+			// 2. A plus sign
+			// 3. Digits
+			jsonStr = jsonStr.replace(/:\s*\+(\d+)/g, ': $1');
+			return JSON.parse(jsonStr);
 		}
 
 		throw new Error('No valid JSON found in AI response');
@@ -198,7 +229,14 @@ export async function processTurnWithLocalAI(
 		worldState: {
 			playerResources: Record<string, number>;
 			relationships: Array<{ name: string; status: string; score: number }>;
-			recentEvents: string[];
+			turnHistory: Array<{
+				turnNumber: number;
+				playerAction: string;
+				narrative: string;
+				consequences: string;
+				events: Array<{ title: string; description: string; type: string }>;
+				worldStateChanges: any;
+			}>;
 		};
 	}
 ): Promise<AIProcessingResult> {
