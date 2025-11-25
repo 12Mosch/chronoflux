@@ -9,7 +9,8 @@ export default defineSchema({
 		currentTurn: v.number(),
 		status: v.union(v.literal('active'), v.literal('paused'), v.literal('completed')),
 		createdAt: v.number(),
-		updatedAt: v.number()
+		updatedAt: v.number(),
+		historySummary: v.optional(v.string())
 	}),
 
 	scenarios: defineTable({

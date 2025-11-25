@@ -4,6 +4,12 @@
  */
 
 /**
+ * Retry configuration
+ */
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 1000;
+
+/**
  * AI Response structure from Ollama
  */
 export interface AIActionResponse {
@@ -40,6 +46,7 @@ export interface AIProcessingResult {
 		statusChange?: 'allied' | 'neutral' | 'hostile' | 'at_war';
 	}>;
 	feasibility: 'high' | 'medium' | 'low';
+	historySummary?: string;
 }
 
 /**
@@ -52,10 +59,34 @@ function buildActionInterpretationPrompt(
 	worldState: {
 		playerResources: Record<string, number>;
 		relationships: Array<{ name: string; status: string; score: number }>;
-		recentEvents: string[];
+		turnHistory: Array<{
+			turnNumber: number;
+			playerAction: string;
+			narrative: string;
+			consequences: string;
+			events: Array<{ title: string; description: string; type: string }>;
+			worldStateChanges: Record<string, unknown>;
+		}>;
+		historySummary?: string;
 	}
 ): string {
-	const { playerResources, relationships, recentEvents } = worldState;
+	const { playerResources, relationships, turnHistory, historySummary } = worldState;
+
+	// Format turn history for the prompt
+	const historyText =
+		turnHistory.length > 0
+			? turnHistory
+					.map(
+						(turn) => `
+Turn ${turn.turnNumber}:
+  Action: ${turn.playerAction}
+  Outcome: ${turn.narrative}
+  Consequences: ${turn.consequences}
+  Events: ${turn.events.map((e) => `\n    - ${e.title}: ${e.description}`).join('')}
+  Resource Changes: ${JSON.stringify(turn.worldStateChanges || {})}`
+					)
+					.join('\n')
+			: '  No previous turns';
 
 	return `You are a historical simulation AI. A player controlling ${playerNationName} in ${currentYear} has taken the following action:
 
@@ -71,14 +102,19 @@ Current World State:
 - Relationships:
 ${relationships.map((r) => `  - ${r.name}: ${r.status} (score: ${r.score})`).join('\n')}
 
-- Recent Events:
-${recentEvents.length > 0 ? recentEvents.map((e) => `  - ${e}`).join('\n') : '  - None'}
+- Recent Turn History (Last 5 Turns):
+${historyText}
 
-Analyze this action and determine:
+- Historical Summary (Previous Eras):
+${historySummary || 'No historical summary available yet.'}
+
+
+Analyze this action IN THE CONTEXT OF THE RECENT HISTORY and determine:
 1. Is it feasible given the nation's current state?
 2. What are the immediate consequences?
 3. How will other nations react?
 4. What resources are required/affected?
+5. How does this build upon or contradict recent actions?
 
 Respond in JSON format:
 {
@@ -122,6 +158,44 @@ Generate events in JSON format (array):
 }
 
 /**
+ * Build Summarization prompt
+ */
+function buildSummarizationPrompt(
+	currentSummary: string,
+	recentTurns: Array<{
+		turnNumber: number;
+		playerAction: string;
+		narrative: string;
+		consequences: string;
+		events: Array<{ title: string; description: string }>;
+	}>
+): string {
+	const recentHistoryText = recentTurns
+		.map(
+			(turn) => `
+Turn ${turn.turnNumber}:
+  Action: ${turn.playerAction}
+  Outcome: ${turn.narrative}
+  Events: ${turn.events.map((e) => e.title).join(', ')}`
+		)
+		.join('\n');
+
+	return `You are the official historian of this nation. Update the historical summary to include the events of the last few turns.
+
+Current Summary:
+${currentSummary || 'The nation has just begun its journey.'}
+
+Recent Events to Add:
+${recentHistoryText}
+
+Task:
+Write a concise, updated summary (max 2 paragraphs) that integrates the recent events into the overall history. Focus on major trends, eras, and pivotal moments. Do not list every minor detail.
+
+Response Format:
+Just the updated summary text.`;
+}
+
+/**
  * Parse JSON from AI response, handling various formats
  */
 function parseAIJSON<T>(response: string): T {
@@ -138,11 +212,59 @@ function parseAIJSON<T>(response: string): T {
 		// Try to find JSON in response
 		const objectMatch = response.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
 		if (objectMatch) {
-			return JSON.parse(objectMatch[0]);
+			let jsonStr = objectMatch[0];
+			// Sanitize common JSON errors:
+			// 1. Remove leading '+' from numbers (e.g. "+5" -> "5")
+			jsonStr = jsonStr.replace(/:\s*\+(\d+)/g, ': $1');
+			// 2. Remove trailing commas before closing braces/brackets
+			jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+			// 3. Remove comments
+			jsonStr = jsonStr.replace(/\/\/.*$/gm, '');
+			jsonStr = jsonStr.replace(/\/\*[\s\S]*?\*\//g, '');
+			return JSON.parse(jsonStr);
 		}
 
 		throw new Error('No valid JSON found in AI response');
 	}
+}
+
+/**
+ * Retry wrapper with exponential backoff for AI calls
+ */
+async function callAIWithRetry<T>(
+	prompt: string,
+	temperature: number,
+	parser: (response: string) => T,
+	onRetry?: (attempt: number, error: Error) => void
+): Promise<T> {
+	let lastError: Error | null = null;
+
+	for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+		try {
+			const rawResponse = await callOllama(prompt, temperature);
+			return parser(rawResponse);
+		} catch (error) {
+			lastError = error instanceof Error ? error : new Error(String(error));
+
+			// Don't retry connection errors - user needs to fix their setup
+			if (lastError.message.includes('Could not connect to Ollama')) {
+				throw lastError;
+			}
+
+			// If this was the last attempt, throw the error
+			if (attempt === MAX_RETRIES) {
+				break;
+			}
+
+			// Notify about retry and wait with exponential backoff
+			onRetry?.(attempt, lastError);
+			const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
+			await new Promise((resolve) => setTimeout(resolve, delay));
+		}
+	}
+
+	// All retries failed
+	throw lastError;
 }
 
 /**
@@ -198,7 +320,15 @@ export async function processTurnWithLocalAI(
 		worldState: {
 			playerResources: Record<string, number>;
 			relationships: Array<{ name: string; status: string; score: number }>;
-			recentEvents: string[];
+			turnHistory: Array<{
+				turnNumber: number;
+				playerAction: string;
+				narrative: string;
+				consequences: string;
+				events: Array<{ title: string; description: string; type: string }>;
+				worldStateChanges: Record<string, unknown>;
+			}>;
+			historySummary?: string;
 		};
 	}
 ): Promise<AIProcessingResult> {
@@ -211,16 +341,35 @@ export async function processTurnWithLocalAI(
 	);
 
 	let actionResponse: AIActionResponse;
+	let actionRetryCount = 0;
 	try {
-		const rawActionResponse = await callOllama(actionPrompt);
-		actionResponse = parseAIJSON<AIActionResponse>(rawActionResponse);
+		actionResponse = await callAIWithRetry(
+			actionPrompt,
+			0.7,
+			(response) => parseAIJSON<AIActionResponse>(response),
+			(attempt, error) => {
+				actionRetryCount = attempt;
+				console.warn(
+					`AI action response parsing failed (attempt ${attempt}/${MAX_RETRIES}):`,
+					error.message
+				);
+			}
+		);
+
+		// Log warning if retries were needed
+		if (actionRetryCount > 0) {
+			console.warn(
+				`AI action response required ${actionRetryCount} ${actionRetryCount === 1 ? 'retry' : 'retries'}`
+			);
+		}
 	} catch (error) {
-		console.error('Failed to parse AI action response:', error);
+		console.error('Failed to get AI action response after all retries:', error);
 		// Re-throw connection errors - user needs to fix their Ollama setup
 		if (error instanceof Error && error.message.includes('Could not connect to Ollama')) {
 			throw error;
 		}
 		// For other errors (like JSON parsing), use fallback response
+		console.warn('Using fallback action response');
 		actionResponse = {
 			feasibility: 'medium',
 			immediate_consequences: ['Action being evaluated...'],
@@ -239,16 +388,35 @@ export async function processTurnWithLocalAI(
 	);
 
 	let events: AIEventResponse[] = [];
+	let eventRetryCount = 0;
 	try {
-		const rawEventResponse = await callOllama(eventPrompt, 0.8);
-		events = parseAIJSON<AIEventResponse[]>(rawEventResponse);
+		events = await callAIWithRetry(
+			eventPrompt,
+			0.8,
+			(response) => parseAIJSON<AIEventResponse[]>(response),
+			(attempt, error) => {
+				eventRetryCount = attempt;
+				console.warn(
+					`AI event response parsing failed (attempt ${attempt}/${MAX_RETRIES}):`,
+					error.message
+				);
+			}
+		);
+
+		// Log warning if retries were needed
+		if (eventRetryCount > 0) {
+			console.warn(
+				`AI event response required ${eventRetryCount} ${eventRetryCount === 1 ? 'retry' : 'retries'}`
+			);
+		}
 	} catch (error) {
-		console.error('Failed to parse AI event response:', error);
+		console.error('Failed to get AI event response after all retries:', error);
 		// Re-throw connection errors
 		if (error instanceof Error && error.message.includes('Could not connect to Ollama')) {
 			throw error;
 		}
 		// For other errors (like JSON parsing), generate a basic event as fallback
+		console.warn('Using fallback event response');
 		events = [
 			{
 				type: 'other',
@@ -260,13 +428,34 @@ export async function processTurnWithLocalAI(
 		];
 	}
 
-	// Return structured AI response
+	// 3. Check if summarization is needed (every 5 turns)
+	let newHistorySummary: string | undefined;
+	if (gameContext.turnNumber % 5 === 0) {
+		const summarizationPrompt = buildSummarizationPrompt(
+			gameContext.worldState.historySummary || '',
+			gameContext.worldState.turnHistory.map((t) => ({
+				turnNumber: t.turnNumber,
+				playerAction: t.playerAction,
+				narrative: t.narrative,
+				consequences: t.consequences,
+				events: t.events
+			}))
+		);
+
+		try {
+			newHistorySummary = await callOllama(summarizationPrompt, 0.6);
+		} catch (error) {
+			console.error('Failed to generate history summary:', error);
+			// Fail silently for summarization, don't block the turn
+		}
+	}
 	return {
 		events,
 		consequences: actionResponse.immediate_consequences.join('. '),
 		narrative: actionResponse.narrative,
 		resourceChanges: actionResponse.resource_changes || {},
 		relationshipChanges: actionResponse.relationship_changes || [],
-		feasibility: actionResponse.feasibility
+		feasibility: actionResponse.feasibility,
+		historySummary: newHistorySummary
 	};
 }

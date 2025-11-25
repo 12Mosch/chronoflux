@@ -95,7 +95,8 @@ export const persistTurnWithAIResponse = mutation({
 				})
 			),
 			feasibility: v.union(v.literal('high'), v.literal('medium'), v.literal('low'))
-		})
+		}),
+		historySummary: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
 		const game = await ctx.db.get(args.gameId);
@@ -244,7 +245,8 @@ export const persistTurnWithAIResponse = mutation({
 		// Update game state
 		await ctx.db.patch(args.gameId, {
 			currentTurn: turnNumber,
-			updatedAt: Date.now()
+			updatedAt: Date.now(),
+			...(args.historySummary && { historySummary: args.historySummary })
 		});
 
 		// Return turn summary data
