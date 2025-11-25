@@ -95,7 +95,8 @@ export const persistTurnWithAIResponse = mutation({
 				})
 			),
 			feasibility: v.union(v.literal('high'), v.literal('medium'), v.literal('low'))
-		})
+		}),
+		historySummary: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
 		const game = await ctx.db.get(args.gameId);

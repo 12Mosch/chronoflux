@@ -40,6 +40,7 @@ export interface AIProcessingResult {
 		statusChange?: 'allied' | 'neutral' | 'hostile' | 'at_war';
 	}>;
 	feasibility: 'high' | 'medium' | 'low';
+	historySummary?: string;
 }
 
 /**
@@ -60,9 +61,10 @@ function buildActionInterpretationPrompt(
 			events: Array<{ title: string; description: string; type: string }>;
 			worldStateChanges: any;
 		}>;
+		historySummary?: string;
 	}
 ): string {
-	const { playerResources, relationships, turnHistory } = worldState;
+	const { playerResources, relationships, turnHistory, historySummary } = worldState;
 
 	// Format turn history for the prompt
 	const historyText =
@@ -96,6 +98,10 @@ ${relationships.map((r) => `  - ${r.name}: ${r.status} (score: ${r.score})`).joi
 
 - Recent Turn History (Last 5 Turns):
 ${historyText}
+
+- Historical Summary (Previous Eras):
+${historySummary || 'No historical summary available yet.'}
+
 
 Analyze this action IN THE CONTEXT OF THE RECENT HISTORY and determine:
 1. Is it feasible given the nation's current state?
@@ -143,6 +149,44 @@ Generate events in JSON format (array):
     "impact": {"resourceType": changeAmount}
   }
 ]`;
+}
+
+/**
+ * Build Summarization prompt
+ */
+function buildSummarizationPrompt(
+	currentSummary: string,
+	recentTurns: Array<{
+		turnNumber: number;
+		playerAction: string;
+		narrative: string;
+		consequences: string;
+		events: Array<{ title: string; description: string }>;
+	}>
+): string {
+	const recentHistoryText = recentTurns
+		.map(
+			(turn) => `
+Turn ${turn.turnNumber}:
+  Action: ${turn.playerAction}
+  Outcome: ${turn.narrative}
+  Events: ${turn.events.map((e) => e.title).join(', ')}`
+		)
+		.join('\n');
+
+	return `You are the official historian of this nation. Update the historical summary to include the events of the last few turns.
+
+Current Summary:
+${currentSummary || 'The nation has just begun its journey.'}
+
+Recent Events to Add:
+${recentHistoryText}
+
+Task:
+Write a concise, updated summary (max 2 paragraphs) that integrates the recent events into the overall history. Focus on major trends, eras, and pivotal moments. Do not list every minor detail.
+
+Response Format:
+Just the updated summary text.`;
 }
 
 /**
@@ -237,6 +281,7 @@ export async function processTurnWithLocalAI(
 				events: Array<{ title: string; description: string; type: string }>;
 				worldStateChanges: any;
 			}>;
+			historySummary?: string;
 		};
 	}
 ): Promise<AIProcessingResult> {
@@ -298,13 +343,34 @@ export async function processTurnWithLocalAI(
 		];
 	}
 
-	// Return structured AI response
+	// 3. Check if summarization is needed (every 5 turns)
+	let newHistorySummary: string | undefined;
+	if (gameContext.turnNumber % 5 === 0) {
+		const summarizationPrompt = buildSummarizationPrompt(
+			gameContext.worldState.historySummary || '',
+			gameContext.worldState.turnHistory.map((t) => ({
+				turnNumber: t.turnNumber,
+				playerAction: t.playerAction,
+				narrative: t.narrative,
+				consequences: t.consequences,
+				events: t.events
+			}))
+		);
+
+		try {
+			newHistorySummary = await callOllama(summarizationPrompt, 0.6);
+		} catch (error) {
+			console.error('Failed to generate history summary:', error);
+			// Fail silently for summarization, don't block the turn
+		}
+	}
 	return {
 		events,
 		consequences: actionResponse.immediate_consequences.join('. '),
 		narrative: actionResponse.narrative,
 		resourceChanges: actionResponse.resource_changes || {},
 		relationshipChanges: actionResponse.relationship_changes || [],
-		feasibility: actionResponse.feasibility
+		feasibility: actionResponse.feasibility,
+		historySummary: newHistorySummary
 	};
 }

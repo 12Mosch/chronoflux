@@ -243,25 +243,25 @@ export const getGameContext = query({
 			.collect();
 
 		// Get recent turns for historical context (last 5 turns)
-	const recentTurns = await ctx.db
-		.query('turns')
-		.withIndex('by_gameId', (q) => q.eq('gameId', args.gameId))
-		.order('desc')
-		.take(5);
+		const recentTurns = await ctx.db
+			.query('turns')
+			.withIndex('by_gameId', (q) => q.eq('gameId', args.gameId))
+			.order('desc')
+			.take(5);
 
-	// Build comprehensive turn history for AI
-	const turnHistory = recentTurns.reverse().map((turn) => ({
-		turnNumber: turn.turnNumber,
-		playerAction: turn.playerAction,
-		narrative: turn.aiResponse.narrative,
-		consequences: turn.aiResponse.consequences,
-		events: turn.aiResponse.events.map((e) => ({
-			title: e.title,
-			description: e.description,
-			type: e.type
-		})),
-		worldStateChanges: turn.aiResponse.worldStateChanges
-	}));
+		// Build comprehensive turn history for AI
+		const turnHistory = recentTurns.reverse().map((turn) => ({
+			turnNumber: turn.turnNumber,
+			playerAction: turn.playerAction,
+			narrative: turn.aiResponse.narrative,
+			consequences: turn.aiResponse.consequences,
+			events: turn.aiResponse.events.map((e) => ({
+				title: e.title,
+				description: e.description,
+				type: e.type
+			})),
+			worldStateChanges: turn.aiResponse.worldStateChanges
+		}));
 
 		// Format relationships for AI
 		const formattedRelationships = relationships.map((rel) => {
@@ -281,7 +281,8 @@ export const getGameContext = query({
 			worldState: {
 				playerResources: playerNation.resources,
 				relationships: formattedRelationships,
-				turnHistory
+				turnHistory,
+				historySummary: game.historySummary
 			}
 		};
 	}
