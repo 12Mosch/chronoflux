@@ -4,6 +4,12 @@
  */
 
 /**
+ * Retry configuration
+ */
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 1000;
+
+/**
  * AI Response structure from Ollama
  */
 export interface AIActionResponse {
@@ -59,7 +65,7 @@ function buildActionInterpretationPrompt(
 			narrative: string;
 			consequences: string;
 			events: Array<{ title: string; description: string; type: string }>;
-			worldStateChanges: any;
+			worldStateChanges: Record<string, unknown>;
 		}>;
 		historySummary?: string;
 	}
@@ -207,17 +213,58 @@ function parseAIJSON<T>(response: string): T {
 		const objectMatch = response.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
 		if (objectMatch) {
 			let jsonStr = objectMatch[0];
-			// Sanitize: Remove leading '+' from numbers (e.g. "+5" -> "5")
-			// This regex looks for:
-			// 1. A colon or whitespace preceding the number
-			// 2. A plus sign
-			// 3. Digits
+			// Sanitize common JSON errors:
+			// 1. Remove leading '+' from numbers (e.g. "+5" -> "5")
 			jsonStr = jsonStr.replace(/:\s*\+(\d+)/g, ': $1');
+			// 2. Remove trailing commas before closing braces/brackets
+			jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+			// 3. Remove comments
+			jsonStr = jsonStr.replace(/\/\/.*$/gm, '');
+			jsonStr = jsonStr.replace(/\/\*[\s\S]*?\*\//g, '');
 			return JSON.parse(jsonStr);
 		}
 
 		throw new Error('No valid JSON found in AI response');
 	}
+}
+
+/**
+ * Retry wrapper with exponential backoff for AI calls
+ */
+async function callAIWithRetry<T>(
+	prompt: string,
+	temperature: number,
+	parser: (response: string) => T,
+	onRetry?: (attempt: number, error: Error) => void
+): Promise<T> {
+	let lastError: Error | null = null;
+
+	for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+		try {
+			const rawResponse = await callOllama(prompt, temperature);
+			return parser(rawResponse);
+		} catch (error) {
+			lastError = error instanceof Error ? error : new Error(String(error));
+
+			// Don't retry connection errors - user needs to fix their setup
+			if (lastError.message.includes('Could not connect to Ollama')) {
+				throw lastError;
+			}
+
+			// If this was the last attempt, throw the error
+			if (attempt === MAX_RETRIES) {
+				break;
+			}
+
+			// Notify about retry and wait with exponential backoff
+			onRetry?.(attempt, lastError);
+			const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
+			await new Promise((resolve) => setTimeout(resolve, delay));
+		}
+	}
+
+	// All retries failed
+	throw lastError;
 }
 
 /**
@@ -279,7 +326,7 @@ export async function processTurnWithLocalAI(
 				narrative: string;
 				consequences: string;
 				events: Array<{ title: string; description: string; type: string }>;
-				worldStateChanges: any;
+				worldStateChanges: Record<string, unknown>;
 			}>;
 			historySummary?: string;
 		};
@@ -294,16 +341,35 @@ export async function processTurnWithLocalAI(
 	);
 
 	let actionResponse: AIActionResponse;
+	let actionRetryCount = 0;
 	try {
-		const rawActionResponse = await callOllama(actionPrompt);
-		actionResponse = parseAIJSON<AIActionResponse>(rawActionResponse);
+		actionResponse = await callAIWithRetry(
+			actionPrompt,
+			0.7,
+			(response) => parseAIJSON<AIActionResponse>(response),
+			(attempt, error) => {
+				actionRetryCount = attempt;
+				console.warn(
+					`AI action response parsing failed (attempt ${attempt}/${MAX_RETRIES}):`,
+					error.message
+				);
+			}
+		);
+
+		// Log warning if retries were needed
+		if (actionRetryCount > 0) {
+			console.warn(
+				`AI action response required ${actionRetryCount} ${actionRetryCount === 1 ? 'retry' : 'retries'}`
+			);
+		}
 	} catch (error) {
-		console.error('Failed to parse AI action response:', error);
+		console.error('Failed to get AI action response after all retries:', error);
 		// Re-throw connection errors - user needs to fix their Ollama setup
 		if (error instanceof Error && error.message.includes('Could not connect to Ollama')) {
 			throw error;
 		}
 		// For other errors (like JSON parsing), use fallback response
+		console.warn('Using fallback action response');
 		actionResponse = {
 			feasibility: 'medium',
 			immediate_consequences: ['Action being evaluated...'],
@@ -322,16 +388,35 @@ export async function processTurnWithLocalAI(
 	);
 
 	let events: AIEventResponse[] = [];
+	let eventRetryCount = 0;
 	try {
-		const rawEventResponse = await callOllama(eventPrompt, 0.8);
-		events = parseAIJSON<AIEventResponse[]>(rawEventResponse);
+		events = await callAIWithRetry(
+			eventPrompt,
+			0.8,
+			(response) => parseAIJSON<AIEventResponse[]>(response),
+			(attempt, error) => {
+				eventRetryCount = attempt;
+				console.warn(
+					`AI event response parsing failed (attempt ${attempt}/${MAX_RETRIES}):`,
+					error.message
+				);
+			}
+		);
+
+		// Log warning if retries were needed
+		if (eventRetryCount > 0) {
+			console.warn(
+				`AI event response required ${eventRetryCount} ${eventRetryCount === 1 ? 'retry' : 'retries'}`
+			);
+		}
 	} catch (error) {
-		console.error('Failed to parse AI event response:', error);
+		console.error('Failed to get AI event response after all retries:', error);
 		// Re-throw connection errors
 		if (error instanceof Error && error.message.includes('Could not connect to Ollama')) {
 			throw error;
 		}
 		// For other errors (like JSON parsing), generate a basic event as fallback
+		console.warn('Using fallback event response');
 		events = [
 			{
 				type: 'other',
