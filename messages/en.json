@@ -139,5 +139,9 @@
 	"error_failed_to_connect": "Failed to connect: {statusText}",
 	"error_model_not_found": "Model '{modelName}' not found. Installed models: {installedModels}",
 	"error_failed_connect_ollama": "Failed to connect to Ollama",
-	"error_cors_issue": "Could not connect. Check URL and ensure OLLAMA_ORIGINS=\"*\" is set."
+	"error_cors_issue": "Could not connect. Check URL and ensure OLLAMA_ORIGINS=\"*\" is set.",
+	"error_page_default_message": "Something went wrong",
+	"error_page_description": "The timeline seems to have disrupted. The page you are looking for might have been moved, deleted, or never existed in this timeline.",
+	"error_page_return_home": "Return Home",
+	"error_page_go_back": "Go Back"
 }
