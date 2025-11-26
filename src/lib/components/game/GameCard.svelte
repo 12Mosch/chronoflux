@@ -31,7 +31,7 @@
 </script>
 
 <Card
-	class="group relative overflow-hidden border-slate-800 bg-slate-900 transition-all hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10"
+	class="group relative overflow-hidden border-slate-700 bg-slate-800/50 transition-all hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10"
 >
 	<CardHeader class="pb-2">
 		<div class="flex items-start justify-between gap-4">

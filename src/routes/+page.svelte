@@ -86,25 +86,29 @@
 	<title>ChronoFlux</title>
 </svelte:head>
 
-<div class="min-h-screen bg-linear-to-b from-slate-900 to-slate-800 text-white">
+<div class="min-h-screen bg-slate-950 text-white">
 	<!-- Hero Section -->
 	<div class="container mx-auto px-4 py-20 text-center">
-		<h1 class="mb-6 text-5xl font-bold md:text-6xl">{m.hero_title()}</h1>
-		<p class="mx-auto mb-8 max-w-2xl text-xl text-slate-300 md:text-2xl">
+		<h1 class="mb-6 text-5xl font-bold tracking-tight md:text-6xl">{m.hero_title()}</h1>
+		<p class="mx-auto mb-8 max-w-2xl text-lg text-slate-300 md:text-xl">
 			{m.hero_description()}
 		</p>
-		<p class="mx-auto mb-12 max-w-2xl text-lg text-slate-400">
+		<p class="mx-auto mb-12 max-w-2xl text-sm text-slate-400">
 			{m.hero_subtitle()}
 		</p>
 
 		<!-- CTA Button -->
 		<div class="flex justify-center gap-4">
 			{#if !loading && games.length > 0}
-				<Button href="/game/{games[0]._id}" size="lg" class="bg-green-600 hover:bg-green-700">
+				<Button
+					href="/game/{games[0]._id}"
+					size="lg"
+					class="bg-green-600 px-8 font-medium hover:bg-green-700"
+				>
 					{m.continue_playing()}
 				</Button>
 			{/if}
-			<Button href="/scenarios" size="lg" class="bg-blue-600 hover:bg-blue-700">
+			<Button href="/scenarios" size="lg" class="bg-blue-600 px-8 font-medium hover:bg-blue-700">
 				{m.start_new_game()}
 			</Button>
 		</div>
@@ -138,21 +142,21 @@
 	<!-- Features Section -->
 	<div class="container mx-auto px-4 py-16">
 		<div class="grid gap-8 md:grid-cols-3">
-			<div class="rounded-lg bg-slate-700 p-6">
-				<h3 class="mb-3 text-xl font-bold">{m.feature_natural_language_title()}</h3>
-				<p class="text-slate-300">
+			<div class="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
+				<h3 class="mb-3 text-lg font-bold text-white">{m.feature_natural_language_title()}</h3>
+				<p class="text-sm text-slate-400">
 					{m.feature_natural_language_desc()}
 				</p>
 			</div>
-			<div class="rounded-lg bg-slate-700 p-6">
-				<h3 class="mb-3 text-xl font-bold">{m.feature_historical_scenarios_title()}</h3>
-				<p class="text-slate-300">
+			<div class="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
+				<h3 class="mb-3 text-lg font-bold text-white">{m.feature_historical_scenarios_title()}</h3>
+				<p class="text-sm text-slate-400">
 					{m.feature_historical_scenarios_desc()}
 				</p>
 			</div>
-			<div class="rounded-lg bg-slate-700 p-6">
-				<h3 class="mb-3 text-xl font-bold">{m.feature_persistent_world_title()}</h3>
-				<p class="text-slate-300">
+			<div class="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
+				<h3 class="mb-3 text-lg font-bold text-white">{m.feature_persistent_world_title()}</h3>
+				<p class="text-sm text-slate-400">
 					{m.feature_persistent_world_desc()}
 				</p>
 			</div>
