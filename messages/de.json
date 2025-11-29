@@ -130,7 +130,7 @@
 	"settings": "Einstellungen",
 	"menu": "Menü",
 	"settings_title": "Einstellungen",
-	"settings_description": "Konfiguriere die Verbindungsdetails deiner lokalen Ollama-Instanz.",
+	"settings_description": "Konfiguriere die Verbindungsdetails deiner lokalen Ollama-Instanz und Anzeigeeinstellungen.",
 	"ollama_url_label": "Ollama URL",
 	"model_name_label": "Modellname",
 	"reset_button": "Zurücksetzen",

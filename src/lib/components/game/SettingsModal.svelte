@@ -78,6 +78,7 @@
 	function resetDefaults() {
 		ollamaUrl = 'http://localhost:11434';
 		modelName = 'qwen3:8b';
+		resetMode(); // Reset theme to system default
 	}
 </script>
 
