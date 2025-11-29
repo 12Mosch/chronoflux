@@ -114,7 +114,11 @@
 										: 'bg-muted text-foreground'
 								}`}
 							>
-								<div class="prose prose-sm max-w-none dark:prose-invert">
+								<div
+									class={msg.role === 'advisor'
+										? 'prose prose-sm max-w-none dark:prose-invert'
+										: 'wrap-break-word'}
+								>
 									<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 									{@html md.render(msg.content)}
 								</div>
