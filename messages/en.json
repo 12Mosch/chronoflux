@@ -143,5 +143,14 @@
 	"error_page_default_message": "Something went wrong",
 	"error_page_description": "The timeline seems to have disrupted. The page you are looking for might have been moved, deleted, or never existed in this timeline.",
 	"error_page_return_home": "Return Home",
-	"error_page_go_back": "Go Back"
+	"error_page_go_back": "Go Back",
+	"advisor_title": "Royal Advisor",
+	"advisor_description": "Consult with your advisor on matters of state.",
+	"advisor_initial_greeting": "Greetings, my liege. How may I serve the realm today?",
+	"advisor_error_message": "My apologies, my liege. I am unable to provide counsel at this moment.",
+	"advisor_input_placeholder": "Ask for advice...",
+	"advisor_quick_strategic": "Strategic Advice",
+	"advisor_quick_summary": "Game Summary",
+	"advisor_quick_threats": "Threats & Opportunities",
+	"advisor_clear_conversation": "Clear conversation"
 }

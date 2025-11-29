@@ -143,5 +143,14 @@
 	"error_page_default_message": "Etwas ist schiefgelaufen",
 	"error_page_description": "Die Zeitlinie scheint gestört zu sein. Die Seite, die Sie suchen, wurde möglicherweise verschoben, gelöscht oder hat in dieser Zeitlinie nie existiert.",
 	"error_page_return_home": "Zur Startseite",
-	"error_page_go_back": "Zurück"
+	"error_page_go_back": "Zurück",
+	"advisor_title": "Königlicher Berater",
+	"advisor_description": "Konsultiere deinen Berater in Staatsangelegenheiten.",
+	"advisor_initial_greeting": "Seid gegrüßt, mein Gebieter. Wie kann ich dem Reich heute dienen?",
+	"advisor_error_message": "Meine Entschuldigung, mein Gebieter. Ich kann momentan keinen Rat erteilen.",
+	"advisor_input_placeholder": "Um Rat bitten...",
+	"advisor_quick_strategic": "Strategischer Rat",
+	"advisor_quick_summary": "Spielzusammenfassung",
+	"advisor_quick_threats": "Gefahren & Chancen",
+	"advisor_clear_conversation": "Gespräch löschen"
 }

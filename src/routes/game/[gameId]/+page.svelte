@@ -3,6 +3,7 @@
 	import TurnSummary from '$lib/components/game/TurnSummary.svelte';
 	import NationPanel from '$lib/components/game/NationPanel.svelte';
 	import EventLog from '$lib/components/game/EventLog.svelte';
+	import Advisor from '$lib/components/game/Advisor.svelte';
 	import Map from '$lib/components/game/Map.svelte';
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
@@ -13,7 +14,18 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import { Search, Globe, Layers, Flag, History, Bell, Plus, Minus, Compass } from '@lucide/svelte';
+	import {
+		Search,
+		Globe,
+		Layers,
+		Flag,
+		History,
+		Bell,
+		Bot,
+		Plus,
+		Minus,
+		Compass
+	} from '@lucide/svelte';
 
 	const gameId = $derived(page.params.gameId as Id<'games'>);
 	const worldState = $derived(useQuery(api.world.getWorldState, gameId ? { gameId } : 'skip'));
@@ -40,6 +52,7 @@
 	let showTurnSummary = $state(false);
 	let showNationPanel = $state(false);
 	let showEventLog = $state(false);
+	let showAdvisor = $state(false);
 	let lastTurnData = $state<TurnData>(null);
 	let mapComponent = $state<MapComponent | null>(null);
 
@@ -135,6 +148,15 @@
 			<Button variant="ghost" size="icon" class="hover:bg-accent">
 				<Bell class="h-5 w-5" />
 			</Button>
+			<Button
+				variant="ghost"
+				size="icon"
+				class="hover:bg-accent {showAdvisor ? 'bg-accent text-accent-foreground' : ''}"
+				onclick={() => (showAdvisor = true)}
+				title={m.advisor_title()}
+			>
+				<Bot class="h-5 w-5" />
+			</Button>
 		</div>
 
 		<!-- Bottom Right: Zoom Controls -->
@@ -195,6 +217,8 @@
 			<EventLog />
 		</Sheet.Content>
 	</Sheet.Root>
+
+	<Advisor bind:open={showAdvisor} />
 
 	<TurnSummary bind:open={showTurnSummary} turnData={lastTurnData} />
 {/if}

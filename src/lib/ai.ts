@@ -459,3 +459,103 @@ export async function processTurnWithLocalAI(
 		historySummary: newHistorySummary
 	};
 }
+
+/**
+ * Build Advisor prompt
+ */
+function buildAdvisorPrompt(
+	question: string,
+	gameContext: {
+		playerNationName: string;
+		currentYear: number;
+		worldState: {
+			playerResources: Record<string, number>;
+			relationships: Array<{ name: string; status: string; score: number }>;
+			turnHistory: Array<{
+				turnNumber: number;
+				playerAction: string;
+				narrative: string;
+				consequences: string;
+				events: Array<{ title: string; description: string; type: string }>;
+			}>;
+			historySummary?: string;
+		};
+	}
+): string {
+	const { playerResources, relationships, turnHistory, historySummary } = gameContext.worldState;
+
+	// Format recent history
+	const recentHistoryText =
+		turnHistory.length > 0
+			? turnHistory
+					.slice(0, 5) // Last 5 turns
+					.map(
+						(turn) => `
+Turn ${turn.turnNumber}:
+  Action: ${turn.playerAction}
+  Outcome: ${turn.narrative}
+  Events: ${turn.events.map((e) => e.title).join(', ')}`
+					)
+					.join('\n')
+			: '  No previous turns';
+
+	return `You are the Royal Advisor to the leader of ${gameContext.playerNationName}. The year is ${gameContext.currentYear}.
+Your duty is to provide strategic counsel, analyze threats, and summarize the state of the realm.
+Speak in character: wise, loyal, and slightly formal, but clear and concise.
+
+Current State of the Realm:
+- Resources:
+  - Military: ${playerResources.military || 0}
+  - Economy: ${playerResources.economy || 0}
+  - Stability: ${playerResources.stability || 0}
+  - Influence: ${playerResources.influence || 0}
+
+- Relationships:
+${relationships.map((r) => `  - ${r.name}: ${r.status} (score: ${r.score})`).join('\n')}
+
+- Recent History:
+${recentHistoryText}
+
+- Historical Context:
+${historySummary || 'The nation is in its early days.'}
+
+The leader asks: "${question}"
+
+Provide your counsel. Keep it under 200 words. Focus on actionable advice or relevant analysis.`;
+}
+
+/**
+ * Ask the Advisor
+ */
+export async function askAdvisor(
+	question: string,
+	gameContext: {
+		playerNationName: string;
+		currentYear: number;
+		worldState: {
+			playerResources: Record<string, number>;
+			relationships: Array<{ name: string; status: string; score: number }>;
+			turnHistory: Array<{
+				turnNumber: number;
+				playerAction: string;
+				narrative: string;
+				consequences: string;
+				events: Array<{ title: string; description: string; type: string }>;
+				worldStateChanges: Record<string, unknown>;
+			}>;
+			historySummary?: string;
+		};
+	}
+): Promise<string> {
+	const prompt = buildAdvisorPrompt(question, gameContext);
+
+	try {
+		return await callOllama(prompt, 0.7);
+	} catch (error) {
+		console.error('Failed to get advisor response:', error);
+		if (error instanceof Error && error.message.includes('Could not connect to Ollama')) {
+			throw error;
+		}
+		return 'My apologies, my liege. My mind is clouded (AI Error). Please try again later.';
+	}
+}
