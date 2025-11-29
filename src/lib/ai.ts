@@ -521,7 +521,8 @@ ${historySummary || 'The nation is in its early days.'}
 
 The leader asks: "${question}"
 
-Provide your counsel. Keep it under 200 words. Focus on actionable advice or relevant analysis.`;
+Provide your counsel. Keep it under 200 words. Focus on actionable advice or relevant analysis.
+Format your response using Markdown for better readability (use **bold** for emphasis, bullet points for lists, etc.).`;
 }
 
 /**
