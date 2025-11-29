@@ -70,7 +70,7 @@
 		<!-- Center: Turn Info -->
 		<div class="flex flex-1 flex-col items-center justify-center">
 			<span class="text-sm font-bold">{m.turn()}: {turn}</span>
-			<span class="text-xs text-muted-foreground">{year} AD</span>
+			<span class="text-xs text-muted-foreground">{m.year_ad({ year })}</span>
 		</div>
 
 		<!-- Right: Actions -->

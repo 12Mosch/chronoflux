@@ -4,6 +4,8 @@
 	import { Button } from '$lib/components/ui/button';
 	import { onMount } from 'svelte';
 	import * as m from '$lib/paraglide/messages';
+	import * as Select from '$lib/components/ui/select';
+	import { setMode, resetMode, userPrefersMode } from 'mode-watcher';
 
 	let { open = $bindable(false) } = $props();
 
@@ -76,6 +78,7 @@
 	function resetDefaults() {
 		ollamaUrl = 'http://localhost:11434';
 		modelName = 'qwen3:8b';
+		resetMode(); // Reset theme to system default
 	}
 </script>
 
@@ -104,6 +107,36 @@
 					{m.model_name_label()}
 				</label>
 				<Input id="model-name" bind:value={modelName} class="col-span-3" disabled={isChecking} />
+			</div>
+			<div class="grid grid-cols-4 items-center gap-4">
+				<label for="theme" class="text-right text-sm font-medium text-foreground">
+					{m.settings_theme_label()}
+				</label>
+				<div class="col-span-3">
+					<Select.Root
+						type="single"
+						value={userPrefersMode.current}
+						onValueChange={(v) => {
+							if (v) setMode(v as 'light' | 'dark' | 'system');
+							else resetMode();
+						}}
+					>
+						<Select.Trigger class="w-full">
+							{#if userPrefersMode.current === 'light'}
+								{m.theme_light()}
+							{:else if userPrefersMode.current === 'dark'}
+								{m.theme_dark()}
+							{:else}
+								{m.theme_system()}
+							{/if}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="light">{m.theme_light()}</Select.Item>
+							<Select.Item value="dark">{m.theme_dark()}</Select.Item>
+							<Select.Item value="system">{m.theme_system()}</Select.Item>
+						</Select.Content>
+					</Select.Root>
+				</div>
 			</div>
 		</div>
 		<Dialog.Footer>
