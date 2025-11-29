@@ -583,7 +583,7 @@ Generate events in JSON format:
 - **Validation**: Zod
 - **Date Handling**: date-fns
 - **Markdown Rendering**: marked (for narratives)
-- **Icons**: lucide-svelte
+- **Icons**: @lucide/svelte
 - **Animations**: Svelte transitions + Motion One
 
 ## Project Timeline
