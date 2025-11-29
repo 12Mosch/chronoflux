@@ -152,5 +152,10 @@
 	"advisor_quick_strategic": "Strategic Advice",
 	"advisor_quick_summary": "Game Summary",
 	"advisor_quick_threats": "Threats & Opportunities",
-	"advisor_clear_conversation": "Clear conversation"
+	"advisor_clear_conversation": "Clear conversation",
+	"settings_theme_label": "Theme",
+	"theme_light": "Light",
+	"theme_dark": "Dark",
+	"theme_system": "System",
+	"year_ad": "{year} AD"
 }

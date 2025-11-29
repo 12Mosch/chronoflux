@@ -152,5 +152,10 @@
 	"advisor_quick_strategic": "Strategischer Rat",
 	"advisor_quick_summary": "Spielzusammenfassung",
 	"advisor_quick_threats": "Gefahren & Chancen",
-	"advisor_clear_conversation": "Gespräch löschen"
+	"advisor_clear_conversation": "Gespräch löschen",
+	"settings_theme_label": "Design",
+	"theme_light": "Hell",
+	"theme_dark": "Dunkel",
+	"theme_system": "System",
+	"year_ad": "{year} n. Chr."
 }
