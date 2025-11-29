@@ -8,9 +8,16 @@
 	import { page } from '$app/state';
 	import type { Id } from '$convex/_generated/dataModel';
 	import { askAdvisor } from '$lib/ai';
-	import { Loader2, User, Send, Bot, RefreshCw } from '@lucide/svelte';
+	import { LoaderCircle, User, Send, Bot, RefreshCw } from '@lucide/svelte';
 	import { tick } from 'svelte';
 	import * as m from '$lib/paraglide/messages';
+	import MarkdownIt from 'markdown-it';
+
+	const md = new MarkdownIt({
+		linkify: true,
+		typographer: true,
+		breaks: true
+	});
 
 	let { open = $bindable(false) } = $props();
 
@@ -107,7 +114,10 @@
 										: 'bg-muted text-foreground'
 								}`}
 							>
-								<p class="whitespace-pre-wrap">{msg.content}</p>
+								<div class="prose prose-sm max-w-none dark:prose-invert">
+									<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+									{@html md.render(msg.content)}
+								</div>
 							</div>
 						</div>
 					{/each}
@@ -117,7 +127,7 @@
 								<Bot class="h-4 w-4" />
 							</div>
 							<div class="flex items-center rounded-lg bg-muted p-3">
-								<Loader2 class="h-4 w-4 animate-spin" />
+								<LoaderCircle class="h-4 w-4 animate-spin" />
 							</div>
 						</div>
 					{/if}
