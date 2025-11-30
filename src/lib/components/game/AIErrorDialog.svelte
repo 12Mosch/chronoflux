@@ -2,19 +2,30 @@
 	import * as m from '$lib/paraglide/messages';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Button } from '$lib/components/ui/button';
-	import { TriangleAlert, ExternalLink, Check } from '@lucide/svelte';
+	import { TriangleAlert, ExternalLink, Check, Settings } from '@lucide/svelte';
+	import { isOpenRouterError as checkIsOpenRouterError } from '$lib/utils/errorClassification';
 
-	let { open = $bindable(false), errorMessage = '' }: { open: boolean; errorMessage: string } =
-		$props();
+	let {
+		open = $bindable(false),
+		errorMessage = '',
+		onOpenSettings
+	}: { open: boolean; errorMessage: string; onOpenSettings?: () => void } = $props();
 
 	const OLLAMA_DOCS_URL = 'https://docs.ollama.com/';
+	const OPENROUTER_DOCS_URL = 'https://openrouter.ai/docs';
 
 	// Track which command was just copied for visual feedback
 	let copiedCommand = $state<string | null>(null);
 
+	// Detect if the error is from OpenRouter
+	const isOpenRouterError = $derived(checkIsOpenRouterError(errorMessage));
+
 	// Parse the error message to extract helpful steps
 	const helpSteps = $derived(() => {
-		if (errorMessage.includes('Could not connect to Ollama')) {
+		if (isOpenRouterError) {
+			return []; // OpenRouter errors don't need command-line steps
+		}
+		if (errorMessage.includes('Could not connect')) {
 			return [
 				{
 					label: m.step_start_ollama(),
@@ -38,13 +49,19 @@
 
 	function copyToClipboard(text: string) {
 		navigator.clipboard.writeText(text);
-		// Show feedback
 		copiedCommand = text;
-		// Reset after 2 seconds
 		setTimeout(() => {
 			copiedCommand = null;
 		}, 2000);
 	}
+
+	function handleOpenSettings() {
+		open = false;
+		onOpenSettings?.();
+	}
+
+	const docsUrl = $derived(isOpenRouterError ? OPENROUTER_DOCS_URL : OLLAMA_DOCS_URL);
+	const docsLabel = $derived(isOpenRouterError ? m.open_openrouter_docs() : m.open_ollama_docs());
 </script>
 
 <Dialog.Root bind:open>
@@ -55,9 +72,9 @@
 					<TriangleAlert class="h-6 w-6 text-red-600 dark:text-red-500" />
 				</div>
 				<div>
-					<Dialog.Title class="text-xl">{m.ollama_error_title()}</Dialog.Title>
+					<Dialog.Title class="text-xl">{m.ai_error_title()}</Dialog.Title>
 					<Dialog.Description>
-						{m.ollama_error_desc()}
+						{m.ai_error_desc()}
 					</Dialog.Description>
 				</div>
 			</div>
@@ -71,7 +88,7 @@
 				<p class="text-sm text-red-800 dark:text-red-200">{errorMessage}</p>
 			</div>
 
-			<!-- Steps to Fix -->
+			<!-- Steps to Fix (Ollama only) -->
 			{#if helpSteps().length > 0}
 				<div>
 					<h4 class="mb-3 font-semibold text-foreground">{m.how_to_fix()}</h4>
@@ -79,7 +96,7 @@
 						{#each helpSteps() as step, index (step.label)}
 							<li class="flex gap-3">
 								<div
-									class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary"
+									class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary"
 								>
 									{index + 1}
 								</div>
@@ -119,12 +136,24 @@
 			<div class="rounded-md border bg-muted/50 p-4">
 				<h4 class="mb-2 font-semibold text-foreground">{m.need_more_help()}</h4>
 				<p class="mb-3 text-sm text-muted-foreground">
-					{m.ollama_docs_desc()}
+					{#if isOpenRouterError}
+						{m.openrouter_docs_desc()}
+					{:else}
+						{m.ollama_docs_desc()}
+					{/if}
 				</p>
-				<Button variant="outline" size="sm" onclick={() => window.open(OLLAMA_DOCS_URL, '_blank')}>
-					<ExternalLink class="mr-2 h-4 w-4" />
-					{m.open_ollama_docs()}
-				</Button>
+				<div class="flex flex-wrap gap-2">
+					<Button variant="outline" size="sm" onclick={() => window.open(docsUrl, '_blank')}>
+						<ExternalLink class="mr-2 h-4 w-4" />
+						{docsLabel}
+					</Button>
+					{#if onOpenSettings}
+						<Button variant="outline" size="sm" onclick={handleOpenSettings}>
+							<Settings class="mr-2 h-4 w-4" />
+							{m.settings_title()}
+						</Button>
+					{/if}
+				</div>
 			</div>
 		</div>
 

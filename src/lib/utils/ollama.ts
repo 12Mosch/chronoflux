@@ -59,10 +59,12 @@ export async function generateWithOllama(
 		temperature?: number;
 		maxTokens?: number;
 		timeout?: number;
+		baseUrl?: string; // Allow overriding the default base URL
 	}
 ): Promise<string> {
 	const model = options?.model || 'qwen3:8b';
 	const timeout = options?.timeout || DEFAULT_TIMEOUT;
+	const baseUrl = options?.baseUrl || OLLAMA_BASE_URL;
 
 	const request: OllamaGenerateRequest = {
 		model,
@@ -82,7 +84,7 @@ export async function generateWithOllama(
 			const controller = new AbortController();
 			const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-			const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
+			const response = await fetch(`${baseUrl}/api/generate`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -170,11 +172,25 @@ export function parseAIResponse<T>(response: string): T {
 }
 
 /**
+ * Check if a model exists in the list of available Ollama models
+ * Handles exact match and implicit :latest tag
+ */
+export function checkOllamaModelExists(models: { name: string }[], modelName: string): boolean {
+	return models.some((model) => {
+		const name = model.name;
+		if (name === modelName) return true;
+		if (!modelName.includes(':') && name === `${modelName}:latest`) return true;
+		return false;
+	});
+}
+
+/**
  * Test Ollama connection and model availability
  */
-export async function testOllamaConnection(model = 'qwen3:8b'): Promise<boolean> {
+export async function testOllamaConnection(model = 'qwen3:8b', baseUrl?: string): Promise<boolean> {
+	const url = baseUrl || OLLAMA_BASE_URL;
 	try {
-		const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`, {
+		const response = await fetch(`${url}/api/tags`, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json'
@@ -189,7 +205,7 @@ export async function testOllamaConnection(model = 'qwen3:8b'): Promise<boolean>
 		const models = data.models || [];
 
 		// Check if the specified model is available
-		return models.some((m: { name: string }) => m.name === model);
+		return checkOllamaModelExists(models, model);
 	} catch {
 		return false;
 	}

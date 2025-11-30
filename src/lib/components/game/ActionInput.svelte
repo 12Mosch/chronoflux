@@ -10,7 +10,9 @@
 	import { LoaderCircle, Send } from '@lucide/svelte';
 
 	import { processTurnWithLocalAI } from '$lib/ai';
-	import OllamaErrorDialog from './OllamaErrorDialog.svelte';
+	import { isAIProviderError } from '$lib/utils/errorClassification';
+	import AIErrorDialog from './AIErrorDialog.svelte';
+	import SettingsModal from './SettingsModal.svelte';
 
 	type TurnData = {
 		turnNumber: number;
@@ -36,8 +38,9 @@
 	let playerAction = $state('');
 	let isSubmitting = $state(false);
 	let submitError = $state<string | null>(null);
-	let showOllamaErrorDialog = $state(false);
-	let ollamaErrorMessage = $state('');
+	let showAIErrorDialog = $state(false);
+	let aiErrorMessage = $state('');
+	let showSettingsModal = $state(false);
 
 	const gameId = $derived(page.params.gameId as Id<'games'>);
 
@@ -119,12 +122,14 @@
 		} catch (error) {
 			console.error('Failed to submit turn:', error);
 
-			// Check if this is an Ollama connection error
+			// Check if this is an AI connection error (Ollama or OpenRouter)
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-			if (errorMessage.includes('Could not connect to Ollama')) {
-				// Show the friendly Ollama error dialog
-				ollamaErrorMessage = errorMessage;
-				showOllamaErrorDialog = true;
+			const isAIError = isAIProviderError(errorMessage);
+
+			if (isAIError) {
+				// Show the friendly AI error dialog
+				aiErrorMessage = errorMessage;
+				showAIErrorDialog = true;
 			} else {
 				// Set user-friendly error message for other errors
 				submitError =
@@ -170,5 +175,12 @@
 	</Card.Footer>
 </Card.Root>
 
-<!-- Ollama Error Dialog -->
-<OllamaErrorDialog bind:open={showOllamaErrorDialog} errorMessage={ollamaErrorMessage} />
+<!-- AI Error Dialog -->
+<AIErrorDialog
+	bind:open={showAIErrorDialog}
+	errorMessage={aiErrorMessage}
+	onOpenSettings={() => (showSettingsModal = true)}
+/>
+
+<!-- Settings Modal -->
+<SettingsModal bind:open={showSettingsModal} />
