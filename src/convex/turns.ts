@@ -199,6 +199,17 @@ export const persistTurnWithAIResponse = mutation({
 							relationshipScore: newScore,
 							...(relChange.statusChange && { status: relChange.statusChange })
 						});
+					} else {
+						// Create new relationship if it doesn't exist
+						await ctx.db.insert('relationships', {
+							gameId: args.gameId,
+							nation1Id,
+							nation2Id,
+							status: relChange.statusChange || 'neutral',
+							tradeAgreements: false,
+							militaryAlliance: false,
+							relationshipScore: Math.max(-100, Math.min(100, relChange.scoreChange))
+						});
 					}
 				}
 			}

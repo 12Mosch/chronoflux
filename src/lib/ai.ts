@@ -68,9 +68,10 @@ function buildActionInterpretationPrompt(
 			worldStateChanges: Record<string, unknown>;
 		}>;
 		historySummary?: string;
+		otherNations?: Array<{ name: string; government: string }>;
 	}
 ): string {
-	const { playerResources, relationships, turnHistory, historySummary } = worldState;
+	const { playerResources, relationships, turnHistory, historySummary, otherNations } = worldState;
 
 	// Format turn history for the prompt
 	const historyText =
@@ -101,6 +102,9 @@ Current World State:
 
 - Relationships:
 ${relationships.map((r) => `  - ${r.name}: ${r.status} (score: ${r.score})`).join('\n')}
+
+- Other Known Nations:
+${otherNations?.map((n) => `  - ${n.name} (${n.government})`).join('\n') || '  None'}
 
 - Recent Turn History (Last 5 Turns):
 ${historyText}
@@ -296,6 +300,7 @@ export async function processTurnWithLocalAI(
 				worldStateChanges: Record<string, unknown>;
 			}>;
 			historySummary?: string;
+			otherNations?: Array<{ name: string; government: string }>;
 		};
 	}
 ): Promise<AIProcessingResult> {
@@ -446,10 +451,11 @@ function buildAdvisorPrompt(
 				events: Array<{ title: string; description: string; type: string }>;
 			}>;
 			historySummary?: string;
+			otherNations?: Array<{ name: string; government: string }>;
 		};
 	}
 ): string {
-	const { playerResources, relationships, turnHistory, historySummary } = gameContext.worldState;
+	const { playerResources, relationships, turnHistory, historySummary, otherNations } = gameContext.worldState;
 
 	// Format recent history
 	const recentHistoryText =
@@ -479,6 +485,9 @@ Current State of the Realm:
 
 - Relationships:
 ${relationships.map((r) => `  - ${r.name}: ${r.status} (score: ${r.score})`).join('\n')}
+
+- Other Known Nations:
+${otherNations?.map((n) => `  - ${n.name} (${n.government})`).join('\n') || '  None'}
 
 - Recent History:
 ${recentHistoryText}
@@ -512,6 +521,7 @@ export async function askAdvisor(
 				worldStateChanges: Record<string, unknown>;
 			}>;
 			historySummary?: string;
+			otherNations?: Array<{ name: string; government: string }>;
 		};
 	}
 ): Promise<string> {

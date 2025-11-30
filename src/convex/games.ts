@@ -282,7 +282,10 @@ export const getGameContext = query({
 				playerResources: playerNation.resources,
 				relationships: formattedRelationships,
 				turnHistory,
-				historySummary: game.historySummary
+				historySummary: game.historySummary,
+				otherNations: allNations
+					.filter((n) => n._id !== playerNation._id)
+					.map((n) => ({ name: n.name, government: n.government }))
 			}
 		};
 	}
