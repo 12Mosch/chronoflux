@@ -8,6 +8,7 @@
  * @returns true if the error is related to AI provider connectivity or configuration
  */
 export function isAIProviderError(errorMessage: string): boolean {
+	if (!errorMessage) return false;
 	const lowerMessage = errorMessage.toLowerCase();
 	return (
 		lowerMessage.includes('could not connect') ||
@@ -24,6 +25,7 @@ export function isAIProviderError(errorMessage: string): boolean {
  * @returns true if the error is related to OpenRouter
  */
 export function isOpenRouterError(errorMessage: string): boolean {
+	if (!errorMessage) return false;
 	const lowerMessage = errorMessage.toLowerCase();
 	return (
 		lowerMessage.includes('openrouter') ||
