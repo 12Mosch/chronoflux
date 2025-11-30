@@ -4,6 +4,7 @@
 	import { PUBLIC_CONVEX_URL } from '$env/static/public';
 	import { setupConvex } from 'convex-svelte';
 	import { ModeWatcher } from 'mode-watcher';
+	import DebugPanel from '$lib/components/debug/DebugPanel.svelte';
 
 	let { children } = $props();
 	setupConvex(PUBLIC_CONVEX_URL);
@@ -15,3 +16,4 @@
 
 <ModeWatcher />
 {@render children()}
+<DebugPanel />

@@ -176,5 +176,11 @@
 	"openrouter_docs_desc": "Überprüfe deinen API-Schlüssel und Kontostatus auf OpenRouter.",
 	"open_openrouter_docs": "OpenRouter-Dokumentation",
 	"show_api_key": "API-Schlüssel anzeigen",
-	"hide_api_key": "API-Schlüssel verbergen"
+	"hide_api_key": "API-Schlüssel verbergen",
+	"debug_mode_label": "Debug-Modus",
+	"debug_mode_description": "KI-Interaktionsprotokollierung aktivieren",
+	"debug_panel_title": "KI-Debug-Protokoll ({count})",
+	"debug_panel_error_prefix": "Fehler:",
+	"debug_panel_prompt_label": "Eingabe:",
+	"debug_panel_response_label": "Antwort:"
 }

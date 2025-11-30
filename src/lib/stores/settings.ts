@@ -13,6 +13,8 @@ export interface AISettings {
 	// OpenRouter
 	openrouterApiKey: string;
 	openrouterModel: string;
+	// Debug
+	debugMode: boolean;
 }
 
 export const defaultSettings: AISettings = {
@@ -20,7 +22,8 @@ export const defaultSettings: AISettings = {
 	ollamaUrl: 'http://localhost:11434',
 	ollamaModel: 'qwen3:8b',
 	openrouterApiKey: '',
-	openrouterModel: 'openai/gpt-5-mini'
+	openrouterModel: 'openai/gpt-5-mini',
+	debugMode: false
 };
 
 /**
@@ -37,7 +40,8 @@ export function loadSettings(): AISettings {
 		ollamaModel: localStorage.getItem('OLLAMA_MODEL') || defaultSettings.ollamaModel,
 		openrouterApiKey:
 			localStorage.getItem('OPENROUTER_API_KEY') || defaultSettings.openrouterApiKey,
-		openrouterModel: localStorage.getItem('OPENROUTER_MODEL') || defaultSettings.openrouterModel
+		openrouterModel: localStorage.getItem('OPENROUTER_MODEL') || defaultSettings.openrouterModel,
+		debugMode: localStorage.getItem('DEBUG_MODE') === 'true'
 	};
 }
 
@@ -54,6 +58,7 @@ export function saveSettings(settings: AISettings): void {
 	localStorage.setItem('OLLAMA_MODEL', settings.ollamaModel);
 	localStorage.setItem('OPENROUTER_API_KEY', settings.openrouterApiKey);
 	localStorage.setItem('OPENROUTER_MODEL', settings.openrouterModel);
+	localStorage.setItem('DEBUG_MODE', String(settings.debugMode));
 }
 
 /**
