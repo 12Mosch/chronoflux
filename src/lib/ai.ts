@@ -47,6 +47,23 @@ export interface AIEventResponse {
 	impact: Record<string, number>;
 }
 
+export interface AIEventGenerationResponse {
+	events: AIEventResponse[];
+	new_nations?: Record<
+		string,
+		{
+			government: string;
+			territories: string[];
+			resources: {
+				military: number;
+				economy: number;
+				stability: number;
+				influence: number;
+			};
+		}
+	>;
+}
+
 export interface AIProcessingResult {
 	events: AIEventResponse[];
 	consequences: string;
@@ -60,6 +77,19 @@ export interface AIProcessingResult {
 	}>;
 	feasibility: 'high' | 'medium' | 'low';
 	historySummary?: string;
+	new_nations?: Record<
+		string,
+		{
+			government: string;
+			territories: string[];
+			resources: {
+				military: number;
+				economy: number;
+				stability: number;
+				influence: number;
+			};
+		}
+	>;
 }
 
 /**
@@ -159,8 +189,11 @@ function buildEventGenerationPrompt(
 	turnNumber: number,
 	currentYear: number,
 	playerAction: string,
-	actionResponse: AIActionResponse
+	actionResponse: AIActionResponse,
+	knownNations: Array<{ name: string; government: string }>
 ): string {
+	const knownNationsList = knownNations.map((n) => `${n.name} (${n.government})`).join(', ');
+
 	return `Based on the player's action and its consequences, generate 1-3 significant events that occur this turn.
 
 Context:
@@ -169,17 +202,29 @@ Context:
 - Player Action: ${playerAction}
 - Feasibility: ${actionResponse.feasibility}
 - Consequences: ${actionResponse.immediate_consequences.join(', ')}
+- Known Nations: ${knownNationsList}
 
-Generate events in JSON format (array):
-[
-  {
-    "type": "political|military|diplomatic|economic|other",
-    "title": "Brief event title",
-    "description": "Detailed event description",
-    "affected_nations": ["nation1", "nation2"],
-    "impact": {"resourceType": changeAmount}
+IMPORTANT: If you mention a NEW nation in "affected_nations" that is not in the Known Nations list, you MUST define it in the "new_nations" field with its government type, territories, and resources.
+
+Respond in JSON format:
+{
+  "events": [
+    {
+      "type": "political|military|diplomatic|economic|other",
+      "title": "Brief event title",
+      "description": "Detailed event description",
+      "affected_nations": ["nation1", "nation2"],
+      "impact": {"resourceType": changeAmount}
+    }
+  ],
+  "new_nations": {
+    "NewNationName": {
+      "government": "Government Type",
+      "territories": ["Territory1", "Territory2"],
+      "resources": {"military": 50, "economy": 50, "stability": 50, "influence": 50}
+    }
   }
-]`;
+}`;
 }
 
 /**
@@ -373,20 +418,39 @@ export async function processTurnWithLocalAI(
 	}
 
 	// Build and execute Event Generation prompt
+	// Build list of known nations (from relationships and otherNations)
+	const knownNations: Array<{ name: string; government: string }> = [
+		{ name: gameContext.playerNationName, government: 'Player Nation' },
+		...(gameContext.worldState.otherNations || []),
+		...gameContext.worldState.relationships.map((r) => ({ name: r.name, government: 'Known' }))
+	];
+
+	// Remove duplicates
+	const uniqueKnownNations = Array.from(new Map(knownNations.map((n) => [n.name, n])).values());
+
 	const eventPrompt = buildEventGenerationPrompt(
 		gameContext.turnNumber,
 		gameContext.currentYear,
 		playerAction,
-		actionResponse
+		actionResponse,
+		uniqueKnownNations
 	);
 
 	let events: AIEventResponse[] = [];
+	let eventNewNations: Record<
+		string,
+		{
+			government: string;
+			territories: string[];
+			resources: { military: number; economy: number; stability: number; influence: number };
+		}
+	> = {};
 	let eventRetryCount = 0;
 	try {
-		events = await callAIWithRetry(
+		const eventGenerationResponse = await callAIWithRetry(
 			eventPrompt,
 			0.8,
-			(response) => parseAIJSON<AIEventResponse[]>(response),
+			(response) => parseAIJSON<AIEventGenerationResponse>(response),
 			(attempt, error) => {
 				eventRetryCount = attempt;
 				console.warn(
@@ -395,6 +459,17 @@ export async function processTurnWithLocalAI(
 				);
 			}
 		);
+
+		// Extract events and new_nations from response
+		// Support both old format (just array of events) and new format (object with events and new_nations)
+		if (Array.isArray(eventGenerationResponse)) {
+			// Old format - just events
+			events = eventGenerationResponse;
+		} else {
+			// New format - object with events and new_nations
+			events = eventGenerationResponse.events || [];
+			eventNewNations = eventGenerationResponse.new_nations || {};
+		}
 
 		// Log warning if retries were needed
 		if (eventRetryCount > 0) {
@@ -442,6 +517,13 @@ export async function processTurnWithLocalAI(
 			// Fail silently for summarization, don't block the turn
 		}
 	}
+
+	// Merge new_nations from both action response and event response
+	const mergedNewNations = {
+		...actionResponse.new_nations,
+		...eventNewNations
+	};
+
 	return {
 		events,
 		consequences: actionResponse.immediate_consequences.join('. '),
@@ -449,7 +531,8 @@ export async function processTurnWithLocalAI(
 		resourceChanges: actionResponse.resource_changes || {},
 		relationshipChanges: actionResponse.relationship_changes || [],
 		feasibility: actionResponse.feasibility,
-		historySummary: newHistorySummary
+		historySummary: newHistorySummary,
+		new_nations: Object.keys(mergedNewNations).length > 0 ? mergedNewNations : undefined
 	};
 }
 
