@@ -94,7 +94,22 @@ export const persistTurnWithAIResponse = mutation({
 					)
 				})
 			),
-			feasibility: v.union(v.literal('high'), v.literal('medium'), v.literal('low'))
+			feasibility: v.union(v.literal('high'), v.literal('medium'), v.literal('low')),
+			new_nations: v.optional(
+				v.record(
+					v.string(),
+					v.object({
+						government: v.string(),
+						territories: v.array(v.string()),
+						resources: v.object({
+							military: v.number(),
+							economy: v.number(),
+							stability: v.number(),
+							influence: v.number()
+						})
+					})
+				)
+			)
 		}),
 		historySummary: v.optional(v.string())
 	},
@@ -128,6 +143,31 @@ export const persistTurnWithAIResponse = mutation({
 		allNations.forEach((nation) => {
 			nationNameToId.set(nation.name, nation._id);
 		});
+
+		const getOrCreateNationId = async (name: string): Promise<Id<'nations'>> => {
+			if (nationNameToId.has(name)) {
+				return nationNameToId.get(name)!;
+			}
+
+			const newNationData = args.aiResponse.new_nations?.[name];
+
+			const newNationId = await ctx.db.insert('nations', {
+				gameId: args.gameId,
+				name,
+				government: newNationData?.government || 'Unknown',
+				resources: newNationData?.resources || {
+					military: 50,
+					economy: 50,
+					stability: 50,
+					influence: 50
+				},
+				territories: newNationData?.territories || [],
+				isPlayerControlled: false
+			});
+
+			nationNameToId.set(name, newNationId);
+			return newNationId;
+		};
 
 		// Update player nation resources based on AI response
 		if (args.aiResponse.resourceChanges) {
@@ -165,66 +205,61 @@ export const persistTurnWithAIResponse = mutation({
 		// Update relationships based on AI response
 		if (args.aiResponse.relationshipChanges) {
 			for (const relChange of args.aiResponse.relationshipChanges) {
-				const nation1Id = nationNameToId.get(relChange.nation1);
-				const nation2Id = nationNameToId.get(relChange.nation2);
+				const nation1Id = await getOrCreateNationId(relChange.nation1);
+				const nation2Id = await getOrCreateNationId(relChange.nation2);
 
-				if (nation1Id && nation2Id) {
-					// Find existing relationship
-					const existingRel = await ctx.db
-						.query('relationships')
-						.filter((q) =>
-							q.and(
-								q.eq(q.field('gameId'), args.gameId),
-								q.or(
-									q.and(
-										q.eq(q.field('nation1Id'), nation1Id),
-										q.eq(q.field('nation2Id'), nation2Id)
-									),
-									q.and(
-										q.eq(q.field('nation1Id'), nation2Id),
-										q.eq(q.field('nation2Id'), nation1Id)
-									)
-								)
+				// Find existing relationship
+				const existingRel = await ctx.db
+					.query('relationships')
+					.filter((q) =>
+						q.and(
+							q.eq(q.field('gameId'), args.gameId),
+							q.or(
+								q.and(q.eq(q.field('nation1Id'), nation1Id), q.eq(q.field('nation2Id'), nation2Id)),
+								q.and(q.eq(q.field('nation1Id'), nation2Id), q.eq(q.field('nation2Id'), nation1Id))
 							)
 						)
-						.first();
+					)
+					.first();
 
-					if (existingRel) {
-						const newScore = Math.max(
-							-100,
-							Math.min(100, existingRel.relationshipScore + relChange.scoreChange)
-						);
+				if (existingRel) {
+					const newScore = Math.max(
+						-100,
+						Math.min(100, existingRel.relationshipScore + relChange.scoreChange)
+					);
 
-						await ctx.db.patch(existingRel._id, {
-							relationshipScore: newScore,
-							...(relChange.statusChange && { status: relChange.statusChange })
-						});
-					} else {
-						// Create new relationship if it doesn't exist
-						await ctx.db.insert('relationships', {
-							gameId: args.gameId,
-							nation1Id,
-							nation2Id,
-							status: relChange.statusChange || 'neutral',
-							tradeAgreements: false,
-							militaryAlliance: false,
-							relationshipScore: Math.max(-100, Math.min(100, relChange.scoreChange))
-						});
-					}
+					await ctx.db.patch(existingRel._id, {
+						relationshipScore: newScore,
+						...(relChange.statusChange && { status: relChange.statusChange })
+					});
+				} else {
+					// Create new relationship if it doesn't exist
+					await ctx.db.insert('relationships', {
+						gameId: args.gameId,
+						nation1Id,
+						nation2Id,
+						status: relChange.statusChange || 'neutral',
+						tradeAgreements: false,
+						militaryAlliance: false,
+						relationshipScore: Math.max(-100, Math.min(100, relChange.scoreChange))
+					});
 				}
 			}
 		}
 
 		// Convert AI events to database events with nation IDs
-		const eventsForDB = args.aiResponse.events.map((event) => {
+		const eventsForDB = [];
+		for (const event of args.aiResponse.events) {
 			const { affected_nations, ...rest } = event;
-			return {
+			const affectedNationIds = [];
+			for (const name of affected_nations) {
+				affectedNationIds.push(await getOrCreateNationId(name));
+			}
+			eventsForDB.push({
 				...rest,
-				affectedNations: affected_nations
-					.map((name) => nationNameToId.get(name))
-					.filter((id): id is Id<'nations'> => id !== undefined)
-			};
-		});
+				affectedNations: affectedNationIds
+			});
+		}
 
 		// Insert turn document
 		const turnId = await ctx.db.insert('turns', {
