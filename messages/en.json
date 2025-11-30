@@ -176,5 +176,11 @@
 	"openrouter_docs_desc": "Check your API key and account status on OpenRouter.",
 	"open_openrouter_docs": "OpenRouter Documentation",
 	"show_api_key": "Show API Key",
-	"hide_api_key": "Hide API Key"
+	"hide_api_key": "Hide API Key",
+	"debug_mode_label": "Debug Mode",
+	"debug_mode_description": "Enable AI interaction logging",
+	"debug_panel_title": "AI Debug Log ({count})",
+	"debug_panel_error_prefix": "Error:",
+	"debug_panel_prompt_label": "Prompt:",
+	"debug_panel_response_label": "Response:"
 }

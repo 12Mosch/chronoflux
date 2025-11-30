@@ -291,11 +291,11 @@
 			<!-- Debug Mode -->
 			<div class="grid grid-cols-4 items-center gap-4">
 				<label for="debug-mode" class="text-right text-sm font-medium text-foreground">
-					Debug Mode
+					{m.debug_mode_label()}
 				</label>
 				<div class="col-span-3 flex items-center space-x-2">
 					<Switch id="debug-mode" bind:checked={debugMode} disabled={isChecking} />
-					<span class="text-xs text-muted-foreground"> Enable AI interaction logging </span>
+					<span class="text-xs text-muted-foreground">{m.debug_mode_description()}</span>
 				</div>
 			</div>
 		</div>

@@ -4,6 +4,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import * as ScrollArea from '$lib/components/ui/scroll-area';
 	import { Trash2, ChevronDown, ChevronRight, Activity } from '@lucide/svelte';
+	import * as m from '$lib/paraglide/messages';
 
 	let expandedLog = $state<string | null>(null);
 	let isExpanded = $state(false);
@@ -38,7 +39,7 @@
 					class="flex items-center gap-2 text-sm font-medium"
 				>
 					<Activity class="h-4 w-4 text-primary" />
-					<span>AI Debug Log ({$aiLogs.length})</span>
+					<span>{m.debug_panel_title({ count: $aiLogs.length })}</span>
 					{#if isExpanded}
 						<ChevronDown class="h-4 w-4" />
 					{:else}
@@ -85,7 +86,8 @@
 											</div>
 											{#if log.error}
 												<div class="text-red-500">
-													Error: {truncate(log.error, 80)}
+													{m.debug_panel_error_prefix()}
+													{truncate(log.error, 80)}
 												</div>
 											{:else}
 												<div class="text-muted-foreground">
@@ -103,7 +105,9 @@
 									{#if expandedLog === log.id}
 										<div class="mt-2 space-y-2 border-t border-border pt-2">
 											<div>
-												<div class="mb-1 font-medium text-foreground">Prompt:</div>
+												<div class="mb-1 font-medium text-foreground">
+													{m.debug_panel_prompt_label()}
+												</div>
 												<div
 													class="max-h-40 overflow-y-auto rounded bg-muted p-2 font-mono text-[10px] leading-relaxed text-muted-foreground"
 												>
@@ -112,7 +116,9 @@
 											</div>
 											{#if log.error}
 												<div>
-													<div class="mb-1 font-medium text-red-500">Error:</div>
+													<div class="mb-1 font-medium text-red-500">
+														{m.debug_panel_error_prefix()}
+													</div>
 													<div
 														class="max-h-40 overflow-y-auto rounded bg-red-500/10 p-2 font-mono text-[10px] leading-relaxed text-red-500"
 													>
@@ -121,7 +127,9 @@
 												</div>
 											{:else if log.response}
 												<div>
-													<div class="mb-1 font-medium text-foreground">Response:</div>
+													<div class="mb-1 font-medium text-foreground">
+														{m.debug_panel_response_label()}
+													</div>
 													<div
 														class="max-h-40 overflow-y-auto rounded bg-muted p-2 font-mono text-[10px] leading-relaxed text-muted-foreground"
 													>
