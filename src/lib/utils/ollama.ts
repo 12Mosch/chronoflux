@@ -59,10 +59,12 @@ export async function generateWithOllama(
 		temperature?: number;
 		maxTokens?: number;
 		timeout?: number;
+		baseUrl?: string; // Allow overriding the default base URL
 	}
 ): Promise<string> {
 	const model = options?.model || 'qwen3:8b';
 	const timeout = options?.timeout || DEFAULT_TIMEOUT;
+	const baseUrl = options?.baseUrl || OLLAMA_BASE_URL;
 
 	const request: OllamaGenerateRequest = {
 		model,
@@ -82,7 +84,7 @@ export async function generateWithOllama(
 			const controller = new AbortController();
 			const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-			const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
+			const response = await fetch(`${baseUrl}/api/generate`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

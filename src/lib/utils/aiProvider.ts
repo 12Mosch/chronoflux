@@ -3,10 +3,9 @@
  * Unified interface for AI text generation across different providers
  */
 
-import { loadSettings, type AISettings } from '$lib/stores/settings';
+import { loadSettings, type AISettings, type AIProvider } from '$lib/stores/settings';
 import { generateWithOpenRouter } from './openrouter';
-
-export type AIProvider = 'ollama' | 'openrouter';
+import { generateWithOllama as generateWithOllamaRobust } from './ollama';
 
 export interface AIGenerateOptions {
 	temperature?: number;
@@ -15,6 +14,7 @@ export interface AIGenerateOptions {
 
 /**
  * Generate text using Ollama
+ * Delegates to the robust implementation in ollama.ts with timeout, retry logic, and abort controller support
  */
 async function generateWithOllama(
 	prompt: string,
@@ -24,29 +24,15 @@ async function generateWithOllama(
 	const { temperature = 0.7, maxTokens = 2000 } = options;
 
 	try {
-		const response = await fetch(`${settings.ollamaUrl}/api/generate`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				model: settings.ollamaModel,
-				prompt,
-				stream: false,
-				options: {
-					temperature,
-					num_predict: maxTokens
-				}
-			})
+		// Use the robust implementation from ollama.ts
+		return await generateWithOllamaRobust(prompt, {
+			model: settings.ollamaModel,
+			temperature,
+			maxTokens,
+			baseUrl: settings.ollamaUrl
 		});
-
-		if (!response.ok) {
-			throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
-		}
-
-		const data = await response.json();
-		return data.response;
 	} catch (error: unknown) {
+		// Provide user-friendly error messages for common issues
 		if (error instanceof Error && error.message.includes('Failed to fetch')) {
 			throw new Error(
 				'Could not connect to Ollama. Please ensure:\n1. Ollama is running (`ollama serve`)\n2. CORS is enabled (`OLLAMA_ORIGINS="*"`)\n3. The model is pulled (`ollama pull ' +

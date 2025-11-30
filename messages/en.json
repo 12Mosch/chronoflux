@@ -172,5 +172,9 @@
 	"error_openrouter_no_key": "OpenRouter API key is required.",
 	"settings_description_provider": "Configure your AI provider settings and display preferences.",
 	"ai_error_title": "AI Connection Error",
-	"ai_error_desc": "ChronoFlux needs an AI provider to process game turns"
+	"ai_error_desc": "ChronoFlux needs an AI provider to process game turns",
+	"openrouter_docs_desc": "Check your API key and account status on OpenRouter.",
+	"open_openrouter_docs": "OpenRouter Documentation",
+	"show_api_key": "Show API Key",
+	"hide_api_key": "Hide API Key"
 }

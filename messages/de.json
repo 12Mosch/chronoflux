@@ -172,5 +172,9 @@
 	"error_openrouter_no_key": "OpenRouter API-Schlüssel erforderlich.",
 	"settings_description_provider": "Konfiguriere deine KI-Anbieter-Einstellungen und Anzeigeeinstellungen.",
 	"ai_error_title": "KI-Verbindungsfehler",
-	"ai_error_desc": "ChronoFlux benötigt einen KI-Anbieter, um Spielzüge zu verarbeiten"
+	"ai_error_desc": "ChronoFlux benötigt einen KI-Anbieter, um Spielzüge zu verarbeiten",
+	"openrouter_docs_desc": "Überprüfe deinen API-Schlüssel und Kontostatus auf OpenRouter.",
+	"open_openrouter_docs": "OpenRouter-Dokumentation",
+	"show_api_key": "API-Schlüssel anzeigen",
+	"hide_api_key": "API-Schlüssel verbergen"
 }

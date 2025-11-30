@@ -10,7 +10,8 @@
 	import { LoaderCircle, Send } from '@lucide/svelte';
 
 	import { processTurnWithLocalAI } from '$lib/ai';
-	import OllamaErrorDialog from './OllamaErrorDialog.svelte';
+	import { isAIProviderError } from '$lib/utils/errorClassification';
+	import OllamaErrorDialog from './AIErrorDialog.svelte';
 	import SettingsModal from './SettingsModal.svelte';
 
 	type TurnData = {
@@ -123,12 +124,7 @@
 
 			// Check if this is an AI connection error (Ollama or OpenRouter)
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-			const isAIError =
-				errorMessage.includes('Could not connect') ||
-				errorMessage.includes('OpenRouter') ||
-				errorMessage.includes('API key') ||
-				errorMessage.includes('Rate limit') ||
-				errorMessage.includes('credits');
+			const isAIError = isAIProviderError(errorMessage);
 
 			if (isAIError) {
 				// Show the friendly AI error dialog

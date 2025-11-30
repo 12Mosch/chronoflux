@@ -202,7 +202,7 @@
 								size="icon"
 								onclick={() => (showApiKey = !showApiKey)}
 								type="button"
-								title={showApiKey ? 'Hide API Key' : 'Show API Key'}
+								title={showApiKey ? m.hide_api_key() : m.show_api_key()}
 							>
 								{#if showApiKey}
 									<EyeOff class="h-4 w-4" />

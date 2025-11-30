@@ -24,6 +24,8 @@ export async function generateWithOpenRouter(
 	options: OpenRouterGenerateOptions = {}
 ): Promise<string> {
 	const { temperature = 0.7, maxTokens = 2000 } = options;
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minutes timeout
 
 	try {
 		const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
@@ -37,8 +39,11 @@ export async function generateWithOpenRouter(
 				messages: [{ role: 'user', content: prompt }],
 				temperature,
 				max_tokens: maxTokens
-			})
+			}),
+			signal: controller.signal
 		});
+
+		clearTimeout(timeoutId);
 
 		if (!response.ok) {
 			const errorData = await response.json().catch(() => ({}));
@@ -119,11 +124,11 @@ export async function fetchAvailableModels(apiKey: string): Promise<string[]> {
 		console.error('Failed to fetch OpenRouter models:', error);
 		// Return a fallback list of popular models
 		return [
-			'openai/gpt-4o-mini',
-			'openai/gpt-4o',
-			'anthropic/claude-sonnet-4',
-			'google/gemini-2.0-flash-001',
-			'meta-llama/llama-3.1-70b-instruct'
+			'x-ai/grok-4.1-fast:free',
+			'openai/gpt-5-mini',
+			'openai/gpt-5.1',
+			'anthropic/claude-haiku-4.5',
+			'google/gemini-3-pro-preview'
 		];
 	}
 }

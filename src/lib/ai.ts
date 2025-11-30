@@ -1,6 +1,6 @@
 /**
  * Client-side AI Integration for ChronoFlux
- * Handles AI-powered turn processing using local Ollama instance
+ * Handles AI-powered turn processing using configurable AI providers (Ollama, OpenRouter)
  */
 
 /**

@@ -3,6 +3,7 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Button } from '$lib/components/ui/button';
 	import { TriangleAlert, ExternalLink, Check, Settings } from '@lucide/svelte';
+	import { isOpenRouterError as checkIsOpenRouterError } from '$lib/utils/errorClassification';
 
 	let {
 		open = $bindable(false),
@@ -17,12 +18,7 @@
 	let copiedCommand = $state<string | null>(null);
 
 	// Detect if the error is from OpenRouter
-	const isOpenRouterError = $derived(
-		errorMessage.includes('OpenRouter') ||
-			errorMessage.includes('API key') ||
-			errorMessage.includes('Rate limit') ||
-			errorMessage.includes('credits')
-	);
+	const isOpenRouterError = $derived(checkIsOpenRouterError(errorMessage));
 
 	// Parse the error message to extract helpful steps
 	const helpSteps = $derived(() => {
@@ -65,7 +61,7 @@
 	}
 
 	const docsUrl = $derived(isOpenRouterError ? OPENROUTER_DOCS_URL : OLLAMA_DOCS_URL);
-	const docsLabel = $derived(isOpenRouterError ? 'OpenRouter Documentation' : m.open_ollama_docs());
+	const docsLabel = $derived(isOpenRouterError ? m.open_openrouter_docs() : m.open_ollama_docs());
 </script>
 
 <Dialog.Root bind:open>
@@ -141,7 +137,7 @@
 				<h4 class="mb-2 font-semibold text-foreground">{m.need_more_help()}</h4>
 				<p class="mb-3 text-sm text-muted-foreground">
 					{#if isOpenRouterError}
-						Check your API key and account status on OpenRouter.
+						{m.openrouter_docs_desc()}
 					{:else}
 						{m.ollama_docs_desc()}
 					{/if}
