@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import * as m from '$lib/paraglide/messages';
 	import * as Select from '$lib/components/ui/select';
+	import { Switch } from '$lib/components/ui/switch';
 	import { setMode, resetMode, userPrefersMode } from 'mode-watcher';
 	import { ExternalLink, Eye, EyeOff } from '@lucide/svelte';
 	import {
@@ -28,6 +29,8 @@
 	let openrouterApiKey = $state('');
 	let openrouterModel = $state('x-ai/grok-4.1-fast:free');
 	let showApiKey = $state(false);
+	// Debug settings
+	let debugMode = $state(false);
 
 	let errorMessage = $state('');
 	let isChecking = $state(false);
@@ -39,6 +42,7 @@
 		ollamaModel = settings.ollamaModel;
 		openrouterApiKey = settings.openrouterApiKey;
 		openrouterModel = settings.openrouterModel;
+		debugMode = settings.debugMode;
 	});
 
 	async function saveSettings() {
@@ -86,7 +90,8 @@
 				ollamaUrl,
 				ollamaModel,
 				openrouterApiKey,
-				openrouterModel
+				openrouterModel,
+				debugMode
 			});
 			open = false;
 		} catch (error) {
@@ -107,6 +112,7 @@
 		ollamaModel = defaultSettings.ollamaModel;
 		openrouterApiKey = defaultSettings.openrouterApiKey;
 		openrouterModel = defaultSettings.openrouterModel;
+		debugMode = defaultSettings.debugMode;
 		resetMode();
 	}
 </script>
@@ -279,6 +285,17 @@
 							<Select.Item value="system">{m.theme_system()}</Select.Item>
 						</Select.Content>
 					</Select.Root>
+				</div>
+			</div>
+
+			<!-- Debug Mode -->
+			<div class="grid grid-cols-4 items-center gap-4">
+				<label for="debug-mode" class="text-right text-sm font-medium text-foreground">
+					Debug Mode
+				</label>
+				<div class="col-span-3 flex items-center space-x-2">
+					<Switch id="debug-mode" bind:checked={debugMode} disabled={isChecking} />
+					<span class="text-xs text-muted-foreground"> Enable AI interaction logging </span>
 				</div>
 			</div>
 		</div>

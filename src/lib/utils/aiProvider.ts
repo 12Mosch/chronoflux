@@ -52,24 +52,46 @@ export async function generateText(
 	options: AIGenerateOptions = {}
 ): Promise<string> {
 	const settings = loadSettings();
+	const startTime = Date.now();
+	let response = '';
+	let error: string | undefined;
 
-	if (settings.provider === 'openrouter') {
-		if (!settings.openrouterApiKey) {
-			throw new Error('OpenRouter API key not configured. Please set it in Settings.');
+	try {
+		if (settings.provider === 'openrouter') {
+			if (!settings.openrouterApiKey) {
+				throw new Error('OpenRouter API key not configured. Please set it in Settings.');
+			}
+
+			response = await generateWithOpenRouter(
+				prompt,
+				{
+					apiKey: settings.openrouterApiKey,
+					model: settings.openrouterModel
+				},
+				options
+			);
+		} else {
+			// Default to Ollama
+			response = await generateWithOllama(prompt, settings, options);
 		}
 
-		return generateWithOpenRouter(
-			prompt,
-			{
-				apiKey: settings.openrouterApiKey,
-				model: settings.openrouterModel
-			},
-			options
-		);
+		return response;
+	} catch (err) {
+		error = err instanceof Error ? err.message : String(err);
+		throw err;
+	} finally {
+		// Log to debug store if debug mode is enabled
+		if (settings.debugMode) {
+			const { addLogEntry } = await import('$lib/stores/debug');
+			addLogEntry({
+				provider: settings.provider,
+				prompt,
+				response,
+				duration: Date.now() - startTime,
+				error
+			});
+		}
 	}
-
-	// Default to Ollama
-	return generateWithOllama(prompt, settings, options);
 }
 
 /**
