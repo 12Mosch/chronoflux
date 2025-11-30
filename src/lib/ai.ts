@@ -132,6 +132,7 @@ Analyze this action IN THE CONTEXT OF THE RECENT HISTORY and determine:
 3. How will other nations react?
 4. What resources are required/affected?
 5. How does this build upon or contradict recent actions?
+6. If you introduce a NEW nation (one not listed in 'Relationships' or 'Other Known Nations'), you MUST provide its details (government, territories, resources) in the 'new_nations' field.
 
 Respond in JSON format:
 {
