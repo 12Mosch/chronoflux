@@ -26,6 +26,12 @@
 
 	let activeTab: 'narrative' | 'events' | 'changes' = $state('narrative');
 
+	$effect(() => {
+		if (open) {
+			activeTab = 'narrative';
+		}
+	});
+
 	function getChangeIcon(value: number) {
 		if (value > 0) return TrendingUp;
 		if (value < 0) return TrendingDown;
