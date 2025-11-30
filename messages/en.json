@@ -157,5 +157,20 @@
 	"theme_light": "Light",
 	"theme_dark": "Dark",
 	"theme_system": "System",
-	"year_ad": "{year} AD"
+	"year_ad": "{year} AD",
+	"provider_label": "AI Provider",
+	"provider_ollama": "Ollama (Local)",
+	"provider_openrouter": "OpenRouter (Cloud)",
+	"openrouter_api_key_label": "API Key",
+	"openrouter_api_key_placeholder": "sk-or-...",
+	"openrouter_model_label": "Model",
+	"openrouter_info": "OpenRouter provides access to various AI models via cloud API.",
+	"openrouter_get_api_key": "Get API Key",
+	"error_openrouter_invalid_key": "Invalid API key. Please check your OpenRouter API key.",
+	"error_openrouter_rate_limit": "Rate limit exceeded. Please try again later.",
+	"error_openrouter_no_credits": "Insufficient credits. Please add credits to your OpenRouter account.",
+	"error_openrouter_no_key": "OpenRouter API key is required.",
+	"settings_description_provider": "Configure your AI provider settings and display preferences.",
+	"ai_error_title": "AI Connection Error",
+	"ai_error_desc": "ChronoFlux needs an AI provider to process game turns"
 }

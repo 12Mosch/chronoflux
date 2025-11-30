@@ -241,13 +241,13 @@ async function callAIWithRetry<T>(
 
 	for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
 		try {
-			const rawResponse = await callOllama(prompt, temperature);
+			const rawResponse = await callAI(prompt, temperature);
 			return parser(rawResponse);
 		} catch (error) {
 			lastError = error instanceof Error ? error : new Error(String(error));
 
 			// Don't retry connection errors - user needs to fix their setup
-			if (lastError.message.includes('Could not connect to Ollama')) {
+			if (lastError.message.includes('Could not connect')) {
 				throw lastError;
 			}
 
@@ -268,44 +268,19 @@ async function callAIWithRetry<T>(
 }
 
 /**
- * Call Ollama API from client-side
+ * Call AI provider (Ollama or OpenRouter) from client-side
  */
+async function callAI(prompt: string, temperature = 0.7): Promise<string> {
+	const { generateText } = await import('$lib/utils/aiProvider');
+	return generateText(prompt, { temperature, maxTokens: 2000 });
+}
+
+/**
+ * @deprecated Use callAI instead. This is kept for backward compatibility.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function callOllama(prompt: string, temperature = 0.7): Promise<string> {
-	// Default to localhost, but allow override via localStorage for advanced users if needed
-	const OLLAMA_URL = localStorage.getItem('OLLAMA_URL') || 'http://localhost:11434';
-	const MODEL = localStorage.getItem('OLLAMA_MODEL') || 'qwen3:8b';
-
-	try {
-		const response = await fetch(`${OLLAMA_URL}/api/generate`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				model: MODEL,
-				prompt,
-				stream: false,
-				options: {
-					temperature,
-					num_predict: 2000
-				}
-			})
-		});
-
-		if (!response.ok) {
-			throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
-		}
-
-		const data = await response.json();
-		return data.response;
-	} catch (error: unknown) {
-		if (error instanceof Error && error.message.includes('Failed to fetch')) {
-			throw new Error(
-				'Could not connect to Ollama. Please ensure:\n1. Ollama is running (`ollama serve`)\n2. CORS is enabled (`OLLAMA_ORIGINS="*"`)\n3. The model is pulled (`ollama pull qwen3:8b`)'
-			);
-		}
-		throw error;
-	}
+	return callAI(prompt, temperature);
 }
 
 /**
@@ -364,8 +339,8 @@ export async function processTurnWithLocalAI(
 		}
 	} catch (error) {
 		console.error('Failed to get AI action response after all retries:', error);
-		// Re-throw connection errors - user needs to fix their Ollama setup
-		if (error instanceof Error && error.message.includes('Could not connect to Ollama')) {
+		// Re-throw connection errors - user needs to fix their AI provider setup
+		if (error instanceof Error && error.message.includes('Could not connect')) {
 			throw error;
 		}
 		// For other errors (like JSON parsing), use fallback response
@@ -412,7 +387,7 @@ export async function processTurnWithLocalAI(
 	} catch (error) {
 		console.error('Failed to get AI event response after all retries:', error);
 		// Re-throw connection errors
-		if (error instanceof Error && error.message.includes('Could not connect to Ollama')) {
+		if (error instanceof Error && error.message.includes('Could not connect')) {
 			throw error;
 		}
 		// For other errors (like JSON parsing), generate a basic event as fallback
@@ -443,7 +418,7 @@ export async function processTurnWithLocalAI(
 		);
 
 		try {
-			newHistorySummary = await callOllama(summarizationPrompt, 0.6);
+			newHistorySummary = await callAI(summarizationPrompt, 0.6);
 		} catch (error) {
 			console.error('Failed to generate history summary:', error);
 			// Fail silently for summarization, don't block the turn
@@ -551,10 +526,10 @@ export async function askAdvisor(
 	const prompt = buildAdvisorPrompt(question, gameContext);
 
 	try {
-		return await callOllama(prompt, 0.7);
+		return await callAI(prompt, 0.7);
 	} catch (error) {
 		console.error('Failed to get advisor response:', error);
-		if (error instanceof Error && error.message.includes('Could not connect to Ollama')) {
+		if (error instanceof Error && error.message.includes('Could not connect')) {
 			throw error;
 		}
 		return 'My apologies, my liege. My mind is clouded (AI Error). Please try again later.';
