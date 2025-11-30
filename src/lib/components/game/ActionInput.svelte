@@ -11,7 +11,7 @@
 
 	import { processTurnWithLocalAI } from '$lib/ai';
 	import { isAIProviderError } from '$lib/utils/errorClassification';
-	import OllamaErrorDialog from './AIErrorDialog.svelte';
+	import AIErrorDialog from './AIErrorDialog.svelte';
 	import SettingsModal from './SettingsModal.svelte';
 
 	type TurnData = {
@@ -176,7 +176,7 @@
 </Card.Root>
 
 <!-- AI Error Dialog -->
-<OllamaErrorDialog
+<AIErrorDialog
 	bind:open={showAIErrorDialog}
 	errorMessage={aiErrorMessage}
 	onOpenSettings={() => (showSettingsModal = true)}

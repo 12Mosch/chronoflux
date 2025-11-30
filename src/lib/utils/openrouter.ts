@@ -43,8 +43,6 @@ export async function generateWithOpenRouter(
 			signal: controller.signal
 		});
 
-		clearTimeout(timeoutId);
-
 		if (!response.ok) {
 			const errorData = await response.json().catch(() => ({}));
 
@@ -79,6 +77,8 @@ export async function generateWithOpenRouter(
 			throw error;
 		}
 		throw new Error('Unknown error occurred while calling OpenRouter');
+	} finally {
+		clearTimeout(timeoutId);
 	}
 }
 
@@ -86,17 +86,22 @@ export async function generateWithOpenRouter(
  * Test OpenRouter connection with a simple ping
  */
 export async function testOpenRouterConnection(apiKey: string): Promise<boolean> {
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minutes timeout
 	try {
 		const response = await fetch(`${OPENROUTER_BASE_URL}/models`, {
 			method: 'GET',
 			headers: {
 				Authorization: `Bearer ${apiKey}`
-			}
+			},
+			signal: controller.signal
 		});
 
 		return response.ok;
 	} catch {
 		return false;
+	} finally {
+		clearTimeout(timeoutId);
 	}
 }
 
@@ -131,12 +136,4 @@ export async function fetchAvailableModels(apiKey: string): Promise<string[]> {
 			'google/gemini-3-pro-preview'
 		];
 	}
-}
-
-/**
- * Validate OpenRouter API key format
- */
-export function isValidApiKeyFormat(apiKey: string): boolean {
-	// OpenRouter API keys typically start with 'sk-or-'
-	return apiKey.startsWith('sk-or-') && apiKey.length > 20;
 }

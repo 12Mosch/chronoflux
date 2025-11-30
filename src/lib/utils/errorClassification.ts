@@ -8,12 +8,13 @@
  * @returns true if the error is related to AI provider connectivity or configuration
  */
 export function isAIProviderError(errorMessage: string): boolean {
+	const lowerMessage = errorMessage.toLowerCase();
 	return (
-		errorMessage.includes('Could not connect') ||
-		errorMessage.includes('OpenRouter') ||
-		errorMessage.includes('API key') ||
-		errorMessage.includes('Rate limit') ||
-		errorMessage.includes('credits')
+		lowerMessage.includes('could not connect') ||
+		lowerMessage.includes('openrouter') ||
+		lowerMessage.includes('api key') ||
+		lowerMessage.includes('rate limit') ||
+		lowerMessage.includes('credits')
 	);
 }
 
@@ -23,10 +24,11 @@ export function isAIProviderError(errorMessage: string): boolean {
  * @returns true if the error is related to OpenRouter
  */
 export function isOpenRouterError(errorMessage: string): boolean {
+	const lowerMessage = errorMessage.toLowerCase();
 	return (
-		errorMessage.includes('OpenRouter') ||
-		errorMessage.includes('API key') ||
-		errorMessage.includes('Rate limit') ||
-		errorMessage.includes('credits')
+		lowerMessage.includes('openrouter') ||
+		lowerMessage.includes('api key') ||
+		lowerMessage.includes('rate limit') ||
+		lowerMessage.includes('credits')
 	);
 }

@@ -276,14 +276,6 @@ async function callAI(prompt: string, temperature = 0.7): Promise<string> {
 }
 
 /**
- * @deprecated Use callAI instead. This is kept for backward compatibility.
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function callOllama(prompt: string, temperature = 0.7): Promise<string> {
-	return callAI(prompt, temperature);
-}
-
-/**
  * Process turn with AI - Client-side orchestration
  */
 export async function processTurnWithLocalAI(

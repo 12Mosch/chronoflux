@@ -5,7 +5,7 @@
 
 import { loadSettings, type AISettings, type AIProvider } from '$lib/stores/settings';
 import { generateWithOpenRouter } from './openrouter';
-import { generateWithOllama as generateWithOllamaRobust } from './ollama';
+import { generateWithOllama as generateWithOllamaRobust, checkOllamaModelExists } from './ollama';
 
 export interface AIGenerateOptions {
 	temperature?: number;
@@ -112,13 +112,7 @@ export async function testConnection(): Promise<{ success: boolean; error?: stri
 		const models = data.models || [];
 
 		// Check if model exists
-		const modelExists = models.some((m: { name: string }) => {
-			const name = m.name;
-			const input = settings.ollamaModel;
-			if (name === input) return true;
-			if (!input.includes(':') && name === `${input}:latest`) return true;
-			return false;
-		});
+		const modelExists = checkOllamaModelExists(models, settings.ollamaModel);
 
 		if (!modelExists) {
 			return {

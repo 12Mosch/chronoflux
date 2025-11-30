@@ -15,6 +15,7 @@
 		type AIProvider
 	} from '$lib/stores/settings';
 	import { testOpenRouterConnection } from '$lib/utils/openrouter';
+	import { checkOllamaModelExists } from '$lib/utils/ollama';
 
 	let { open = $bindable(false) } = $props();
 
@@ -25,7 +26,7 @@
 	let ollamaModel = $state('qwen3:8b');
 	// OpenRouter settings
 	let openrouterApiKey = $state('');
-	let openrouterModel = $state('openai/gpt-5-mini');
+	let openrouterModel = $state('x-ai/grok-4.1-fast:free');
 	let showApiKey = $state(false);
 
 	let errorMessage = $state('');
@@ -68,12 +69,7 @@
 				const data = await response.json();
 				const models = data.models || [];
 
-				const modelExists = models.some((model: { name: string }) => {
-					const name = model.name;
-					if (name === ollamaModel) return true;
-					if (!ollamaModel.includes(':') && name === `${ollamaModel}:latest`) return true;
-					return false;
-				});
+				const modelExists = checkOllamaModelExists(models, ollamaModel);
 
 				if (!modelExists) {
 					errorMessage = m.error_model_not_found({
@@ -105,6 +101,7 @@
 	}
 
 	function resetDefaults() {
+		errorMessage = '';
 		provider = defaultSettings.provider;
 		ollamaUrl = defaultSettings.ollamaUrl;
 		ollamaModel = defaultSettings.ollamaModel;
