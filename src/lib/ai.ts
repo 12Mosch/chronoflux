@@ -10,6 +10,25 @@ const MAX_RETRIES = 3;
 const BASE_DELAY_MS = 1000;
 
 /**
+ * Nation definition structure for new nations
+ */
+export interface AINationDefinition {
+	government: string;
+	territories: string[];
+	resources: {
+		military: number;
+		economy: number;
+		stability: number;
+		influence: number;
+	};
+}
+
+/**
+ * Map of nation names to their definitions
+ */
+export type NewNationsMap = Record<string, AINationDefinition>;
+
+/**
  * AI Response structure from Ollama
  */
 export interface AIActionResponse {
@@ -23,19 +42,7 @@ export interface AIActionResponse {
 		scoreChange: number;
 		statusChange?: 'allied' | 'neutral' | 'hostile' | 'at_war';
 	}>;
-	new_nations?: Record<
-		string,
-		{
-			government: string;
-			territories: string[];
-			resources: {
-				military: number;
-				economy: number;
-				stability: number;
-				influence: number;
-			};
-		}
-	>;
+	new_nations?: NewNationsMap;
 	narrative: string;
 }
 
@@ -47,22 +54,17 @@ export interface AIEventResponse {
 	impact: Record<string, number>;
 }
 
-export interface AIEventGenerationResponse {
-	events: AIEventResponse[];
-	new_nations?: Record<
-		string,
-		{
-			government: string;
-			territories: string[];
-			resources: {
-				military: number;
-				economy: number;
-				stability: number;
-				influence: number;
-			};
-		}
-	>;
-}
+/**
+ * Event generation response format
+ * Supports both old format (array of events) and new format (object with events and new_nations)
+ */
+export type AIEventGenerationResponse =
+	| AIEventResponse[] // Old format for backward compatibility
+	| {
+			// New format with nation definitions
+			events: AIEventResponse[];
+			new_nations?: NewNationsMap;
+	  };
 
 export interface AIProcessingResult {
 	events: AIEventResponse[];
@@ -77,19 +79,7 @@ export interface AIProcessingResult {
 	}>;
 	feasibility: 'high' | 'medium' | 'low';
 	historySummary?: string;
-	new_nations?: Record<
-		string,
-		{
-			government: string;
-			territories: string[];
-			resources: {
-				military: number;
-				economy: number;
-				stability: number;
-				influence: number;
-			};
-		}
-	>;
+	new_nations?: NewNationsMap;
 }
 
 /**
@@ -425,8 +415,14 @@ export async function processTurnWithLocalAI(
 		...gameContext.worldState.relationships.map((r) => ({ name: r.name, government: 'Known' }))
 	];
 
-	// Remove duplicates
-	const uniqueKnownNations = Array.from(new Map(knownNations.map((n) => [n.name, n])).values());
+	// Remove duplicates, keeping the first occurrence (which has the specific government type)
+	const uniqueKnownNationsMap = new Map<string, { name: string; government: string }>();
+	for (const nation of knownNations) {
+		if (!uniqueKnownNationsMap.has(nation.name)) {
+			uniqueKnownNationsMap.set(nation.name, nation);
+		}
+	}
+	const uniqueKnownNations = Array.from(uniqueKnownNationsMap.values());
 
 	const eventPrompt = buildEventGenerationPrompt(
 		gameContext.turnNumber,
@@ -437,14 +433,7 @@ export async function processTurnWithLocalAI(
 	);
 
 	let events: AIEventResponse[] = [];
-	let eventNewNations: Record<
-		string,
-		{
-			government: string;
-			territories: string[];
-			resources: { military: number; economy: number; stability: number; influence: number };
-		}
-	> = {};
+	let eventNewNations: NewNationsMap = {};
 	let eventRetryCount = 0;
 	try {
 		const eventGenerationResponse = await callAIWithRetry(
@@ -519,9 +508,10 @@ export async function processTurnWithLocalAI(
 	}
 
 	// Merge new_nations from both action response and event response
-	const mergedNewNations = {
-		...actionResponse.new_nations,
-		...eventNewNations
+	// Prefer action definitions over event definitions (action phase is more deliberate)
+	const mergedNewNations: NewNationsMap = {
+		...eventNewNations,
+		...actionResponse.new_nations
 	};
 
 	return {
