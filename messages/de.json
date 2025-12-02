@@ -182,5 +182,9 @@
 	"debug_panel_title": "KI-Debug-Protokoll ({count})",
 	"debug_panel_error_prefix": "Fehler:",
 	"debug_panel_prompt_label": "Eingabe:",
-	"debug_panel_response_label": "Antwort:"
+	"debug_panel_response_label": "Antwort:",
+	"delete_game_title": "Spiel löschen",
+	"delete_game_confirm": "Bist du sicher, dass du dieses Spiel löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
+	"delete_game_label": "Spiel löschen",
+	"failed_delete_game": "Spiel konnte nicht gelöscht werden"
 }
