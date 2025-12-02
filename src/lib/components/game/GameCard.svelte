@@ -31,7 +31,6 @@
 	}
 
 	let { game, scenarioName, nationName, onDelete }: Props = $props();
-	let showDeleteDialog = $state(false);
 
 	function formatDate(timestamp: number) {
 		return new Intl.DateTimeFormat('en-US', {
@@ -40,11 +39,6 @@
 			hour: 'numeric',
 			minute: 'numeric'
 		}).format(new Date(timestamp));
-	}
-
-	function handleDelete() {
-		showDeleteDialog = false;
-		onDelete?.();
 	}
 </script>
 
@@ -73,7 +67,7 @@
 				>
 					{game.status}
 				</Badge>
-				<AlertDialog bind:open={showDeleteDialog}>
+				<AlertDialog>
 					<AlertDialogTrigger>
 						<Button
 							variant="ghost"
@@ -93,7 +87,7 @@
 						</AlertDialogHeader>
 						<AlertDialogFooter>
 							<AlertDialogCancel>{m.cancel()}</AlertDialogCancel>
-							<AlertDialogAction onclick={handleDelete} class="bg-red-600 hover:bg-red-700">
+							<AlertDialogAction onclick={onDelete} class="bg-red-600 hover:bg-red-700">
 								{m.delete()}
 							</AlertDialogAction>
 						</AlertDialogFooter>

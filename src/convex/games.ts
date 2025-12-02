@@ -305,16 +305,6 @@ export const deleteGame = mutation({
 			throw new Error('Game not found');
 		}
 
-		// Delete all nations associated with this game
-		const nations = await ctx.db
-			.query('nations')
-			.filter((q) => q.eq(q.field('gameId'), args.gameId))
-			.collect();
-
-		for (const nation of nations) {
-			await ctx.db.delete(nation._id);
-		}
-
 		// Delete all relationships associated with this game
 		const relationships = await ctx.db
 			.query('relationships')
@@ -333,6 +323,16 @@ export const deleteGame = mutation({
 
 		for (const turn of turns) {
 			await ctx.db.delete(turn._id);
+		}
+
+		// Delete all nations associated with this game
+		const nations = await ctx.db
+			.query('nations')
+			.filter((q) => q.eq(q.field('gameId'), args.gameId))
+			.collect();
+
+		for (const nation of nations) {
+			await ctx.db.delete(nation._id);
 		}
 
 		// Finally, delete the game itself
