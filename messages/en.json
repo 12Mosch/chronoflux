@@ -182,5 +182,9 @@
 	"debug_panel_title": "AI Debug Log ({count})",
 	"debug_panel_error_prefix": "Error:",
 	"debug_panel_prompt_label": "Prompt:",
-	"debug_panel_response_label": "Response:"
+	"debug_panel_response_label": "Response:",
+	"delete_game_title": "Delete Game",
+	"delete_game_confirm": "Are you sure you want to delete this game? This action cannot be undone.",
+	"delete_game_label": "Delete game",
+	"failed_delete_game": "Failed to delete game"
 }

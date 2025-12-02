@@ -290,3 +290,52 @@ export const getGameContext = query({
 		};
 	}
 });
+
+/**
+ * Delete a game and all associated data
+ * This includes nations, relationships, and turns
+ */
+export const deleteGame = mutation({
+	args: {
+		gameId: v.id('games')
+	},
+	handler: async (ctx, args) => {
+		const game = await ctx.db.get(args.gameId);
+		if (!game) {
+			throw new Error('Game not found');
+		}
+
+		// Delete all nations associated with this game
+		const nations = await ctx.db
+			.query('nations')
+			.filter((q) => q.eq(q.field('gameId'), args.gameId))
+			.collect();
+
+		for (const nation of nations) {
+			await ctx.db.delete(nation._id);
+		}
+
+		// Delete all relationships associated with this game
+		const relationships = await ctx.db
+			.query('relationships')
+			.filter((q) => q.eq(q.field('gameId'), args.gameId))
+			.collect();
+
+		for (const relationship of relationships) {
+			await ctx.db.delete(relationship._id);
+		}
+
+		// Delete all turns associated with this game
+		const turns = await ctx.db
+			.query('turns')
+			.withIndex('by_gameId', (q) => q.eq('gameId', args.gameId))
+			.collect();
+
+		for (const turn of turns) {
+			await ctx.db.delete(turn._id);
+		}
+
+		// Finally, delete the game itself
+		await ctx.db.delete(args.gameId);
+	}
+});

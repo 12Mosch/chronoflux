@@ -80,6 +80,19 @@
 			loading = false;
 		}
 	});
+
+	async function handleDeleteGame(gameId: string) {
+		error = null;
+
+		try {
+			await client.mutation(api.games.deleteGame, { gameId: gameId as Id<'games'> });
+			// Remove the game from the local state
+			games = games.filter((g) => g._id !== gameId);
+		} catch (e) {
+			console.error('Failed to delete game', e);
+			error = m.failed_delete_game();
+		}
+	}
 </script>
 
 <svelte:head>
@@ -133,6 +146,7 @@
 						{game}
 						scenarioName={scenarios[game.scenarioId]?.name || m.unknown_scenario()}
 						nationName={nations[game.playerNationId || '']?.name}
+						onDelete={() => handleDeleteGame(game._id)}
 					/>
 				{/each}
 			</div>
