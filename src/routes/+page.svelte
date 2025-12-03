@@ -7,6 +7,7 @@
 	import GameCard from '$lib/components/game/GameCard.svelte';
 	import type { Doc, Id } from '../convex/_generated/dataModel';
 	import * as m from '$lib/paraglide/messages';
+	import WorldMapBg from '$lib/assets/world-map-bg.png?enhanced';
 
 	const client = useConvexClient();
 	let games = $state<Doc<'games'>[]>([]);
@@ -99,9 +100,15 @@
 	<title>ChronoFlux</title>
 </svelte:head>
 
-<div class="min-h-screen bg-slate-950 text-white">
+<div class="relative min-h-screen overflow-hidden bg-slate-950 text-white">
+	<!-- Animated World Map Background -->
+	<div class="world-map-container absolute inset-0">
+		<enhanced:img src={WorldMapBg} alt="" />
+		<div class="world-map-overlay"></div>
+	</div>
+
 	<!-- Hero Section -->
-	<div class="container mx-auto px-4 py-20 text-center">
+	<div class="relative z-10 container mx-auto px-4 py-20 text-center">
 		<h1 class="mb-6 text-5xl font-bold tracking-tight md:text-6xl">{m.hero_title()}</h1>
 		<p class="mx-auto mb-8 max-w-2xl text-lg text-slate-300 md:text-xl">
 			{m.hero_description()}
@@ -177,3 +184,60 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	.world-map-container {
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+	}
+
+	.world-map-container :global(img) {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center;
+		opacity: 0.15;
+		filter: blur(3px);
+		animation:
+			mapPan 60s ease-in-out infinite,
+			mapPulse 8s ease-in-out infinite;
+	}
+
+	.world-map-overlay {
+		position: absolute;
+		inset: 0;
+		background: radial-gradient(
+			ellipse at center,
+			transparent 0%,
+			rgba(2, 6, 23, 0.4) 50%,
+			rgba(2, 6, 23, 0.8) 100%
+		);
+		pointer-events: none;
+	}
+
+	@keyframes mapPan {
+		0%,
+		100% {
+			transform: scale(1.1) translateX(0);
+		}
+		50% {
+			transform: scale(1.15) translateX(-2%);
+		}
+	}
+
+	@keyframes mapPulse {
+		0%,
+		100% {
+			opacity: 0.15;
+		}
+		50% {
+			opacity: 0.22;
+		}
+	}
+</style>
