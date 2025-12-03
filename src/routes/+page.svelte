@@ -7,6 +7,8 @@
 	import GameCard from '$lib/components/game/GameCard.svelte';
 	import type { Doc, Id } from '../convex/_generated/dataModel';
 	import * as m from '$lib/paraglide/messages';
+	import WorldMapBg from '$lib/assets/world-map-bg.png?enhanced';
+	import { Globe, MessageCircle, ScrollText, Play, Sparkles } from '@lucide/svelte';
 
 	const client = useConvexClient();
 	let games = $state<Doc<'games'>[]>([]);
@@ -99,30 +101,42 @@
 	<title>ChronoFlux</title>
 </svelte:head>
 
-<div class="min-h-screen bg-slate-950 text-white">
+<div class="relative min-h-screen overflow-hidden bg-slate-950 text-white">
+	<!-- Animated World Map Background -->
+	<div class="world-map-container absolute inset-0">
+		<enhanced:img src={WorldMapBg} alt="" />
+		<div class="world-map-overlay"></div>
+	</div>
+
 	<!-- Hero Section -->
-	<div class="container mx-auto px-4 py-20 text-center">
-		<h1 class="mb-6 text-5xl font-bold tracking-tight md:text-6xl">{m.hero_title()}</h1>
-		<p class="mx-auto mb-8 max-w-2xl text-lg text-slate-300 md:text-xl">
+	<div class="relative z-10 container mx-auto px-4 py-20 text-center">
+		<h1 class="mb-8 text-5xl font-bold tracking-tight md:text-6xl">{m.hero_title()}</h1>
+		<p class="mx-auto mb-4 max-w-2xl text-base text-slate-300 md:text-lg">
 			{m.hero_description()}
 		</p>
-		<p class="mx-auto mb-12 max-w-2xl text-sm text-slate-400">
+		<p class="mx-auto mb-16 max-w-xl text-sm text-slate-400 md:text-base">
 			{m.hero_subtitle()}
 		</p>
 
-		<!-- CTA Button -->
+		<!-- CTA Buttons -->
 		<div class="flex justify-center gap-4">
 			{#if !loading && games.length > 0}
 				<Button
 					href="/game/{games[0]._id}"
 					size="lg"
-					class="bg-green-600 px-8 font-medium hover:bg-green-700"
+					class="h-11 bg-green-600 px-8 font-medium shadow-lg shadow-green-500/40 hover:bg-green-700 hover:shadow-xl hover:shadow-green-400/70 md:h-12 md:px-9"
 				>
-					{m.continue_playing()}
+					<Play aria-hidden="true" />
+					<span>{m.continue_playing()}</span>
 				</Button>
 			{/if}
-			<Button href="/scenarios" size="lg" class="bg-blue-600 px-8 font-medium hover:bg-blue-700">
-				{m.start_new_game()}
+			<Button
+				href="/scenarios"
+				size="lg"
+				class="h-11 bg-blue-600 px-8 font-medium shadow-lg shadow-blue-500/40 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-400/70 md:h-12 md:px-9"
+			>
+				<Sparkles aria-hidden="true" />
+				<span>{m.start_new_game()}</span>
 			</Button>
 		</div>
 
@@ -154,22 +168,58 @@
 	{/if}
 
 	<!-- Features Section -->
-	<div class="container mx-auto px-4 py-16">
+	<div
+		class="container mx-auto border-slate-800/60 px-4 pt-20 pb-20"
+		class:mt-16={!loading && games.length > 0}
+		class:border-t={!loading && games.length > 0}
+	>
+		<div class="mb-10 text-center">
+			<h2 class="text-sm font-semibold tracking-[0.25em] text-slate-400 uppercase">
+				{m.features_section_title()}
+			</h2>
+		</div>
 		<div class="grid gap-8 md:grid-cols-3">
-			<div class="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
-				<h3 class="mb-3 text-lg font-bold text-white">{m.feature_natural_language_title()}</h3>
+			<div
+				class="group relative overflow-hidden rounded-xl border border-slate-700/80 bg-slate-900/40 p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-blue-500/70 hover:bg-slate-900/70 hover:shadow-xl hover:shadow-blue-500/30"
+			>
+				<div
+					class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-950/80 text-blue-400 shadow-inner shadow-blue-500/30"
+				>
+					<MessageCircle class="h-7 w-7" />
+				</div>
+				<h3 class="mb-3 text-xl font-semibold tracking-tight text-white md:text-2xl">
+					{m.feature_natural_language_title()}
+				</h3>
 				<p class="text-sm text-slate-400">
 					{m.feature_natural_language_desc()}
 				</p>
 			</div>
-			<div class="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
-				<h3 class="mb-3 text-lg font-bold text-white">{m.feature_historical_scenarios_title()}</h3>
+			<div
+				class="group relative overflow-hidden rounded-xl border border-slate-700/80 bg-slate-900/40 p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-emerald-500/70 hover:bg-slate-900/70 hover:shadow-xl hover:shadow-emerald-500/30"
+			>
+				<div
+					class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-950/80 text-emerald-400 shadow-inner shadow-emerald-500/30"
+				>
+					<ScrollText class="h-7 w-7" />
+				</div>
+				<h3 class="mb-3 text-xl font-semibold tracking-tight text-white md:text-2xl">
+					{m.feature_historical_scenarios_title()}
+				</h3>
 				<p class="text-sm text-slate-400">
 					{m.feature_historical_scenarios_desc()}
 				</p>
 			</div>
-			<div class="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
-				<h3 class="mb-3 text-lg font-bold text-white">{m.feature_persistent_world_title()}</h3>
+			<div
+				class="group relative overflow-hidden rounded-xl border border-slate-700/80 bg-slate-900/40 p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-amber-500/70 hover:bg-slate-900/70 hover:shadow-xl hover:shadow-amber-500/30"
+			>
+				<div
+					class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-950/80 text-amber-300 shadow-inner shadow-amber-500/30"
+				>
+					<Globe class="h-7 w-7" />
+				</div>
+				<h3 class="mb-3 text-xl font-semibold tracking-tight text-white md:text-2xl">
+					{m.feature_persistent_world_title()}
+				</h3>
 				<p class="text-sm text-slate-400">
 					{m.feature_persistent_world_desc()}
 				</p>
@@ -177,3 +227,60 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	.world-map-container {
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+	}
+
+	.world-map-container :global(img) {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center;
+		opacity: 0.15;
+		filter: blur(3px);
+		animation:
+			mapPan 60s ease-in-out infinite,
+			mapPulse 8s ease-in-out infinite;
+	}
+
+	.world-map-overlay {
+		position: absolute;
+		inset: 0;
+		background: radial-gradient(
+			ellipse at center,
+			transparent 0%,
+			rgba(2, 6, 23, 0.4) 50%,
+			rgba(2, 6, 23, 0.8) 100%
+		);
+		pointer-events: none;
+	}
+
+	@keyframes mapPan {
+		0%,
+		100% {
+			transform: scale(1.1) translateX(0);
+		}
+		50% {
+			transform: scale(1.15) translateX(-2%);
+		}
+	}
+
+	@keyframes mapPulse {
+		0%,
+		100% {
+			opacity: 0.15;
+		}
+		50% {
+			opacity: 0.22;
+		}
+	}
+</style>

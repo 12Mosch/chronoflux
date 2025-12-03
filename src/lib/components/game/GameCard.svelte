@@ -20,7 +20,7 @@
 		AlertDialogTitle,
 		AlertDialogTrigger
 	} from '$lib/components/ui/alert-dialog';
-	import { ArrowRight, Calendar, Flag, Trash } from '@lucide/svelte';
+	import { ArrowRight, Calendar, Flag, RefreshCcw, Trash } from '@lucide/svelte';
 	import type { Doc } from '../../../convex/_generated/dataModel';
 
 	interface Props {
@@ -43,11 +43,25 @@
 </script>
 
 <Card
-	class="group relative overflow-hidden border-slate-700 bg-slate-800/50 transition-all hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10"
+	class={`group relative overflow-hidden rounded-xl border border-slate-700/70 bg-linear-to-b from-slate-900/80 via-slate-900/60 to-slate-900/40 shadow-md shadow-slate-950/60 transition-all hover:border-blue-500/70 hover:shadow-xl hover:shadow-blue-500/25 ${
+		game.status === 'active' ? 'border-blue-500/80 shadow-blue-500/30' : ''
+	}`}
 >
-	<CardHeader class="pb-2">
+	<CardHeader class="pb-3">
 		<div class="flex items-start justify-between gap-4">
-			<div class="flex-1">
+			<div class="flex-1 space-y-1.5">
+				<div class="flex items-center gap-2">
+					<Badge
+						variant="outline"
+						class={`rounded-full px-3 py-1 text-[0.7rem] font-semibold tracking-wide uppercase ${
+							game.status === 'active'
+								? 'bg-blue-500 text-slate-950 shadow-sm ring-2 shadow-blue-500/40 ring-blue-300/80'
+								: 'border-slate-600/70 bg-slate-800 text-slate-200'
+						}`}
+					>
+						{game.status}
+					</Badge>
+				</div>
 				<CardTitle
 					class="mb-1 text-lg font-bold text-white transition-colors group-hover:text-blue-400"
 				>
@@ -59,14 +73,6 @@
 				</CardDescription>
 			</div>
 			<div class="flex items-center gap-2">
-				<Badge
-					variant={game.status === 'active' ? 'default' : 'secondary'}
-					class="capitalize {game.status === 'active'
-						? 'bg-blue-600 hover:bg-blue-700'
-						: 'bg-slate-700 text-slate-300'}"
-				>
-					{game.status}
-				</Badge>
 				<AlertDialog>
 					<AlertDialogTrigger>
 						<Button
@@ -97,13 +103,15 @@
 		</div>
 	</CardHeader>
 	<CardContent>
-		<div class="mb-6 flex items-center gap-2 text-sm text-slate-300">
-			<div class="flex items-center gap-1.5 rounded-full bg-slate-800 px-2.5 py-1">
-				<Flag class="h-3.5 w-3.5 text-blue-400" />
+		<div class="mb-5 space-y-2 text-sm text-slate-200">
+			<div class="flex items-center gap-2">
+				<Flag class="h-4 w-4 text-blue-400" />
 				<span class="font-medium">{nationName || m.unknown_nation()}</span>
 			</div>
-			<span class="text-slate-600">•</span>
-			<span class="text-slate-400">{m.turn_header({ turnNumber: game.currentTurn })}</span>
+			<div class="flex items-center gap-2 text-slate-300">
+				<RefreshCcw class="h-4 w-4 text-emerald-400" />
+				<span>{m.turn_header({ turnNumber: game.currentTurn })}</span>
+			</div>
 		</div>
 
 		<Button
