@@ -6,6 +6,7 @@
 	"start_new_game": "Neues Spiel starten",
 	"continue_playing": "Weiterspielen",
 	"unknown_scenario": "Unbekanntes Szenario",
+	"features_section_title": "Warum ChronoFlux",
 	"feature_natural_language_title": "Aktionen in natürlicher Sprache",
 	"feature_natural_language_desc": "Beschreibe deine Aktionen in freiem Text. Die KI versteht den Kontext und generiert plausible Konsequenzen.",
 	"feature_historical_scenarios_title": "Historische Szenarien",

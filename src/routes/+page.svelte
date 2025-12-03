@@ -8,6 +8,7 @@
 	import type { Doc, Id } from '../convex/_generated/dataModel';
 	import * as m from '$lib/paraglide/messages';
 	import WorldMapBg from '$lib/assets/world-map-bg.png?enhanced';
+	import { Globe, MessageCircle, ScrollText } from '@lucide/svelte';
 
 	const client = useConvexClient();
 	let games = $state<Doc<'games'>[]>([]);
@@ -161,22 +162,58 @@
 	{/if}
 
 	<!-- Features Section -->
-	<div class="container mx-auto px-4 py-16">
+	<div
+		class="container mx-auto border-slate-800/60 px-4 pt-20 pb-20"
+		class:mt-16={!loading && games.length > 0}
+		class:border-t={!loading && games.length > 0}
+	>
+		<div class="mb-10 text-center">
+			<h2 class="text-sm font-semibold tracking-[0.25em] text-slate-400 uppercase">
+				{m.features_section_title()}
+			</h2>
+		</div>
 		<div class="grid gap-8 md:grid-cols-3">
-			<div class="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
-				<h3 class="mb-3 text-lg font-bold text-white">{m.feature_natural_language_title()}</h3>
+			<div
+				class="group relative overflow-hidden rounded-xl border border-slate-700/80 bg-slate-900/40 p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-blue-500/70 hover:bg-slate-900/70 hover:shadow-xl hover:shadow-blue-500/30"
+			>
+				<div
+					class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-950/80 text-blue-400 shadow-inner shadow-blue-500/30"
+				>
+					<MessageCircle class="h-7 w-7" />
+				</div>
+				<h3 class="mb-3 text-xl font-semibold tracking-tight text-white md:text-2xl">
+					{m.feature_natural_language_title()}
+				</h3>
 				<p class="text-sm text-slate-400">
 					{m.feature_natural_language_desc()}
 				</p>
 			</div>
-			<div class="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
-				<h3 class="mb-3 text-lg font-bold text-white">{m.feature_historical_scenarios_title()}</h3>
+			<div
+				class="group relative overflow-hidden rounded-xl border border-slate-700/80 bg-slate-900/40 p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-emerald-500/70 hover:bg-slate-900/70 hover:shadow-xl hover:shadow-emerald-500/30"
+			>
+				<div
+					class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-950/80 text-emerald-400 shadow-inner shadow-emerald-500/30"
+				>
+					<ScrollText class="h-7 w-7" />
+				</div>
+				<h3 class="mb-3 text-xl font-semibold tracking-tight text-white md:text-2xl">
+					{m.feature_historical_scenarios_title()}
+				</h3>
 				<p class="text-sm text-slate-400">
 					{m.feature_historical_scenarios_desc()}
 				</p>
 			</div>
-			<div class="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
-				<h3 class="mb-3 text-lg font-bold text-white">{m.feature_persistent_world_title()}</h3>
+			<div
+				class="group relative overflow-hidden rounded-xl border border-slate-700/80 bg-slate-900/40 p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-amber-500/70 hover:bg-slate-900/70 hover:shadow-xl hover:shadow-amber-500/30"
+			>
+				<div
+					class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-950/80 text-amber-300 shadow-inner shadow-amber-500/30"
+				>
+					<Globe class="h-7 w-7" />
+				</div>
+				<h3 class="mb-3 text-xl font-semibold tracking-tight text-white md:text-2xl">
+					{m.feature_persistent_world_title()}
+				</h3>
 				<p class="text-sm text-slate-400">
 					{m.feature_persistent_world_desc()}
 				</p>
