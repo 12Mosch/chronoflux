@@ -156,6 +156,12 @@
 			class="h-full min-h-[100px] resize-none"
 			bind:value={playerAction}
 			disabled={isSubmitting}
+			onkeydown={(e) => {
+				if (e.key === 'Enter' && !e.shiftKey) {
+					e.preventDefault();
+					handleSubmit();
+				}
+			}}
 		/>
 		{#if submitError}
 			<div class="mt-2 text-sm text-red-600 dark:text-red-400" role="alert" aria-live="polite">

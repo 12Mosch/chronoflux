@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
+	import { Textarea } from '$lib/components/ui/textarea';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { useConvexClient } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
@@ -163,11 +163,20 @@
 					handleAsk(query);
 				}}
 			>
-				<Input
+				<Textarea
 					bind:value={query}
 					placeholder={m.advisor_input_placeholder()}
 					disabled={isLoading}
-					class="flex-1"
+					class="min-h-[40px] flex-1 resize-none"
+					rows={1}
+					onkeydown={(e) => {
+						if (e.key === 'Enter' && !e.shiftKey) {
+							e.preventDefault();
+							if (!isLoading && query.trim()) {
+								handleAsk(query);
+							}
+						}
+					}}
 				/>
 				<Button type="submit" size="icon" disabled={isLoading || !query.trim()}>
 					<Send class="h-4 w-4" />
