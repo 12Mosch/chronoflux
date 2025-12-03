@@ -8,7 +8,7 @@
 	import type { Doc, Id } from '../convex/_generated/dataModel';
 	import * as m from '$lib/paraglide/messages';
 	import WorldMapBg from '$lib/assets/world-map-bg.png?enhanced';
-	import { Globe, MessageCircle, ScrollText } from '@lucide/svelte';
+	import { Globe, MessageCircle, ScrollText, Play, Sparkles } from '@lucide/svelte';
 
 	const client = useConvexClient();
 	let games = $state<Doc<'games'>[]>([]);
@@ -110,27 +110,33 @@
 
 	<!-- Hero Section -->
 	<div class="relative z-10 container mx-auto px-4 py-20 text-center">
-		<h1 class="mb-6 text-5xl font-bold tracking-tight md:text-6xl">{m.hero_title()}</h1>
-		<p class="mx-auto mb-8 max-w-2xl text-lg text-slate-300 md:text-xl">
+		<h1 class="mb-8 text-5xl font-bold tracking-tight md:text-6xl">{m.hero_title()}</h1>
+		<p class="mx-auto mb-4 max-w-2xl text-base text-slate-300 md:text-lg">
 			{m.hero_description()}
 		</p>
-		<p class="mx-auto mb-12 max-w-2xl text-sm text-slate-400">
+		<p class="mx-auto mb-16 max-w-xl text-sm text-slate-400 md:text-base">
 			{m.hero_subtitle()}
 		</p>
 
-		<!-- CTA Button -->
+		<!-- CTA Buttons -->
 		<div class="flex justify-center gap-4">
 			{#if !loading && games.length > 0}
 				<Button
 					href="/game/{games[0]._id}"
 					size="lg"
-					class="bg-green-600 px-8 font-medium hover:bg-green-700"
+					class="h-11 bg-green-600 px-8 font-medium shadow-lg shadow-green-500/40 hover:bg-green-700 hover:shadow-xl hover:shadow-green-400/70 md:h-12 md:px-9"
 				>
-					{m.continue_playing()}
+					<Play aria-hidden="true" />
+					<span>{m.continue_playing()}</span>
 				</Button>
 			{/if}
-			<Button href="/scenarios" size="lg" class="bg-blue-600 px-8 font-medium hover:bg-blue-700">
-				{m.start_new_game()}
+			<Button
+				href="/scenarios"
+				size="lg"
+				class="h-11 bg-blue-600 px-8 font-medium shadow-lg shadow-blue-500/40 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-400/70 md:h-12 md:px-9"
+			>
+				<Sparkles aria-hidden="true" />
+				<span>{m.start_new_game()}</span>
 			</Button>
 		</div>
 
