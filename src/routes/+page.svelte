@@ -124,7 +124,7 @@
 				<Button
 					href="/game/{games[0]._id}"
 					size="lg"
-					class="h-11 bg-green-600 px-8 font-medium shadow-lg shadow-green-500/40 hover:bg-green-700 hover:shadow-xl hover:shadow-green-400/70 md:h-12 md:px-9"
+					class="btn-glow-green h-11 bg-green-600 px-8 font-medium hover:bg-green-700 md:h-12 md:px-9"
 				>
 					<Play aria-hidden="true" />
 					<span>{m.continue_playing()}</span>
@@ -133,7 +133,7 @@
 			<Button
 				href="/scenarios"
 				size="lg"
-				class="h-11 bg-blue-600 px-8 font-medium shadow-lg shadow-blue-500/40 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-400/70 md:h-12 md:px-9"
+				class="btn-glow-blue h-11 bg-blue-600 px-8 font-medium hover:bg-blue-700 md:h-12 md:px-9"
 			>
 				<Sparkles aria-hidden="true" />
 				<span>{m.start_new_game()}</span>
@@ -282,5 +282,21 @@
 		50% {
 			opacity: 0.22;
 		}
+	}
+
+	:global(.btn-glow-green) {
+		box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
+		transition: all 0.3s ease;
+	}
+	:global(.btn-glow-green:hover) {
+		box-shadow: 0 0 30px rgba(34, 197, 94, 0.8);
+	}
+
+	:global(.btn-glow-blue) {
+		box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+		transition: all 0.3s ease;
+	}
+	:global(.btn-glow-blue:hover) {
+		box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
 	}
 </style>
