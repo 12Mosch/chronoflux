@@ -137,7 +137,7 @@ function buildActionInterpretationPrompt(
 
 	// Format turn history for the prompt
 	const historyText =
-		turnHistory.length > 0
+		(turnHistory || []).length > 0
 			? turnHistory
 					.map(
 						(turn) => `
@@ -145,7 +145,7 @@ Turn ${turn.turnNumber}:
   Action: ${turn.playerAction}
   Outcome: ${turn.narrative}
   Consequences: ${turn.consequences}
-  Events: ${turn.events.map((e) => `\n    - ${e.title}: ${e.description}`).join('')}
+  Events: ${(turn.events || []).map((e) => `\n    - ${e.title}: ${e.description}`).join('')}
   Resource Changes: ${JSON.stringify(turn.worldStateChanges || {})}`
 					)
 					.join('\n')
@@ -163,12 +163,12 @@ Current World State:
   - Influence: ${playerResources.influence || 0}
 
 - Relationships:
-${relationships.map((r) => `  - ${r.name}: ${r.status} (score: ${r.score})`).join('\n')}
+${(relationships || []).map((r) => `  - ${r.name}: ${r.status} (score: ${r.score})`).join('\n')}
 
 - Other Known Nations:
 ${
-	otherNations
-		?.map(
+	(otherNations || [])
+		.map(
 			(n) =>
 				`  - ${n.name} (${n.government}) [Mil:${n.resources.military} Eco:${n.resources.economy}]`
 		)
@@ -242,7 +242,7 @@ Context:
 - Year: ${currentYear}
 - Player Action: ${playerAction}
 - Feasibility: ${actionResponse.feasibility}
-- Consequences: ${actionResponse.immediate_consequences.join(', ')}
+- Consequences: ${(actionResponse.immediate_consequences ? (Array.isArray(actionResponse.immediate_consequences) ? actionResponse.immediate_consequences : [actionResponse.immediate_consequences]) : []).join(', ')}
 
 Known Nations Status:
 - ${knownNationsList}
@@ -263,9 +263,6 @@ Respond in JSON format:
     }
   ],
   "new_nations": {
-    "NewNationName": {
-      "government": "Government Type",
-      "territories": ["Territory1"],
     "NewNationName": {
       "government": "Government Type",
       "territories": ["Territory1"],
@@ -297,7 +294,7 @@ function buildSummarizationPrompt(
 Turn ${turn.turnNumber}:
   Action: ${turn.playerAction}
   Outcome: ${turn.narrative}
-  Events: ${turn.events.map((e) => e.title).join(', ')}`
+  Events: ${(turn.events || []).map((e) => e.title).join(', ')}`
 		)
 		.join('\n');
 
@@ -492,7 +489,7 @@ export async function processTurnWithLocalAI(
 			government: n.government,
 			resources: n.resources
 		})),
-		...gameContext.worldState.relationships.map((r) => ({
+		...(gameContext.worldState.relationships || []).map((r) => ({
 			name: r.name,
 			government: 'Known via Relationship'
 		}))
@@ -590,7 +587,7 @@ export async function processTurnWithLocalAI(
 	if (gameContext.turnNumber % 5 === 0) {
 		const summarizationPrompt = buildSummarizationPrompt(
 			gameContext.worldState.historySummary || '',
-			gameContext.worldState.turnHistory.map((t) => ({
+			(gameContext.worldState.turnHistory || []).map((t) => ({
 				turnNumber: t.turnNumber,
 				playerAction: t.playerAction,
 				narrative: t.narrative,
@@ -616,7 +613,12 @@ export async function processTurnWithLocalAI(
 
 	return {
 		events,
-		consequences: actionResponse.immediate_consequences.join('. '),
+		consequences: (actionResponse.immediate_consequences
+			? Array.isArray(actionResponse.immediate_consequences)
+				? actionResponse.immediate_consequences
+				: [actionResponse.immediate_consequences]
+			: []
+		).join('. '),
 		narrative: actionResponse.narrative,
 		resourceChanges: actionResponse.resource_changes || {},
 		relationshipChanges: actionResponse.relationship_changes || [],
@@ -665,7 +667,7 @@ function buildAdvisorPrompt(
 
 	// Format recent history
 	const recentHistoryText =
-		turnHistory.length > 0
+		(turnHistory || []).length > 0
 			? turnHistory
 					.slice(0, 5) // Last 5 turns
 					.map(
@@ -673,7 +675,7 @@ function buildAdvisorPrompt(
 Turn ${turn.turnNumber}:
   Action: ${turn.playerAction}
   Outcome: ${turn.narrative}
-  Events: ${turn.events.map((e) => e.title).join(', ')}`
+  Events: ${(turn.events || []).map((e) => e.title).join(', ')}`
 					)
 					.join('\n')
 			: '  No previous turns';
@@ -690,12 +692,12 @@ Current State of the Realm:
   - Influence: ${playerResources.influence || 0}
 
 - Relationships:
-${relationships.map((r) => `  - ${r.name}: ${r.status} (score: ${r.score})`).join('\n')}
+${(relationships || []).map((r) => `  - ${r.name}: ${r.status} (score: ${r.score})`).join('\n')}
 
 - Other Known Nations:
 ${
-	otherNations
-		?.map(
+	(otherNations || [])
+		.map(
 			(n) =>
 				`  - ${n.name} (${n.government}) [Mil:${n.resources.military} Eco:${n.resources.economy}]`
 		)
