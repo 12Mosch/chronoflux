@@ -109,6 +109,17 @@ export const persistTurnWithAIResponse = mutation({
 						})
 					})
 				)
+			),
+			nation_updates: v.optional(
+				v.record(
+					v.string(), // key is nation name
+					v.object({
+						military: v.optional(v.number()),
+						economy: v.optional(v.number()),
+						stability: v.optional(v.number()),
+						influence: v.optional(v.number())
+					})
+				)
 			)
 		}),
 		historySummary: v.optional(v.string())
@@ -200,6 +211,37 @@ export const persistTurnWithAIResponse = mutation({
 			await ctx.db.patch('nations', game.playerNationId, {
 				resources: newResources
 			});
+		}
+
+		// Update other nations' resources based on AI response (nation_updates)
+		if (args.aiResponse.nation_updates) {
+			for (const [nationName, updates] of Object.entries(args.aiResponse.nation_updates)) {
+				const nationId = await getOrCreateNationId(nationName);
+				const nation = await ctx.db.get('nations', nationId);
+
+				if (nation) {
+					const currentResources = nation.resources;
+					const newResources = {
+						military: Math.max(
+							0,
+							Math.min(100, currentResources.military + (updates.military || 0))
+						),
+						economy: Math.max(0, Math.min(100, currentResources.economy + (updates.economy || 0))),
+						stability: Math.max(
+							0,
+							Math.min(100, currentResources.stability + (updates.stability || 0))
+						),
+						influence: Math.max(
+							0,
+							Math.min(100, currentResources.influence + (updates.influence || 0))
+						)
+					};
+
+					await ctx.db.patch('nations', nationId, {
+						resources: newResources
+					});
+				}
+			}
 		}
 
 		// Update relationships based on AI response

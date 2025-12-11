@@ -64,6 +64,15 @@ export type AIEventGenerationResponse =
 			// New format with nation definitions
 			events: AIEventResponse[];
 			new_nations?: NewNationsMap;
+			nation_updates?: Record<
+				string,
+				{
+					military?: number;
+					economy?: number;
+					stability?: number;
+					influence?: number;
+				}
+			>;
 	  };
 
 export interface AIProcessingResult {
@@ -79,7 +88,17 @@ export interface AIProcessingResult {
 	}>;
 	feasibility: 'high' | 'medium' | 'low';
 	historySummary?: string;
+
 	new_nations?: NewNationsMap;
+	nation_updates?: Record<
+		string,
+		{
+			military?: number;
+			economy?: number;
+			stability?: number;
+			influence?: number;
+		}
+	>;
 }
 
 /**
@@ -101,7 +120,17 @@ function buildActionInterpretationPrompt(
 			worldStateChanges: Record<string, unknown>;
 		}>;
 		historySummary?: string;
-		otherNations?: Array<{ name: string; government: string }>;
+		otherNations?: Array<{
+			name: string;
+			government: string;
+			resources: {
+				military: number;
+				economy: number;
+				stability: number;
+				influence: number;
+			};
+			territories: string[];
+		}>;
 	}
 ): string {
 	const { playerResources, relationships, turnHistory, historySummary, otherNations } = worldState;
@@ -137,7 +166,14 @@ Current World State:
 ${relationships.map((r) => `  - ${r.name}: ${r.status} (score: ${r.score})`).join('\n')}
 
 - Other Known Nations:
-${otherNations?.map((n) => `  - ${n.name} (${n.government})`).join('\n') || '  None'}
+${
+	otherNations
+		?.map(
+			(n) =>
+				`  - ${n.name} (${n.government}) [Mil:${n.resources.military} Eco:${n.resources.economy}]`
+		)
+		.join('\n') || '  None'
+}
 
 - Recent Turn History (Last 5 Turns):
 ${historyText}
@@ -180,11 +216,26 @@ function buildEventGenerationPrompt(
 	currentYear: number,
 	playerAction: string,
 	actionResponse: AIActionResponse,
-	knownNations: Array<{ name: string; government: string }>
+	knownNations: Array<{
+		name: string;
+		government: string;
+		resources?: { military: number; economy: number; stability: number };
+	}>
 ): string {
-	const knownNationsList = knownNations.map((n) => `${n.name} (${n.government})`).join(', ');
+	const knownNationsList = knownNations
+		.map(
+			(n) =>
+				`${n.name} (${n.government})` +
+				(n.resources
+					? ` [Mil:${n.resources.military} Eco:${n.resources.economy} Sta:${n.resources.stability}]`
+					: '')
+		)
+		.join('\n- ');
 
 	return `Based on the player's action and its consequences, generate 1-3 significant events that occur this turn.
+Crucially, you must also SIMULATE ACTIONS FOR OTHER AUTONOMOUS NATIONS.
+Look at the 'Known Nations' list and their resources. What would they do? (e.g. A strong military nation might expand, a rich nation might trade).
+Include these AI nation actions as 'events' with type 'political', 'diplomatic', or 'military'.
 
 Context:
 - Turn: ${turnNumber}
@@ -192,9 +243,13 @@ Context:
 - Player Action: ${playerAction}
 - Feasibility: ${actionResponse.feasibility}
 - Consequences: ${actionResponse.immediate_consequences.join(', ')}
-- Known Nations: ${knownNationsList}
 
-IMPORTANT: If you mention a NEW nation in "affected_nations" that is not in the Known Nations list, you MUST define it in the "new_nations" field with its government type, territories, and resources.
+Known Nations Status:
+- ${knownNationsList}
+
+IMPORTANT:
+1. If you mention a NEW nation in "affected_nations" that is not in the Known Nations list, you MUST define it in the "new_nations" field.
+2. Generate events that are initiated by OTHER nations, not just responses to the player. Make the world feel alive.
 
 Respond in JSON format:
 {
@@ -210,9 +265,15 @@ Respond in JSON format:
   "new_nations": {
     "NewNationName": {
       "government": "Government Type",
-      "territories": ["Territory1", "Territory2"],
+      "territories": ["Territory1"],
+    "NewNationName": {
+      "government": "Government Type",
+      "territories": ["Territory1"],
       "resources": {"military": 50, "economy": 50, "stability": 50, "influence": 50}
     }
+  },
+  "nation_updates": {
+    "NationName": {"military": -10, "influence": 5}
   }
 }`;
 }
@@ -356,7 +417,17 @@ export async function processTurnWithLocalAI(
 				worldStateChanges: Record<string, unknown>;
 			}>;
 			historySummary?: string;
-			otherNations?: Array<{ name: string; government: string }>;
+			otherNations?: Array<{
+				name: string;
+				government: string;
+				resources: {
+					military: number;
+					economy: number;
+					stability: number;
+					influence: number;
+				};
+				territories: string[];
+			}>;
 		};
 	}
 ): Promise<AIProcessingResult> {
@@ -409,14 +480,33 @@ export async function processTurnWithLocalAI(
 
 	// Build and execute Event Generation prompt
 	// Build list of known nations (from relationships and otherNations)
-	const knownNations: Array<{ name: string; government: string }> = [
+	const knownNations: Array<{
+		name: string;
+		government: string;
+		resources?: { military: number; economy: number; stability: number };
+	}> = [
 		{ name: gameContext.playerNationName, government: 'Player Nation' },
-		...(gameContext.worldState.otherNations || []),
-		...gameContext.worldState.relationships.map((r) => ({ name: r.name, government: 'Known' }))
+		// Map otherNations to the simplified structure if needed, or pass through
+		...(gameContext.worldState.otherNations || []).map((n) => ({
+			name: n.name,
+			government: n.government,
+			resources: n.resources
+		})),
+		...gameContext.worldState.relationships.map((r) => ({
+			name: r.name,
+			government: 'Known via Relationship'
+		}))
 	];
 
 	// Remove duplicates, keeping the first occurrence (which has the specific government type)
-	const uniqueKnownNationsMap = new Map<string, { name: string; government: string }>();
+	const uniqueKnownNationsMap = new Map<
+		string,
+		{
+			name: string;
+			government: string;
+			resources?: { military: number; economy: number; stability: number };
+		}
+	>();
 	for (const nation of knownNations) {
 		if (!uniqueKnownNationsMap.has(nation.name)) {
 			uniqueKnownNationsMap.set(nation.name, nation);
@@ -434,6 +524,15 @@ export async function processTurnWithLocalAI(
 
 	let events: AIEventResponse[] = [];
 	let eventNewNations: NewNationsMap = {};
+	let eventNationUpdates: Record<
+		string,
+		{
+			military?: number;
+			economy?: number;
+			stability?: number;
+			influence?: number;
+		}
+	> = {};
 	let eventRetryCount = 0;
 	try {
 		const eventGenerationResponse = await callAIWithRetry(
@@ -458,6 +557,7 @@ export async function processTurnWithLocalAI(
 			// New format - object with events and new_nations
 			events = eventGenerationResponse.events || [];
 			eventNewNations = eventGenerationResponse.new_nations || {};
+			eventNationUpdates = eventGenerationResponse.nation_updates || {};
 		}
 
 		// Log warning if retries were needed
@@ -522,7 +622,8 @@ export async function processTurnWithLocalAI(
 		relationshipChanges: actionResponse.relationship_changes || [],
 		feasibility: actionResponse.feasibility,
 		historySummary: newHistorySummary,
-		new_nations: Object.keys(mergedNewNations).length > 0 ? mergedNewNations : undefined
+		new_nations: Object.keys(mergedNewNations).length > 0 ? mergedNewNations : undefined,
+		nation_updates: Object.keys(eventNationUpdates).length > 0 ? eventNationUpdates : undefined
 	};
 }
 
@@ -545,7 +646,17 @@ function buildAdvisorPrompt(
 				events: Array<{ title: string; description: string; type: string }>;
 			}>;
 			historySummary?: string;
-			otherNations?: Array<{ name: string; government: string }>;
+			otherNations?: Array<{
+				name: string;
+				government: string;
+				resources: {
+					military: number;
+					economy: number;
+					stability: number;
+					influence: number;
+				};
+				territories: string[];
+			}>;
 		};
 	}
 ): string {
@@ -582,7 +693,14 @@ Current State of the Realm:
 ${relationships.map((r) => `  - ${r.name}: ${r.status} (score: ${r.score})`).join('\n')}
 
 - Other Known Nations:
-${otherNations?.map((n) => `  - ${n.name} (${n.government})`).join('\n') || '  None'}
+${
+	otherNations
+		?.map(
+			(n) =>
+				`  - ${n.name} (${n.government}) [Mil:${n.resources.military} Eco:${n.resources.economy}]`
+		)
+		.join('\n') || '  None'
+}
 
 - Recent History:
 ${recentHistoryText}
@@ -616,7 +734,17 @@ export async function askAdvisor(
 				worldStateChanges: Record<string, unknown>;
 			}>;
 			historySummary?: string;
-			otherNations?: Array<{ name: string; government: string }>;
+			otherNations?: Array<{
+				name: string;
+				government: string;
+				resources: {
+					military: number;
+					economy: number;
+					stability: number;
+					influence: number;
+				};
+				territories: string[];
+			}>;
 		};
 	}
 ): Promise<string> {
