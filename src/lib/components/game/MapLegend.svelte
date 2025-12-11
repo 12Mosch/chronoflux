@@ -53,7 +53,7 @@
 		<!-- Trade Routes -->
 		<div class="flex items-center justify-between gap-3">
 			<div class="flex items-center gap-2">
-				<div class="h-0.5 w-3 bg-blue-500" style="border-style: dashed;"></div>
+				<div class="w-3 border-t-2 border-dashed border-blue-500"></div>
 				<label for="trade-toggle" class="cursor-pointer text-xs">
 					{m.map_layer_trade_routes()}
 				</label>

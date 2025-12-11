@@ -3,6 +3,13 @@
  * Maps territory names to geographic center points.
  */
 
+/**
+ * Escapes special regex characters in a string.
+ */
+function escapeRegExp(str: string): string {
+	return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export interface TerritoryLocation {
 	center: [number, number]; // [longitude, latitude]
 	zoom: number;
@@ -101,8 +108,14 @@ export function getTerritoryCoordinates(name: string): TerritoryLocation | undef
 	}
 
 	// Try partial match (for composite names like "Northern Germany")
+	// Only match if the input contains a known territory as a whole word,
+	// or if the input is a known territory abbreviation/alias.
+	// Avoid reverse substring matching to prevent false positives (e.g., "US" matching "Russia").
 	for (const [key, value] of Object.entries(TERRITORY_COORDINATES)) {
-		if (lowerName.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerName)) {
+		const keyLower = key.toLowerCase();
+		// Check if input contains the territory name as a word boundary match
+		const wordBoundaryRegex = new RegExp(`\\b${escapeRegExp(keyLower)}\\b`, 'i');
+		if (wordBoundaryRegex.test(lowerName)) {
 			return value;
 		}
 	}
