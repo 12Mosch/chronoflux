@@ -56,7 +56,7 @@ export const createOrUpdateScenario = mutation({
 			.first();
 
 		if (existing) {
-			await ctx.db.patch(existing._id, {
+			await ctx.db.patch('scenarios', existing._id, {
 				name: args.name,
 				description: args.description,
 				historicalPeriod: args.period,
@@ -65,7 +65,7 @@ export const createOrUpdateScenario = mutation({
 				aiContext: args.aiContext
 			});
 
-			return await ctx.db.get(existing._id);
+			return await ctx.db.get('scenarios', existing._id);
 		}
 
 		const id = await ctx.db.insert('scenarios', {
@@ -78,7 +78,7 @@ export const createOrUpdateScenario = mutation({
 			isUserCreated: true
 		});
 
-		return await ctx.db.get(id);
+		return await ctx.db.get('scenarios', id);
 	}
 });
 
@@ -95,7 +95,7 @@ export const getScenario = query({
 		id: v.id('scenarios')
 	},
 	handler: async (ctx, args) => {
-		return await ctx.db.get(args.id);
+		return await ctx.db.get('scenarios', args.id);
 	}
 });
 
@@ -104,7 +104,7 @@ export const getScenarioById = internalQuery({
 		scenarioId: v.id('scenarios')
 	},
 	handler: async (ctx, args) => {
-		return await ctx.db.get(args.scenarioId);
+		return await ctx.db.get('scenarios', args.scenarioId);
 	}
 });
 
@@ -253,7 +253,7 @@ export const deleteScenario = mutation({
 	},
 	handler: async (ctx, args) => {
 		// Get the scenario to check if it's user-created
-		const scenario = await ctx.db.get(args.id);
+		const scenario = await ctx.db.get('scenarios', args.id);
 
 		if (!scenario) {
 			throw new Error('Scenario not found');
@@ -277,7 +277,7 @@ export const deleteScenario = mutation({
 		}
 
 		// Delete the scenario
-		await ctx.db.delete(args.id);
+		await ctx.db.delete('scenarios', args.id);
 
 		return { success: true };
 	}

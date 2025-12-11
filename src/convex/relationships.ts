@@ -94,9 +94,9 @@ export const updateRelationshipScore = internalMutation({
 			updates.status = args.newStatus;
 		}
 
-		await ctx.db.patch(relationship._id, updates);
+		await ctx.db.patch('relationships', relationship._id, updates);
 
-		return await ctx.db.get(relationship._id);
+		return await ctx.db.get('relationships', relationship._id);
 	}
 });
 
@@ -153,8 +153,8 @@ export const setRelationshipStatus = mutation({
 			updates.relationshipScore = clampRelationshipScore(args.relationshipScore);
 		}
 
-		await ctx.db.patch(relationship._id, updates);
+		await ctx.db.patch('relationships', relationship._id, updates);
 
-		return await ctx.db.get(relationship._id);
+		return await ctx.db.get('relationships', relationship._id);
 	}
 });

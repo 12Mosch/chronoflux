@@ -7,7 +7,7 @@ import { v } from 'convex/values';
 export const getNationById = internalQuery({
 	args: { nationId: v.id('nations') },
 	handler: async (ctx, args) => {
-		return await ctx.db.get(args.nationId);
+		return await ctx.db.get('nations', args.nationId);
 	}
 });
 
@@ -17,7 +17,7 @@ export const getNationById = internalQuery({
 export const getNation = query({
 	args: { nationId: v.id('nations') },
 	handler: async (ctx, args) => {
-		return await ctx.db.get(args.nationId);
+		return await ctx.db.get('nations', args.nationId);
 	}
 });
 
@@ -53,10 +53,10 @@ export const listNationsForGame = query({
 export const getPlayerNation = query({
 	args: { gameId: v.id('games') },
 	handler: async (ctx, args) => {
-		const game = await ctx.db.get(args.gameId);
+		const game = await ctx.db.get('games', args.gameId);
 		if (!game || !game.playerNationId) return null;
 
-		return await ctx.db.get(game.playerNationId);
+		return await ctx.db.get('nations', game.playerNationId);
 	}
 });
 
@@ -82,7 +82,7 @@ export const updateNationResources = internalMutation({
 		})
 	},
 	handler: async (ctx, args) => {
-		const nation = await ctx.db.get(args.nationId);
+		const nation = await ctx.db.get('nations', args.nationId);
 		if (!nation) throw new Error('Nation not found');
 
 		const currentResources = nation.resources;
@@ -93,11 +93,11 @@ export const updateNationResources = internalMutation({
 			influence: clamp(currentResources.influence + (args.resourceChanges.influence || 0), 0, 100)
 		};
 
-		await ctx.db.patch(args.nationId, {
+		await ctx.db.patch('nations', args.nationId, {
 			resources: newResources
 		});
 
-		return await ctx.db.get(args.nationId);
+		return await ctx.db.get('nations', args.nationId);
 	}
 });
 
@@ -116,7 +116,7 @@ export const setNationResources = mutation({
 		})
 	},
 	handler: async (ctx, args) => {
-		const nation = await ctx.db.get(args.nationId);
+		const nation = await ctx.db.get('nations', args.nationId);
 		if (!nation) throw new Error('Nation not found');
 
 		const clampedResources = {
@@ -126,10 +126,10 @@ export const setNationResources = mutation({
 			influence: clamp(args.resources.influence, 0, 100)
 		};
 
-		await ctx.db.patch(args.nationId, {
+		await ctx.db.patch('nations', args.nationId, {
 			resources: clampedResources
 		});
 
-		return await ctx.db.get(args.nationId);
+		return await ctx.db.get('nations', args.nationId);
 	}
 });

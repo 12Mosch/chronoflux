@@ -5,7 +5,7 @@ import type { Id } from './_generated/dataModel';
 export const submitTurn = mutation({
 	args: { gameId: v.id('games'), playerAction: v.string() },
 	handler: async (ctx, args) => {
-		const game = await ctx.db.get(args.gameId);
+		const game = await ctx.db.get('games', args.gameId);
 		if (!game) throw new Error('Game not found');
 
 		const turnNumber = (game.currentTurn || 0) + 1;
@@ -24,7 +24,7 @@ export const submitTurn = mutation({
 		});
 
 		// Re-check game state to prevent race conditions
-		const currentGame = await ctx.db.get(args.gameId);
+		const currentGame = await ctx.db.get('games', args.gameId);
 		if (!currentGame) throw new Error('Game not found');
 
 		// Only update if current turn hasn't changed (prevents duplicate turn numbers)
@@ -32,7 +32,7 @@ export const submitTurn = mutation({
 			throw new Error('Game state changed during turn submission. Please retry.');
 		}
 
-		await ctx.db.patch(args.gameId, {
+		await ctx.db.patch('games', args.gameId, {
 			currentTurn: turnNumber,
 			updatedAt: Date.now()
 		});
@@ -114,14 +114,14 @@ export const persistTurnWithAIResponse = mutation({
 		historySummary: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
-		const game = await ctx.db.get(args.gameId);
+		const game = await ctx.db.get('games', args.gameId);
 		if (!game) throw new Error('Game not found');
 		if (!game.playerNationId) throw new Error('Player nation not set');
 
 		const turnNumber = (game.currentTurn || 0) + 1;
 
 		// Re-check game state to prevent race conditions
-		const currentGame = await ctx.db.get(args.gameId);
+		const currentGame = await ctx.db.get('games', args.gameId);
 		if (!currentGame) throw new Error('Game not found');
 
 		// Only update if current turn hasn't changed (prevents duplicate turn numbers)
@@ -130,7 +130,7 @@ export const persistTurnWithAIResponse = mutation({
 		}
 
 		// Get player nation
-		const playerNation = await ctx.db.get(game.playerNationId);
+		const playerNation = await ctx.db.get('nations', game.playerNationId);
 		if (!playerNation) throw new Error('Player nation not found');
 
 		// Get all nations for name mapping
@@ -197,7 +197,7 @@ export const persistTurnWithAIResponse = mutation({
 				)
 			};
 
-			await ctx.db.patch(game.playerNationId, {
+			await ctx.db.patch('nations', game.playerNationId, {
 				resources: newResources
 			});
 		}
@@ -228,7 +228,7 @@ export const persistTurnWithAIResponse = mutation({
 						Math.min(100, existingRel.relationshipScore + relChange.scoreChange)
 					);
 
-					await ctx.db.patch(existingRel._id, {
+					await ctx.db.patch('relationships', existingRel._id, {
 						relationshipScore: newScore,
 						...(relChange.statusChange && { status: relChange.statusChange })
 					});
@@ -289,7 +289,7 @@ export const persistTurnWithAIResponse = mutation({
 		}
 
 		// Update game state
-		await ctx.db.patch(args.gameId, {
+		await ctx.db.patch('games', args.gameId, {
 			currentTurn: turnNumber,
 			updatedAt: Date.now(),
 			...(args.historySummary && { historySummary: args.historySummary })

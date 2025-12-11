@@ -9,7 +9,7 @@ export const createGame = mutation({
 		playerId: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
-		const scenario = await ctx.db.get(args.scenarioId);
+		const scenario = await ctx.db.get('scenarios', args.scenarioId);
 
 		if (!scenario) {
 			throw new Error('Scenario not found');
@@ -99,7 +99,7 @@ export const createGame = mutation({
 			throw new Error('Player nation not found in scenario initialWorldState');
 		}
 
-		await ctx.db.patch(gameId, {
+		await ctx.db.patch('games', gameId, {
 			playerNationId: playerNationDocId,
 			updatedAt: Date.now()
 		});
@@ -113,7 +113,7 @@ export const getGame = query({
 		gameId: v.id('games')
 	},
 	handler: async (ctx, args) => {
-		return await ctx.db.get(args.gameId);
+		return await ctx.db.get('games', args.gameId);
 	}
 });
 
@@ -138,7 +138,7 @@ export const updateGamePlayerId = mutation({
 		playerId: v.string()
 	},
 	handler: async (ctx, args) => {
-		await ctx.db.patch(args.gameId, {
+		await ctx.db.patch('games', args.gameId, {
 			playerId: args.playerId,
 			updatedAt: Date.now()
 		});
@@ -155,13 +155,13 @@ export const getWorldState = query({
 	},
 	handler: async (ctx, args) => {
 		// Get game
-		const game = await ctx.db.get(args.gameId);
+		const game = await ctx.db.get('games', args.gameId);
 		if (!game) {
 			throw new Error('Game not found');
 		}
 
 		// Get scenario
-		const scenario = await ctx.db.get(game.scenarioId);
+		const scenario = await ctx.db.get('scenarios', game.scenarioId);
 		if (!scenario) {
 			throw new Error('Scenario not found');
 		}
@@ -179,7 +179,9 @@ export const getWorldState = query({
 			.collect();
 
 		// Get player nation
-		const playerNation = game.playerNationId ? await ctx.db.get(game.playerNationId) : null;
+		const playerNation = game.playerNationId
+			? await ctx.db.get('nations', game.playerNationId)
+			: null;
 
 		return {
 			game: {
@@ -213,13 +215,15 @@ export const getGameContext = query({
 		gameId: v.id('games')
 	},
 	handler: async (ctx, args) => {
-		const game = await ctx.db.get(args.gameId);
+		const game = await ctx.db.get('games', args.gameId);
 		if (!game) throw new Error('Game not found');
 
-		const scenario = await ctx.db.get(game.scenarioId);
+		const scenario = await ctx.db.get('scenarios', game.scenarioId);
 		if (!scenario) throw new Error('Scenario not found');
 
-		const playerNation = game.playerNationId ? await ctx.db.get(game.playerNationId) : null;
+		const playerNation = game.playerNationId
+			? await ctx.db.get('nations', game.playerNationId)
+			: null;
 		if (!playerNation) throw new Error('Player nation not found');
 
 		// Get all nations for name resolution
@@ -300,7 +304,7 @@ export const deleteGame = mutation({
 		gameId: v.id('games')
 	},
 	handler: async (ctx, args) => {
-		const game = await ctx.db.get(args.gameId);
+		const game = await ctx.db.get('games', args.gameId);
 		if (!game) {
 			throw new Error('Game not found');
 		}
@@ -312,7 +316,7 @@ export const deleteGame = mutation({
 			.collect();
 
 		for (const relationship of relationships) {
-			await ctx.db.delete(relationship._id);
+			await ctx.db.delete('relationships', relationship._id);
 		}
 
 		// Delete all turns associated with this game
@@ -322,7 +326,7 @@ export const deleteGame = mutation({
 			.collect();
 
 		for (const turn of turns) {
-			await ctx.db.delete(turn._id);
+			await ctx.db.delete('turns', turn._id);
 		}
 
 		// Delete all nations associated with this game
@@ -332,10 +336,10 @@ export const deleteGame = mutation({
 			.collect();
 
 		for (const nation of nations) {
-			await ctx.db.delete(nation._id);
+			await ctx.db.delete('nations', nation._id);
 		}
 
 		// Finally, delete the game itself
-		await ctx.db.delete(args.gameId);
+		await ctx.db.delete('games', args.gameId);
 	}
 });

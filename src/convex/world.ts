@@ -9,17 +9,19 @@ import { v } from 'convex/values';
 export const getWorldState = query({
 	args: { gameId: v.id('games') },
 	handler: async (ctx, args) => {
-		const game = await ctx.db.get(args.gameId);
+		const game = await ctx.db.get('games', args.gameId);
 		if (!game) {
 			return null;
 		}
 
-		const scenario = await ctx.db.get(game.scenarioId);
+		const scenario = await ctx.db.get('scenarios', game.scenarioId);
 		if (!scenario) {
 			return null;
 		}
 
-		const playerNation = game.playerNationId ? await ctx.db.get(game.playerNationId) : null;
+		const playerNation = game.playerNationId
+			? await ctx.db.get('nations', game.playerNationId)
+			: null;
 
 		const nations = await ctx.db
 			.query('nations')

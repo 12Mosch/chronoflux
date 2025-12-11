@@ -17,7 +17,7 @@
 		"translate": "bunx @inlang/paraglide-js compile"
 	},
 	"devDependencies": {
-		"@convex-dev/eslint-plugin": "^1.0.0",
+		"@convex-dev/eslint-plugin": "^1.1.0",
 		"@eslint/compat": "^2.0.0",
 		"@eslint/js": "^9.38.0",
 		"@inlang/paraglide-js": "^2.6.0",
@@ -59,7 +59,7 @@
 	},
 	"dependencies": {
 		"@lucide/svelte": "^0.560.0",
-		"convex": "^1.29.3",
+		"convex": "^1.31.0",
 		"convex-svelte": "^0.0.12",
 		"maplibre-gl": "^5.14.0",
 		"markdown-it": "^14.1.0",
