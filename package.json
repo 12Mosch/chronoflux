@@ -11,7 +11,7 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
-		"lint": "bun run format && eslint --fix .",
+		"lint": "eslint --fix . && bun run format",
 		"test:unit": "vitest",
 		"test": "bun run test:unit -- --run",
 		"translate": "bunx @inlang/paraglide-js compile"
