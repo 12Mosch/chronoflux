@@ -37,7 +37,7 @@
 	let isDeleteDialogOpen = $state(false);
 
 	let searchQuery = $state('');
-	let selectedEra = $state(m.all_eras());
+	let selectedEra = $state<string>(m.all_eras());
 
 	const availableNations = $derived<NationConfig[]>(
 		selectedScenario?.initialWorldState.nations ?? []

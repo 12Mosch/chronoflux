@@ -2,6 +2,31 @@ import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel';
 
+type Resources = {
+	military: number;
+	economy: number;
+	stability: number;
+	influence: number;
+};
+
+type ResourceChanges = {
+	military?: number;
+	economy?: number;
+	stability?: number;
+	influence?: number;
+};
+
+/** Clamps a resource value between 0 and 100. */
+const clampResource = (value: number): number => Math.max(0, Math.min(100, value));
+
+/** Applies resource changes to current resources, clamping results between 0 and 100. */
+const applyResourceChanges = (current: Resources, changes: ResourceChanges): Resources => ({
+	military: clampResource(current.military + (changes.military || 0)),
+	economy: clampResource(current.economy + (changes.economy || 0)),
+	stability: clampResource(current.stability + (changes.stability || 0)),
+	influence: clampResource(current.influence + (changes.influence || 0))
+});
+
 export const submitTurn = mutation({
 	args: { gameId: v.id('games'), playerAction: v.string() },
 	handler: async (ctx, args) => {
@@ -109,6 +134,17 @@ export const persistTurnWithAIResponse = mutation({
 						})
 					})
 				)
+			),
+			nation_updates: v.optional(
+				v.record(
+					v.string(), // key is nation name
+					v.object({
+						military: v.optional(v.number()),
+						economy: v.optional(v.number()),
+						stability: v.optional(v.number()),
+						influence: v.optional(v.number())
+					})
+				)
 			)
 		}),
 		historySummary: v.optional(v.string())
@@ -171,35 +207,36 @@ export const persistTurnWithAIResponse = mutation({
 
 		// Update player nation resources based on AI response
 		if (args.aiResponse.resourceChanges) {
-			const currentResources = playerNation.resources;
-			const newResources = {
-				military: Math.max(
-					0,
-					Math.min(100, currentResources.military + (args.aiResponse.resourceChanges.military || 0))
-				),
-				economy: Math.max(
-					0,
-					Math.min(100, currentResources.economy + (args.aiResponse.resourceChanges.economy || 0))
-				),
-				stability: Math.max(
-					0,
-					Math.min(
-						100,
-						currentResources.stability + (args.aiResponse.resourceChanges.stability || 0)
-					)
-				),
-				influence: Math.max(
-					0,
-					Math.min(
-						100,
-						currentResources.influence + (args.aiResponse.resourceChanges.influence || 0)
-					)
-				)
-			};
+			const newResources = applyResourceChanges(
+				playerNation.resources,
+				args.aiResponse.resourceChanges
+			);
 
 			await ctx.db.patch('nations', game.playerNationId, {
 				resources: newResources
 			});
+		}
+
+		// Update other nations' resources based on AI response (nation_updates)
+		if (args.aiResponse.nation_updates) {
+			for (const [nationName, updates] of Object.entries(args.aiResponse.nation_updates)) {
+				const nationId = await getOrCreateNationId(nationName);
+
+				// Skip player nation - their resources are already updated via resourceChanges
+				if (nationId === game.playerNationId) {
+					continue;
+				}
+
+				const nation = await ctx.db.get('nations', nationId);
+
+				if (nation) {
+					const newResources = applyResourceChanges(nation.resources, updates);
+
+					await ctx.db.patch('nations', nationId, {
+						resources: newResources
+					});
+				}
+			}
 		}
 
 		// Update relationships based on AI response
