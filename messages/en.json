@@ -187,5 +187,15 @@
 	"delete_game_title": "Delete Game",
 	"delete_game_confirm": "Are you sure you want to delete this game? This action cannot be undone.",
 	"delete_game_label": "Delete game",
-	"failed_delete_game": "Failed to delete game"
+	"failed_delete_game": "Failed to delete game",
+	"map_legend_title": "Map Layers",
+	"map_layer_territories": "Territories",
+	"map_layer_trade_routes": "Trade Routes",
+	"map_layer_alliances": "Military Alliances",
+	"map_layer_wars": "War Zones",
+	"map_status_player": "Your Nation",
+	"map_status_allied": "Allied",
+	"map_status_hostile": "Hostile",
+	"map_status_at_war": "At War",
+	"map_status_neutral": "Neutral"
 }
