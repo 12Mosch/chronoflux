@@ -3,6 +3,14 @@
  * Maps territory names to geographic center points.
  */
 
+import {
+	PLAYER_COLORS,
+	RELATIONSHIP_COLORS,
+	TRADE_COLORS,
+	ALLIANCE_COLORS,
+	type RelationshipStatus
+} from './mapColors';
+
 /**
  * Escapes special regex characters in a string.
  */
@@ -134,16 +142,20 @@ export function getDefaultLocation(): TerritoryLocation {
 /**
  * Generate a unique color for a nation based on its name.
  * Uses a hash function to generate consistent colors.
+ * Nation names are normalized to lowercase for case-insensitive color stability.
  */
 export function getNationColor(nationName: string, isPlayer: boolean = false): string {
 	if (isPlayer) {
-		return '#22c55e'; // Green for player
+		return PLAYER_COLORS.primary;
 	}
+
+	// Normalize to lowercase for case-insensitive color stability
+	const normalized = nationName.toLowerCase();
 
 	// Simple hash function for consistent colors
 	let hash = 0;
-	for (let i = 0; i < nationName.length; i++) {
-		hash = nationName.charCodeAt(i) + ((hash << 5) - hash);
+	for (let i = 0; i < normalized.length; i++) {
+		hash = normalized.charCodeAt(i) + ((hash << 5) - hash);
 	}
 
 	// Generate HSL color with good saturation and lightness
@@ -154,30 +166,20 @@ export function getNationColor(nationName: string, isPlayer: boolean = false): s
 /**
  * Get relationship line color based on status.
  */
-export function getRelationshipColor(status: 'allied' | 'neutral' | 'hostile' | 'at_war'): string {
-	switch (status) {
-		case 'allied':
-			return '#22c55e'; // Green
-		case 'hostile':
-			return '#f97316'; // Orange
-		case 'at_war':
-			return '#ef4444'; // Red
-		case 'neutral':
-		default:
-			return '#6b7280'; // Gray
-	}
+export function getRelationshipColor(status: RelationshipStatus): string {
+	return RELATIONSHIP_COLORS[status] ?? RELATIONSHIP_COLORS.neutral;
 }
 
 /**
  * Get trade route color.
  */
 export function getTradeRouteColor(): string {
-	return '#3b82f6'; // Blue
+	return TRADE_COLORS.route;
 }
 
 /**
  * Get military alliance color.
  */
 export function getMilitaryAllianceColor(): string {
-	return '#a855f7'; // Purple
+	return ALLIANCE_COLORS.military;
 }

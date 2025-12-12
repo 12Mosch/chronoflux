@@ -10,6 +10,7 @@
 		getTradeRouteColor,
 		getMilitaryAllianceColor
 	} from '$lib/utils/territoryCoordinates';
+	import { PLAYER_COLORS } from '$lib/utils/mapColors';
 
 	interface Nation {
 		_id: string;
@@ -47,7 +48,7 @@
 		showWarZones = true
 	}: Props = $props();
 
-	let mapContainer: HTMLDivElement;
+	let mapContainer = $state<HTMLDivElement | null>(null);
 	let map: maplibregl.Map;
 	let error = $state<string | null>(null);
 	let mapLoaded = $state(false);
@@ -225,7 +226,7 @@
 		try {
 			const defaultLocation = getDefaultLocation();
 			map = new maplibregl.Map({
-				container: mapContainer,
+				container: mapContainer!,
 				style: 'https://demotiles.maplibre.org/style.json',
 				center: defaultLocation.center,
 				zoom: defaultLocation.zoom
@@ -300,7 +301,7 @@
 					source: 'territories',
 					paint: {
 						'circle-radius': ['case', ['get', 'isPlayer'], 25, 0],
-						'circle-color': '#22c55e',
+						'circle-color': PLAYER_COLORS.glow,
 						'circle-opacity': 0.3,
 						'circle-blur': 1
 					}
@@ -357,20 +358,43 @@
 						number
 					];
 
-					const popupContent = `
-						<div class="p-2">
-							<h3 class="font-bold text-sm">${props?.nationName}</h3>
-							<p class="text-xs text-gray-500">${props?.territoryName}</p>
-							<div class="mt-2 text-xs grid grid-cols-2 gap-1">
-								<span>⚔️ Military:</span><span>${props?.military}</span>
-								<span>💰 Economy:</span><span>${props?.economy}</span>
-								<span>⚖️ Stability:</span><span>${props?.stability}</span>
-								<span>🌐 Influence:</span><span>${props?.influence}</span>
-							</div>
-						</div>
-					`;
+					// Build popup DOM safely to prevent XSS
+					const popupContainer = document.createElement('div');
+					popupContainer.className = 'p-2';
 
-					new maplibregl.Popup().setLngLat(coordinates).setHTML(popupContent).addTo(map);
+					const title = document.createElement('h3');
+					title.className = 'font-bold text-sm';
+					title.textContent = props?.nationName ?? '';
+					popupContainer.appendChild(title);
+
+					const subtitle = document.createElement('p');
+					subtitle.className = 'text-xs text-gray-500';
+					subtitle.textContent = props?.territoryName ?? '';
+					popupContainer.appendChild(subtitle);
+
+					const statsGrid = document.createElement('div');
+					statsGrid.className = 'mt-2 text-xs grid grid-cols-2 gap-1';
+
+					const stats = [
+						{ icon: '⚔️ Military:', value: props?.military },
+						{ icon: '💰 Economy:', value: props?.economy },
+						{ icon: '⚖️ Stability:', value: props?.stability },
+						{ icon: '🌐 Influence:', value: props?.influence }
+					];
+
+					stats.forEach(({ icon, value }) => {
+						const labelSpan = document.createElement('span');
+						labelSpan.textContent = icon;
+						statsGrid.appendChild(labelSpan);
+
+						const valueSpan = document.createElement('span');
+						valueSpan.textContent = String(value ?? '');
+						statsGrid.appendChild(valueSpan);
+					});
+
+					popupContainer.appendChild(statsGrid);
+
+					new maplibregl.Popup().setLngLat(coordinates).setDOMContent(popupContainer).addTo(map);
 				});
 
 				// Change cursor on hover
