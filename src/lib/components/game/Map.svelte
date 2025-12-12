@@ -211,9 +211,9 @@
 		setVisibility('war-zones-layer', showWarZones);
 	}
 
-	// React to prop changes
+	// React to prop changes (including playerNationId for isPlayer styling)
 	$effect(() => {
-		if (nations && relationships) {
+		if (nations && relationships && playerNationId !== undefined) {
 			updateMapLayers();
 		}
 	});
@@ -414,7 +414,8 @@
 			map.on('error', (e) => {
 				console.error('MapLibre error:', e);
 				if (!map.loaded()) {
-					error = `Map error: ${e.error.message}`;
+					const message = e.error?.message ?? e.message ?? 'Unknown error';
+					error = `Map error: ${message}`;
 				}
 			});
 		} catch (e) {
