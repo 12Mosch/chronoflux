@@ -227,7 +227,36 @@
 			const defaultLocation = getDefaultLocation();
 			map = new maplibregl.Map({
 				container: mapContainer!,
-				style: 'https://demotiles.maplibre.org/style.json',
+				style: {
+					version: 8,
+					sources: {
+						'osm': {
+							type: 'raster',
+							tiles: [
+								'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+								'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+								'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+							],
+							tileSize: 256,
+							attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+						}
+					},
+					glyphs: 'https://fonts.openmaptiles.org/{fontstack}/{range}.pbf',
+					layers: [
+						{
+							id: 'background',
+							type: 'background',
+							paint: { 'background-color': '#e0dfdf' }
+						},
+						{
+							id: 'osm',
+							type: 'raster',
+							source: 'osm',
+							minzoom: 0,
+							maxzoom: 19
+						}
+					]
+				},
 				center: defaultLocation.center,
 				zoom: defaultLocation.zoom
 			});
