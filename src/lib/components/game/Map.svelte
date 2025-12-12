@@ -227,7 +227,7 @@
 
 	// React to year changes and update the date filter
 	$effect(() => {
-		if (map && mapLoaded && year) {
+		if (map && mapLoaded && year != null) {
 			filterByDate(map, String(year));
 		}
 	});
