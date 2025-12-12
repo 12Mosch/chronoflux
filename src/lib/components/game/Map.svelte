@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import maplibregl from 'maplibre-gl';
 	import 'maplibre-gl/dist/maplibre-gl.css';
+	import { filterByDate } from '@openhistoricalmap/maplibre-gl-dates';
 	import {
 		getTerritoryCoordinates,
 		getDefaultLocation,
@@ -36,6 +37,7 @@
 		showTradeRoutes?: boolean;
 		showAlliances?: boolean;
 		showWarZones?: boolean;
+		year?: number;
 	}
 
 	let {
@@ -45,7 +47,8 @@
 		showTerritories = true,
 		showTradeRoutes = true,
 		showAlliances = true,
-		showWarZones = true
+		showWarZones = true,
+		year = 1914
 	}: Props = $props();
 
 	let mapContainer = $state<HTMLDivElement | null>(null);
@@ -222,19 +225,47 @@
 		updateLayerVisibility();
 	});
 
+	// React to year changes and update the date filter
+	$effect(() => {
+		if (map && mapLoaded && year != null) {
+			filterByDate(map, String(year));
+		}
+	});
+
 	onMount(() => {
 		try {
 			const defaultLocation = getDefaultLocation();
 			map = new maplibregl.Map({
 				container: mapContainer!,
-				style: 'https://demotiles.maplibre.org/style.json',
+				style: 'https://www.openhistoricalmap.org/map-styles/main/main.json',
 				center: defaultLocation.center,
-				zoom: defaultLocation.zoom
+				zoom: defaultLocation.zoom,
+				attributionControl: false
+			});
+
+			// Add custom attribution
+			map.addControl(
+				new maplibregl.AttributionControl({
+					customAttribution: '<a href="https://www.openhistoricalmap.org/">OpenHistoricalMap</a>'
+				})
+			);
+
+			// Filter map by year once style is loaded
+			map.once('styledata', () => {
+				filterByDate(map, String(year));
 			});
 
 			map.on('load', () => {
 				console.log('Map loaded successfully');
 				mapLoaded = true;
+
+				// Remove the landcover hillshade layer which has incomplete tile coverage
+				if (map.getLayer('ohm_landcover_hillshade')) {
+					map.removeLayer('ohm_landcover_hillshade');
+				}
+				if (map.getSource('ohm_landcover_hillshade')) {
+					map.removeSource('ohm_landcover_hillshade');
+				}
 
 				// Add sources
 				map.addSource('territories', {
