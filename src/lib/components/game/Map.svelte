@@ -236,6 +236,9 @@
 	});
 
 	onMount(() => {
+		// Track whether the component has been destroyed to abort async initialization
+		let destroyed = false;
+
 		// Use an IIFE to handle async initialization while keeping onMount synchronous
 		(async () => {
 			try {
@@ -245,7 +248,25 @@
 				// before creating the map to prevent 404 errors from the broken S3 tiles
 				const styleUrl = 'https://www.openhistoricalmap.org/map-styles/main/main.json';
 				const styleResponse = await fetch(styleUrl);
+
+				// Abort if component was destroyed during fetch
+				if (destroyed) return;
+
+				if (!styleResponse.ok) {
+					throw new Error(
+						`Failed to load map style: ${styleResponse.status} ${styleResponse.statusText}`
+					);
+				}
+				const contentType = styleResponse.headers.get('content-type');
+				if (!contentType || !contentType.includes('application/json')) {
+					throw new Error(
+						`Invalid map style response: expected JSON but received ${contentType || 'unknown content type'}`
+					);
+				}
 				const style = await styleResponse.json();
+
+				// Abort if component was destroyed during JSON parsing
+				if (destroyed) return;
 
 				// Remove the broken ohm_landcover_hillshade source (S3 tiles return 404)
 				if (style.sources && style.sources.ohm_landcover_hillshade) {
@@ -506,6 +527,7 @@
 
 		// Cleanup on destroy
 		return () => {
+			destroyed = true;
 			if (map) map.remove();
 		};
 	});
