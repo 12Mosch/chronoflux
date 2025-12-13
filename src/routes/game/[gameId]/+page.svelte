@@ -116,6 +116,7 @@
 				{showTradeRoutes}
 				{showAlliances}
 				{showWarZones}
+				year={worldState.data.scenario.startYear + worldState.data.game.currentTurn - 1}
 			/>
 		</div>
 
