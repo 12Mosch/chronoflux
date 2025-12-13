@@ -55,6 +55,7 @@
 	let map: maplibregl.Map;
 	let error = $state<string | null>(null);
 	let mapLoaded = $state(false);
+	let lastFilteredYear: number | null = null;
 
 	// Build a lookup from nationId to nation data
 	const nationById = $derived(
@@ -206,6 +207,7 @@
 			}
 		};
 
+		setVisibility('territory-areas', showTerritories);
 		setVisibility('territory-markers', showTerritories);
 		setVisibility('territory-markers-glow', showTerritories);
 		setVisibility('territory-labels', showTerritories);
@@ -225,237 +227,307 @@
 		updateLayerVisibility();
 	});
 
-	// React to year changes and update the date filter
+	// React to year changes and update the date filter (only when year actually changes)
 	$effect(() => {
-		if (map && mapLoaded && year != null) {
+		if (map && mapLoaded && year != null && year !== lastFilteredYear) {
 			filterByDate(map, String(year));
+			lastFilteredYear = year;
 		}
 	});
 
 	onMount(() => {
-		try {
-			const defaultLocation = getDefaultLocation();
-			map = new maplibregl.Map({
-				container: mapContainer!,
-				style: 'https://www.openhistoricalmap.org/map-styles/main/main.json',
-				center: defaultLocation.center,
-				zoom: defaultLocation.zoom,
-				attributionControl: false
-			});
+		// Track whether the component has been destroyed to abort async initialization
+		let destroyed = false;
 
-			// Add custom attribution
-			map.addControl(
-				new maplibregl.AttributionControl({
-					customAttribution: '<a href="https://www.openhistoricalmap.org/">OpenHistoricalMap</a>'
-				})
-			);
+		// Use an IIFE to handle async initialization while keeping onMount synchronous
+		(async () => {
+			try {
+				const defaultLocation = getDefaultLocation();
 
-			// Filter map by year once style is loaded
-			map.once('styledata', () => {
-				filterByDate(map, String(year));
-			});
+				// Fetch the style and remove the broken ohm_landcover_hillshade source/layer
+				// before creating the map to prevent 404 errors from the broken S3 tiles
+				const styleUrl = 'https://www.openhistoricalmap.org/map-styles/main/main.json';
+				const styleResponse = await fetch(styleUrl);
 
-			map.on('load', () => {
-				console.log('Map loaded successfully');
-				mapLoaded = true;
+				// Abort if component was destroyed during fetch
+				if (destroyed) return;
 
-				// Remove the landcover hillshade layer which has incomplete tile coverage
-				if (map.getLayer('ohm_landcover_hillshade')) {
-					map.removeLayer('ohm_landcover_hillshade');
+				if (!styleResponse.ok) {
+					throw new Error(
+						`Failed to load map style: ${styleResponse.status} ${styleResponse.statusText}`
+					);
 				}
-				if (map.getSource('ohm_landcover_hillshade')) {
-					map.removeSource('ohm_landcover_hillshade');
+				const contentType = styleResponse.headers.get('content-type');
+				if (!contentType || !contentType.includes('application/json')) {
+					throw new Error(
+						`Invalid map style response: expected JSON but received ${contentType || 'unknown content type'}`
+					);
+				}
+				const style = await styleResponse.json();
+
+				// Abort if component was destroyed during JSON parsing
+				if (destroyed) return;
+
+				// Remove the broken ohm_landcover_hillshade source (S3 tiles return 404)
+				if (style.sources && style.sources.ohm_landcover_hillshade) {
+					delete style.sources.ohm_landcover_hillshade;
 				}
 
-				// Add sources
-				map.addSource('territories', {
-					type: 'geojson',
-					data: buildTerritoryGeoJSON()
+				// Remove any layers that reference the broken source
+				if (style.layers) {
+					style.layers = style.layers.filter(
+						(layer: { id?: string; source?: string }) =>
+							layer.source !== 'ohm_landcover_hillshade' && layer.id !== 'ohm_landcover_hillshade'
+					);
+				}
+
+				map = new maplibregl.Map({
+					container: mapContainer!,
+					style: style,
+					center: defaultLocation.center,
+					zoom: defaultLocation.zoom,
+					attributionControl: false
 				});
 
-				map.addSource('trade-routes', {
-					type: 'geojson',
-					data: buildRelationshipLinesGeoJSON('trade')
-				});
+				// Add custom attribution
+				map.addControl(
+					new maplibregl.AttributionControl({
+						customAttribution: '<a href="https://www.openhistoricalmap.org/">OpenHistoricalMap</a>'
+					})
+				);
 
-				map.addSource('alliances', {
-					type: 'geojson',
-					data: buildRelationshipLinesGeoJSON('alliance')
-				});
+				map.on('load', () => {
+					console.log('Map loaded successfully');
+					mapLoaded = true;
 
-				map.addSource('war-zones', {
-					type: 'geojson',
-					data: buildRelationshipLinesGeoJSON('war')
-				});
-
-				// Add trade routes layer (dashed blue lines)
-				map.addLayer({
-					id: 'trade-routes-layer',
-					type: 'line',
-					source: 'trade-routes',
-					paint: {
-						'line-color': ['get', 'color'],
-						'line-width': 2,
-						'line-dasharray': [4, 2],
-						'line-opacity': 0.7
-					}
-				});
-
-				// Add alliance layer (solid purple lines)
-				map.addLayer({
-					id: 'alliances-layer',
-					type: 'line',
-					source: 'alliances',
-					paint: {
-						'line-color': ['get', 'color'],
-						'line-width': 3,
-						'line-opacity': 0.8
-					}
-				});
-
-				// Add war zones layer (bold red lines)
-				map.addLayer({
-					id: 'war-zones-layer',
-					type: 'line',
-					source: 'war-zones',
-					paint: {
-						'line-color': ['get', 'color'],
-						'line-width': 4,
-						'line-opacity': 0.9
-					}
-				});
-
-				// Add territory glow layer (for player nation)
-				map.addLayer({
-					id: 'territory-markers-glow',
-					type: 'circle',
-					source: 'territories',
-					paint: {
-						'circle-radius': ['case', ['get', 'isPlayer'], 25, 0],
-						'circle-color': PLAYER_COLORS.glow,
-						'circle-opacity': 0.3,
-						'circle-blur': 1
-					}
-				});
-
-				// Add territory markers layer
-				map.addLayer({
-					id: 'territory-markers',
-					type: 'circle',
-					source: 'territories',
-					paint: {
-						'circle-radius': ['interpolate', ['linear'], ['get', 'military'], 0, 8, 100, 20],
-						'circle-color': ['get', 'color'],
-						'circle-stroke-width': ['case', ['get', 'isPlayer'], 3, ['get', 'isAtWar'], 2, 1],
-						'circle-stroke-color': [
-							'case',
-							['get', 'isPlayer'],
-							'#16a34a',
-							['get', 'isAtWar'],
-							'#ef4444',
-							'#ffffff'
-						],
-						'circle-opacity': 0.9
-					}
-				});
-
-				// Add territory labels
-				map.addLayer({
-					id: 'territory-labels',
-					type: 'symbol',
-					source: 'territories',
-					layout: {
-						'text-field': ['get', 'nationName'],
-						'text-size': 12,
-						'text-offset': [0, 2],
-						'text-anchor': 'top',
-						'text-font': ['Open Sans Regular']
-					},
-					paint: {
-						'text-color': '#ffffff',
-						'text-halo-color': '#000000',
-						'text-halo-width': 1.5
-					}
-				});
-
-				// Add click handler for territory popups
-				map.on('click', 'territory-markers', (e) => {
-					if (!e.features || e.features.length === 0) return;
-
-					const feature = e.features[0];
-					const props = feature.properties;
-					const coordinates = (feature.geometry as GeoJSON.Point).coordinates.slice() as [
-						number,
-						number
-					];
-
-					// Build popup DOM safely to prevent XSS
-					const popupContainer = document.createElement('div');
-					popupContainer.className = 'p-2';
-
-					const title = document.createElement('h3');
-					title.className = 'font-bold text-sm';
-					title.textContent = props?.nationName ?? '';
-					popupContainer.appendChild(title);
-
-					const subtitle = document.createElement('p');
-					subtitle.className = 'text-xs text-gray-500';
-					subtitle.textContent = props?.territoryName ?? '';
-					popupContainer.appendChild(subtitle);
-
-					const statsGrid = document.createElement('div');
-					statsGrid.className = 'mt-2 text-xs grid grid-cols-2 gap-1';
-
-					const stats = [
-						{ icon: '⚔️ Military:', value: props?.military },
-						{ icon: '💰 Economy:', value: props?.economy },
-						{ icon: '⚖️ Stability:', value: props?.stability },
-						{ icon: '🌐 Influence:', value: props?.influence }
-					];
-
-					stats.forEach(({ icon, value }) => {
-						const labelSpan = document.createElement('span');
-						labelSpan.textContent = icon;
-						statsGrid.appendChild(labelSpan);
-
-						const valueSpan = document.createElement('span');
-						valueSpan.textContent = String(value ?? '');
-						statsGrid.appendChild(valueSpan);
+					// Add sources
+					map.addSource('territories', {
+						type: 'geojson',
+						data: buildTerritoryGeoJSON()
 					});
 
-					popupContainer.appendChild(statsGrid);
+					map.addSource('trade-routes', {
+						type: 'geojson',
+						data: buildRelationshipLinesGeoJSON('trade')
+					});
 
-					new maplibregl.Popup().setLngLat(coordinates).setDOMContent(popupContainer).addTo(map);
+					map.addSource('alliances', {
+						type: 'geojson',
+						data: buildRelationshipLinesGeoJSON('alliance')
+					});
+
+					map.addSource('war-zones', {
+						type: 'geojson',
+						data: buildRelationshipLinesGeoJSON('war')
+					});
+
+					// Add subtle territory area overlay (soft colored wash per nation)
+					map.addLayer({
+						id: 'territory-areas',
+						type: 'circle',
+						source: 'territories',
+						paint: {
+							// Radius in pixels, scaling with zoom so territories feel like soft areas
+							'circle-radius': [
+								'interpolate',
+								['linear'],
+								['zoom'],
+								2,
+								10,
+								3,
+								18,
+								4,
+								26,
+								5,
+								36,
+								6,
+								48
+							],
+							'circle-color': ['get', 'color'],
+							'circle-opacity': 0.18,
+							'circle-blur': 0.9
+						}
+					});
+
+					// Add trade routes layer (dashed blue lines)
+					map.addLayer({
+						id: 'trade-routes-layer',
+						type: 'line',
+						source: 'trade-routes',
+						paint: {
+							'line-color': ['get', 'color'],
+							'line-width': 2,
+							'line-dasharray': [4, 2],
+							'line-opacity': 0.7
+						}
+					});
+
+					// Add alliance layer (solid purple lines)
+					map.addLayer({
+						id: 'alliances-layer',
+						type: 'line',
+						source: 'alliances',
+						paint: {
+							'line-color': ['get', 'color'],
+							'line-width': 3,
+							'line-opacity': 0.8
+						}
+					});
+
+					// Add war zones layer (bold red lines)
+					map.addLayer({
+						id: 'war-zones-layer',
+						type: 'line',
+						source: 'war-zones',
+						paint: {
+							'line-color': ['get', 'color'],
+							'line-width': 4,
+							'line-opacity': 0.9
+						}
+					});
+
+					// Add territory glow layer (for player nation)
+					map.addLayer({
+						id: 'territory-markers-glow',
+						type: 'circle',
+						source: 'territories',
+						paint: {
+							'circle-radius': ['case', ['get', 'isPlayer'], 25, 0],
+							'circle-color': PLAYER_COLORS.glow,
+							'circle-opacity': 0.3,
+							'circle-blur': 1
+						}
+					});
+
+					// Add territory markers layer
+					map.addLayer({
+						id: 'territory-markers',
+						type: 'circle',
+						source: 'territories',
+						paint: {
+							'circle-radius': ['interpolate', ['linear'], ['get', 'military'], 0, 8, 100, 20],
+							'circle-color': ['get', 'color'],
+							'circle-stroke-width': ['case', ['get', 'isPlayer'], 3, ['get', 'isAtWar'], 2, 1],
+							'circle-stroke-color': [
+								'case',
+								['get', 'isPlayer'],
+								'#16a34a',
+								['get', 'isAtWar'],
+								'#ef4444',
+								'#ffffff'
+							],
+							'circle-opacity': 0.9
+						}
+					});
+
+					// Add territory labels
+					map.addLayer({
+						id: 'territory-labels',
+						type: 'symbol',
+						source: 'territories',
+						layout: {
+							'text-field': ['get', 'nationName'],
+							'text-size': 12,
+							'text-offset': [0, 2],
+							'text-anchor': 'top',
+							'text-font': ['Open Sans Regular']
+						},
+						paint: {
+							'text-color': '#ffffff',
+							'text-halo-color': '#000000',
+							'text-halo-width': 1.5
+						}
+					});
+
+					// Add click handler for territory popups
+					map.on('click', 'territory-markers', (e) => {
+						if (!e.features || e.features.length === 0) return;
+
+						const feature = e.features[0];
+						const props = feature.properties;
+						const coordinates = (feature.geometry as GeoJSON.Point).coordinates.slice() as [
+							number,
+							number
+						];
+
+						// Build popup DOM safely to prevent XSS
+						const popupContainer = document.createElement('div');
+						popupContainer.className = 'p-2';
+
+						const title = document.createElement('h3');
+						title.className = 'font-bold text-sm';
+						title.textContent = props?.nationName ?? '';
+						popupContainer.appendChild(title);
+
+						const subtitle = document.createElement('p');
+						subtitle.className = 'text-xs text-gray-500';
+						subtitle.textContent = props?.territoryName ?? '';
+						popupContainer.appendChild(subtitle);
+
+						const statsGrid = document.createElement('div');
+						statsGrid.className = 'mt-2 text-xs grid grid-cols-2 gap-1';
+
+						const stats = [
+							{ icon: '⚔️ Military:', value: props?.military },
+							{ icon: '💰 Economy:', value: props?.economy },
+							{ icon: '⚖️ Stability:', value: props?.stability },
+							{ icon: '🌐 Influence:', value: props?.influence }
+						];
+
+						stats.forEach(({ icon, value }) => {
+							const labelSpan = document.createElement('span');
+							labelSpan.textContent = icon;
+							statsGrid.appendChild(labelSpan);
+
+							const valueSpan = document.createElement('span');
+							valueSpan.textContent = String(value ?? '');
+							statsGrid.appendChild(valueSpan);
+						});
+
+						popupContainer.appendChild(statsGrid);
+
+						new maplibregl.Popup().setLngLat(coordinates).setDOMContent(popupContainer).addTo(map);
+					});
+
+					// Change cursor on hover
+					map.on('mouseenter', 'territory-markers', () => {
+						map.getCanvas().style.cursor = 'pointer';
+					});
+
+					map.on('mouseleave', 'territory-markers', () => {
+						map.getCanvas().style.cursor = '';
+					});
+
+					// Initial visibility setup
+					updateLayerVisibility();
 				});
 
-				// Change cursor on hover
-				map.on('mouseenter', 'territory-markers', () => {
-					map.getCanvas().style.cursor = 'pointer';
+				// Apply date filter after map is fully idle (all tiles rendered)
+				map.once('idle', () => {
+					if (year != null && year !== lastFilteredYear) {
+						console.log('Applying date filter for year:', year);
+						filterByDate(map, String(year));
+						lastFilteredYear = year;
+					}
 				});
 
-				map.on('mouseleave', 'territory-markers', () => {
-					map.getCanvas().style.cursor = '';
+				// Handle runtime errors
+				map.on('error', (e) => {
+					console.error('MapLibre error:', e);
+					if (!map.loaded()) {
+						const message = e.error?.message ?? e.message ?? 'Unknown error';
+						error = `Map error: ${message}`;
+					}
 				});
-
-				// Initial visibility setup
-				updateLayerVisibility();
-			});
-
-			// Handle runtime errors
-			map.on('error', (e) => {
-				console.error('MapLibre error:', e);
-				if (!map.loaded()) {
-					const message = e.error?.message ?? e.message ?? 'Unknown error';
-					error = `Map error: ${message}`;
-				}
-			});
-		} catch (e) {
-			console.error('Failed to initialize map:', e);
-			error = e instanceof Error ? e.message : 'Failed to initialize map';
-		}
+			} catch (e) {
+				console.error('Failed to initialize map:', e);
+				error = e instanceof Error ? e.message : 'Failed to initialize map';
+			}
+		})();
 
 		// Cleanup on destroy
 		return () => {
+			destroyed = true;
 			if (map) map.remove();
 		};
 	});
