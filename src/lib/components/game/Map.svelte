@@ -504,7 +504,7 @@
 
 				// Apply date filter after map is fully idle (all tiles rendered)
 				map.once('idle', () => {
-					if (year != null) {
+					if (year != null && year !== lastFilteredYear) {
 						console.log('Applying date filter for year:', year);
 						filterByDate(map, String(year));
 						lastFilteredYear = year;
