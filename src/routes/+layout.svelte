@@ -5,9 +5,11 @@
 	import { setupConvex } from 'convex-svelte';
 	import { ModeWatcher } from 'mode-watcher';
 	import DebugPanel from '$lib/components/debug/DebugPanel.svelte';
+	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 
 	let { children } = $props();
 	setupConvex(PUBLIC_CONVEX_URL);
+	injectSpeedInsights();
 </script>
 
 <svelte:head>
