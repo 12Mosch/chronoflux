@@ -619,10 +619,10 @@ export async function processTurnWithLocalAI(
 				: [actionResponse.immediate_consequences]
 			: []
 		).join('. '),
-		narrative: actionResponse.narrative,
+		narrative: actionResponse.narrative || 'The consequences of this action are unfolding...',
 		resourceChanges: actionResponse.resource_changes || {},
 		relationshipChanges: actionResponse.relationship_changes || [],
-		feasibility: actionResponse.feasibility,
+		feasibility: actionResponse.feasibility || 'medium',
 		historySummary: newHistorySummary,
 		new_nations: Object.keys(mergedNewNations).length > 0 ? mergedNewNations : undefined,
 		nation_updates: Object.keys(eventNationUpdates).length > 0 ? eventNationUpdates : undefined
