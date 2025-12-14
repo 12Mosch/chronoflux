@@ -187,5 +187,15 @@
 	"delete_game_title": "Spiel löschen",
 	"delete_game_confirm": "Bist du sicher, dass du dieses Spiel löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.",
 	"delete_game_label": "Spiel löschen",
-	"failed_delete_game": "Spiel konnte nicht gelöscht werden"
+	"failed_delete_game": "Spiel konnte nicht gelöscht werden",
+	"map_legend_title": "Kartenebenen",
+	"map_layer_territories": "Territorien",
+	"map_layer_trade_routes": "Handelsrouten",
+	"map_layer_alliances": "Militärbündnisse",
+	"map_layer_wars": "Kriegsgebiete",
+	"map_status_player": "Deine Nation",
+	"map_status_allied": "Verbündet",
+	"map_status_hostile": "Feindlich",
+	"map_status_at_war": "Im Krieg",
+	"map_status_neutral": "Neutral"
 }

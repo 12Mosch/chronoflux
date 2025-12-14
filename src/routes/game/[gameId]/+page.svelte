@@ -5,6 +5,7 @@
 	import EventLog from '$lib/components/game/EventLog.svelte';
 	import Advisor from '$lib/components/game/Advisor.svelte';
 	import Map from '$lib/components/game/Map.svelte';
+	import MapLegend from '$lib/components/game/MapLegend.svelte';
 	import { useQuery } from 'convex-svelte';
 	import { api } from '$convex/_generated/api';
 	import type { Id } from '$convex/_generated/dataModel';
@@ -47,6 +48,7 @@
 		zoomIn: () => void;
 		zoomOut: () => void;
 		resetNorth: () => void;
+		flyToTerritory: (name: string) => boolean;
 	};
 
 	let showTurnSummary = $state(false);
@@ -55,6 +57,12 @@
 	let showAdvisor = $state(false);
 	let lastTurnData = $state<TurnData>(null);
 	let mapComponent = $state<MapComponent | null>(null);
+
+	// Map layer visibility
+	let showTerritories = $state(true);
+	let showTradeRoutes = $state(true);
+	let showAlliances = $state(true);
+	let showWarZones = $state(true);
 
 	// Update game state store when world state loads
 	$effect(() => {
@@ -99,7 +107,17 @@
 	<div class="relative h-full w-full bg-slate-900">
 		<!-- Full Screen Map -->
 		<div class="absolute inset-0 z-0">
-			<Map bind:this={mapComponent} />
+			<Map
+				bind:this={mapComponent}
+				nations={worldState.data.nations}
+				relationships={worldState.data.relationships}
+				playerNationId={worldState.data.playerNation?._id}
+				{showTerritories}
+				{showTradeRoutes}
+				{showAlliances}
+				{showWarZones}
+				year={worldState.data.scenario.startYear + worldState.data.game.currentTurn - 1}
+			/>
 		</div>
 
 		<!-- Top Left: Search -->
@@ -187,6 +205,11 @@
 			>
 				<Compass class="h-4 w-4" />
 			</Button>
+		</div>
+
+		<!-- Bottom Left: Map Legend -->
+		<div class="absolute bottom-4 left-4 z-10">
+			<MapLegend bind:showTerritories bind:showTradeRoutes bind:showAlliances bind:showWarZones />
 		</div>
 
 		<!-- Action Input -->
