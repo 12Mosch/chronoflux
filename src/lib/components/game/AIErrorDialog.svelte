@@ -4,6 +4,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { TriangleAlert, ExternalLink, Check, Settings } from '@lucide/svelte';
 	import { isOpenRouterError as checkIsOpenRouterError } from '$lib/utils/errorClassification';
+	import { loadSettings } from '$lib/stores/settings';
 
 	let {
 		open = $bindable(false),
@@ -35,6 +36,11 @@
 		if (isOpenRouterError) {
 			return []; // OpenRouter errors don't need command-line steps
 		}
+
+		// Get configured model from settings
+		const settings = loadSettings();
+		const model = settings.ollamaModel || 'qwen3:8b';
+
 		if (errorMessage.includes('Could not connect') || isCorsError) {
 			// If it's a CORS error, provide more specific instructions
 			if (isCorsError) {
@@ -52,7 +58,7 @@
 					},
 					{
 						label: m.step_pull_model(),
-						command: 'ollama pull qwen3:8b',
+						command: `ollama pull ${model}`,
 						description: m.step_pull_model_desc()
 					}
 				];
@@ -71,7 +77,7 @@
 				},
 				{
 					label: m.step_pull_model(),
-					command: 'ollama pull qwen3:8b',
+					command: `ollama pull ${model}`,
 					description: m.step_pull_model_desc()
 				}
 			];
