@@ -236,8 +236,8 @@
 	});
 
 	onMount(() => {
-		// Track whether the component has been destroyed to abort async initialization
-		let destroyed = false;
+		// Use AbortController to cancel fetch on component destroy
+		const abortController = new AbortController();
 
 		// Use an IIFE to handle async initialization while keeping onMount synchronous
 		(async () => {
@@ -247,10 +247,7 @@
 				// Fetch the style and remove the broken ohm_landcover_hillshade source/layer
 				// before creating the map to prevent 404 errors from the broken S3 tiles
 				const styleUrl = 'https://www.openhistoricalmap.org/map-styles/main/main.json';
-				const styleResponse = await fetch(styleUrl);
-
-				// Abort if component was destroyed during fetch
-				if (destroyed) return;
+				const styleResponse = await fetch(styleUrl, { signal: abortController.signal });
 
 				if (!styleResponse.ok) {
 					throw new Error(
@@ -264,9 +261,6 @@
 					);
 				}
 				const style = await styleResponse.json();
-
-				// Abort if component was destroyed during JSON parsing
-				if (destroyed) return;
 
 				// Remove the broken ohm_landcover_hillshade source (S3 tiles return 404)
 				if (style.sources && style.sources.ohm_landcover_hillshade) {
@@ -296,8 +290,10 @@
 					})
 				);
 
+				// Track active popup to ensure only one is open at a time
+				let activePopup: maplibregl.Popup | null = null;
+
 				map.on('load', () => {
-					console.log('Map loaded successfully');
 					mapLoaded = true;
 
 					// Add sources
@@ -486,7 +482,12 @@
 
 						popupContainer.appendChild(statsGrid);
 
-						new maplibregl.Popup().setLngLat(coordinates).setDOMContent(popupContainer).addTo(map);
+						// Close previous popup before opening new one
+						activePopup?.remove();
+						activePopup = new maplibregl.Popup()
+							.setLngLat(coordinates)
+							.setDOMContent(popupContainer)
+							.addTo(map);
 					});
 
 					// Change cursor on hover
@@ -505,7 +506,6 @@
 				// Apply date filter after map is fully idle (all tiles rendered)
 				map.once('idle', () => {
 					if (year != null && year !== lastFilteredYear) {
-						console.log('Applying date filter for year:', year);
 						filterByDate(map, String(year));
 						lastFilteredYear = year;
 					}
@@ -525,6 +525,8 @@
 					}
 				});
 			} catch (e) {
+				// Ignore abort errors - component was destroyed during fetch
+				if (e instanceof DOMException && e.name === 'AbortError') return;
 				console.error('Failed to initialize map:', e);
 				error = e instanceof Error ? e.message : 'Failed to initialize map';
 			}
@@ -532,7 +534,7 @@
 
 		// Cleanup on destroy
 		return () => {
-			destroyed = true;
+			abortController.abort();
 			if (map) map.remove();
 		};
 	});
@@ -549,15 +551,15 @@
 		map?.resetNorthPitch();
 	}
 
-	export function flyToTerritory(territoryName: string) {
+	export function flyToTerritory(territoryName: string): boolean {
 		const coords = getTerritoryCoordinates(territoryName);
-		if (coords) {
-			map?.flyTo({
-				center: coords.center,
-				zoom: coords.zoom,
-				duration: 1500
-			});
-		}
+		if (!coords || !map) return false;
+		map.flyTo({
+			center: coords.center,
+			zoom: coords.zoom,
+			duration: 1500
+		});
+		return true;
 	}
 </script>
 
