@@ -94,37 +94,60 @@ const TERRITORY_COORDINATES: Record<string, TerritoryLocation> = {
 	Macedonia: { center: [21.7453, 41.5122], zoom: 6 },
 	Athens: { center: [23.7275, 37.9838], zoom: 7 },
 	Sparta: { center: [22.4297, 37.0755], zoom: 7 },
-	Persia_Ancient: { center: [52.5311, 29.5918], zoom: 4 }
+	Persia_Ancient: { center: [52.5311, 29.5918], zoom: 4 },
+	'Persia Ancient': { center: [52.5311, 29.5918], zoom: 4 },
+	'Ancient Persia': { center: [52.5311, 29.5918], zoom: 4 }
 };
+
+/**
+ * Precomputed lookup maps for efficient territory matching.
+ * Built once at module initialization.
+ */
+const LOWERCASE_TERRITORY_MAP: Map<string, TerritoryLocation> = new Map();
+const WORD_BOUNDARY_REGEXES: Array<{ regex: RegExp; location: TerritoryLocation }> = [];
+
+// Initialize lookup maps
+(function initializeLookupMaps() {
+	for (const [key, value] of Object.entries(TERRITORY_COORDINATES)) {
+		LOWERCASE_TERRITORY_MAP.set(key.toLowerCase(), value);
+		WORD_BOUNDARY_REGEXES.push({
+			regex: new RegExp(`\\b${escapeRegExp(key.toLowerCase())}\\b`, 'i'),
+			location: value
+		});
+	}
+})();
 
 /**
  * Get coordinates for a territory name.
  * Returns undefined if territory is not found.
  */
 export function getTerritoryCoordinates(name: string): TerritoryLocation | undefined {
-	// Try exact match first
-	if (TERRITORY_COORDINATES[name]) {
-		return TERRITORY_COORDINATES[name];
+	// Normalize input: trim whitespace and handle empty strings
+	const input = name.trim();
+	if (!input) {
+		return undefined;
 	}
 
-	// Try case-insensitive match
-	const lowerName = name.toLowerCase();
-	for (const [key, value] of Object.entries(TERRITORY_COORDINATES)) {
-		if (key.toLowerCase() === lowerName) {
-			return value;
-		}
+	// Try exact match first
+	if (TERRITORY_COORDINATES[input]) {
+		return TERRITORY_COORDINATES[input];
+	}
+
+	// Try case-insensitive match using precomputed lowercase map
+	const lowerName = input.toLowerCase();
+	const caseInsensitiveMatch = LOWERCASE_TERRITORY_MAP.get(lowerName);
+	if (caseInsensitiveMatch) {
+		return caseInsensitiveMatch;
 	}
 
 	// Try partial match (for composite names like "Northern Germany")
 	// Only match if the input contains a known territory as a whole word,
 	// or if the input is a known territory abbreviation/alias.
 	// Avoid reverse substring matching to prevent false positives (e.g., "US" matching "Russia").
-	for (const [key, value] of Object.entries(TERRITORY_COORDINATES)) {
-		const keyLower = key.toLowerCase();
-		// Check if input contains the territory name as a word boundary match
-		const wordBoundaryRegex = new RegExp(`\\b${escapeRegExp(keyLower)}\\b`, 'i');
-		if (wordBoundaryRegex.test(lowerName)) {
-			return value;
+	// Uses precomputed word-boundary regexes for efficiency.
+	for (const { regex, location } of WORD_BOUNDARY_REGEXES) {
+		if (regex.test(lowerName)) {
+			return location;
 		}
 	}
 
