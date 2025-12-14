@@ -25,10 +25,14 @@ export default defineConfig({
 			outdir: './src/lib/paraglide',
 			strategy: ['url', 'cookie', 'baseLocale']
 		}),
-		visualizer({
-			emitFile: true,
-			filename: 'stats.html'
-		}) as PluginOption
+		...(process.env.ANALYZE
+			? [
+					visualizer({
+						emitFile: true,
+						filename: 'stats.html'
+					}) as PluginOption
+				]
+			: [])
 	],
 	test: {
 		expect: { requireAssertions: true },

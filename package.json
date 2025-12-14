@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "concurrently \"vite dev\" \"bunx convex dev\"",
 		"build": "vite build",
+		"build:analyze": "ANALYZE=true vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
