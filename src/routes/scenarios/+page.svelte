@@ -206,9 +206,10 @@
 			</div>
 		{:else}
 			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-				<!-- Create New Scenario Card -->
+				<!-- Create New Scenario Card - eager code preloading for common action -->
 				<a
 					href={resolve('/scenarios/editor')}
+					data-sveltekit-preload-code="eager"
 					class="group flex h-full min-h-[300px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-600 bg-slate-900/30 p-6 transition-all hover:border-slate-500 hover:bg-slate-800/50"
 				>
 					<div class="flex flex-col items-center gap-4 text-center">
