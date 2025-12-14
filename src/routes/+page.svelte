@@ -123,30 +123,27 @@
 		<div class="flex justify-center gap-4">
 			{#if !loading && games.length > 0}
 				<!-- Use tap preloading for game data since it may update frequently -->
-				<a
+				<Button
 					href={resolve(`/game/${games[0]._id}`)}
 					data-sveltekit-preload-data="tap"
 					data-sveltekit-preload-code="eager"
+					size="lg"
+					class="btn-glow-green h-11 bg-green-600 px-8 font-medium hover:bg-green-700 md:h-12 md:px-9"
 				>
-					<Button
-						size="lg"
-						class="btn-glow-green h-11 bg-green-600 px-8 font-medium hover:bg-green-700 md:h-12 md:px-9"
-					>
-						<Play aria-hidden="true" />
-						<span>{m.continue_playing()}</span>
-					</Button>
-				</a>
+					<Play aria-hidden="true" />
+					<span>{m.continue_playing()}</span>
+				</Button>
 			{/if}
 			<!-- Eager code preloading for primary CTA -->
-			<a href={resolve('/scenarios')} data-sveltekit-preload-code="eager">
-				<Button
-					size="lg"
-					class="btn-glow-blue h-11 bg-blue-600 px-8 font-medium hover:bg-blue-700 md:h-12 md:px-9"
-				>
-					<Sparkles aria-hidden="true" />
-					<span>{m.start_new_game()}</span>
-				</Button>
-			</a>
+			<Button
+				href={resolve('/scenarios')}
+				data-sveltekit-preload-code="eager"
+				size="lg"
+				class="btn-glow-blue h-11 bg-blue-600 px-8 font-medium hover:bg-blue-700 md:h-12 md:px-9"
+			>
+				<Sparkles aria-hidden="true" />
+				<span>{m.start_new_game()}</span>
+			</Button>
 		</div>
 
 		{#if error}
