@@ -2,9 +2,11 @@ import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import devtoolsJson from 'vite-plugin-devtools-json';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vitest/config';
+import { type PluginOption } from 'vite';
 import { playwright } from '@vitest/browser-playwright';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { enhancedImages } from '@sveltejs/enhanced-img';
+import { visualizer } from 'rollup-plugin-visualizer';
 import { fileURLToPath } from 'url';
 
 export default defineConfig({
@@ -22,7 +24,15 @@ export default defineConfig({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide',
 			strategy: ['url', 'cookie', 'baseLocale']
-		})
+		}),
+		...(process.env.ANALYZE
+			? [
+					visualizer({
+						emitFile: true,
+						filename: 'stats.html'
+					}) as PluginOption
+				]
+			: [])
 	],
 	test: {
 		expect: { requireAssertions: true },
