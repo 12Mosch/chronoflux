@@ -48,7 +48,7 @@
 		zoomIn: () => void;
 		zoomOut: () => void;
 		resetNorth: () => void;
-		flyToTerritory: (name: string) => void;
+		flyToTerritory: (name: string) => boolean;
 	};
 
 	let showTurnSummary = $state(false);

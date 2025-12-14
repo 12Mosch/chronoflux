@@ -75,6 +75,15 @@
 		)
 	);
 
+	// Find the first territory with valid map coordinates
+	function findFirstMappedTerritoryCoords(territories: string[]) {
+		for (const territory of territories) {
+			const coords = getTerritoryCoordinates(territory);
+			if (coords) return coords;
+		}
+		return null;
+	}
+
 	// Generate GeoJSON for territory markers
 	function buildTerritoryGeoJSON(): GeoJSON.FeatureCollection {
 		const features: GeoJSON.Feature[] = [];
@@ -123,13 +132,9 @@
 			const nation2 = nationById[rel.nation2Id];
 			if (!nation1 || !nation2) continue;
 
-			// Get center coordinates for first territory of each nation
-			const coords1 = nation1.territories[0]
-				? getTerritoryCoordinates(nation1.territories[0])
-				: null;
-			const coords2 = nation2.territories[0]
-				? getTerritoryCoordinates(nation2.territories[0])
-				: null;
+			// Get center coordinates for first mapped territory of each nation
+			const coords1 = findFirstMappedTerritoryCoords(nation1.territories);
+			const coords2 = findFirstMappedTerritoryCoords(nation2.territories);
 			if (!coords1 || !coords2) continue;
 
 			let shouldInclude = false;

@@ -18,11 +18,9 @@ declare module '@openhistoricalmap/maplibre-gl-dates' {
 	export function updateVariable(letExpression: unknown[], name: string, newValue: unknown): void;
 
 	interface DateRange {
-		startDate?: Date | number | string | false;
-		startDecimalYear?: Date | number | string | false;
-		startISODate?: Date | number | string | false;
-		endDate?: Date | number | string | false;
-		endDecimalYear?: Date | number | string | false;
-		endISODate?: Date | number | string | false;
+		startDecimalYear: number;
+		endDecimalYear: number;
+		startISODate?: string;
+		endISODate?: string;
 	}
 }
