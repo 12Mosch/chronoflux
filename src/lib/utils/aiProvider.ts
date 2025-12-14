@@ -34,6 +34,26 @@ async function generateWithOllama(
 	} catch (error: unknown) {
 		// Provide user-friendly error messages for common issues
 		if (error instanceof Error && error.message.includes('Failed to fetch')) {
+			// Check if this is likely a CORS issue (accessing from a different origin)
+			const isRemoteOrigin =
+				typeof window !== 'undefined' &&
+				window.location.origin !== 'http://localhost:5173' &&
+				window.location.origin !== 'http://127.0.0.1:5173';
+
+			if (isRemoteOrigin) {
+				throw new Error(
+					'Could not connect to Ollama (CORS blocked). When using ChronoFlux from a remote URL, you need to configure Ollama to allow cross-origin requests.\n\n' +
+						'To fix this:\n' +
+						'1. Stop Ollama if running\n' +
+						'2. Start Ollama with: OLLAMA_ORIGINS="' +
+						window.location.origin +
+						'" ollama serve\n' +
+						'   Or allow all origins: OLLAMA_ORIGINS="*" ollama serve\n' +
+						'3. Ensure your model is installed: ollama pull ' +
+						settings.ollamaModel
+				);
+			}
+
 			throw new Error(
 				'Could not connect to Ollama. Please ensure:\n1. Ollama is running (`ollama serve`)\n2. CORS is enabled (`OLLAMA_ORIGINS="*"`)\n3. The model is pulled (`ollama pull ' +
 					settings.ollamaModel +

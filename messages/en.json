@@ -197,5 +197,8 @@
 	"map_status_allied": "Allied",
 	"map_status_hostile": "Hostile",
 	"map_status_at_war": "At War",
-	"map_status_neutral": "Neutral"
+	"map_status_neutral": "Neutral",
+	"step_enable_cors_remote_desc": "Allow connections from this specific origin",
+	"step_enable_cors_systemd": "Systemd Service (Linux)",
+	"step_enable_cors_systemd_desc": "Configure environment variables for the systemd service"
 }
