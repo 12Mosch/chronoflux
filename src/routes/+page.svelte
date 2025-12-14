@@ -9,6 +9,7 @@
 	import * as m from '$lib/paraglide/messages';
 	import WorldMapBg from '$lib/assets/world-map-bg.png?enhanced';
 	import { Globe, MessageCircle, ScrollText, Play, Sparkles } from '@lucide/svelte';
+	import { resolve } from '$app/paths';
 
 	const client = useConvexClient();
 	let games = $state<Doc<'games'>[]>([]);
@@ -121,23 +122,31 @@
 		<!-- CTA Buttons -->
 		<div class="flex justify-center gap-4">
 			{#if !loading && games.length > 0}
-				<Button
-					href="/game/{games[0]._id}"
-					size="lg"
-					class="btn-glow-green h-11 bg-green-600 px-8 font-medium hover:bg-green-700 md:h-12 md:px-9"
+				<!-- Use tap preloading for game data since it may update frequently -->
+				<a
+					href={resolve(`/game/${games[0]._id}`)}
+					data-sveltekit-preload-data="tap"
+					data-sveltekit-preload-code="eager"
 				>
-					<Play aria-hidden="true" />
-					<span>{m.continue_playing()}</span>
-				</Button>
+					<Button
+						size="lg"
+						class="btn-glow-green h-11 bg-green-600 px-8 font-medium hover:bg-green-700 md:h-12 md:px-9"
+					>
+						<Play aria-hidden="true" />
+						<span>{m.continue_playing()}</span>
+					</Button>
+				</a>
 			{/if}
-			<Button
-				href="/scenarios"
-				size="lg"
-				class="btn-glow-blue h-11 bg-blue-600 px-8 font-medium hover:bg-blue-700 md:h-12 md:px-9"
-			>
-				<Sparkles aria-hidden="true" />
-				<span>{m.start_new_game()}</span>
-			</Button>
+			<!-- Eager code preloading for primary CTA -->
+			<a href={resolve('/scenarios')} data-sveltekit-preload-code="eager">
+				<Button
+					size="lg"
+					class="btn-glow-blue h-11 bg-blue-600 px-8 font-medium hover:bg-blue-700 md:h-12 md:px-9"
+				>
+					<Sparkles aria-hidden="true" />
+					<span>{m.start_new_game()}</span>
+				</Button>
+			</a>
 		</div>
 
 		{#if error}
@@ -154,7 +163,12 @@
 				<h2 class="text-2xl font-bold">{m.continue_playing()}</h2>
 			</div>
 
-			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+			<!-- Use tap preloading for game links since game state updates frequently -->
+			<div
+				class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+				data-sveltekit-preload-data="tap"
+				data-sveltekit-preload-code="eager"
+			>
 				{#each games as game (game._id)}
 					<GameCard
 						{game}
