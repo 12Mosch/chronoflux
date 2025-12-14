@@ -516,6 +516,11 @@
 					console.error('MapLibre error:', e);
 					if (!map.loaded()) {
 						const message = e.error?.message ?? e.message ?? 'Unknown error';
+						// Remove the map instance before setting error state to prevent
+						// the map from running without a container (which gets removed
+						// by the {#if error} branch in the template)
+						map.remove();
+						map = undefined!;
 						error = `Map error: ${message}`;
 					}
 				});
