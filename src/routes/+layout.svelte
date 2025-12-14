@@ -6,10 +6,12 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import DebugPanel from '$lib/components/debug/DebugPanel.svelte';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+	import { injectAnalytics } from '@vercel/analytics/sveltekit';
 
 	let { children } = $props();
 	setupConvex(PUBLIC_CONVEX_URL);
 	injectSpeedInsights();
+	injectAnalytics();
 </script>
 
 <svelte:head>
