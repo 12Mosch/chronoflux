@@ -5,7 +5,7 @@ declare module '@openhistoricalmap/maplibre-gl-dates' {
 	export function dateRangeFromDate(date: string | Date): DateRange | undefined;
 	export function decimalYearFromDate(date: Date): number;
 	export function dateRangeFromISODate(isoDate: string): DateRange | undefined;
-	export function constrainFilterByDateRange(filter: unknown, dateRange: DateRange): unknown;
+	export function constrainFilterByDateRange(filter: unknown, dateRange: DateRange): unknown[];
 	export function constrainLegacyFilterByDateRange(
 		filter: unknown[],
 		dateRange: DateRange
@@ -18,11 +18,11 @@ declare module '@openhistoricalmap/maplibre-gl-dates' {
 	export function updateVariable(letExpression: unknown[], name: string, newValue: unknown): void;
 
 	interface DateRange {
-		startDate: Date | false;
-		startDecimalYear: number | false;
-		startISODate: string | false;
-		endDate: Date | false;
-		endDecimalYear: number | false;
-		endISODate: string | false;
+		startDate?: Date | number | string | false;
+		startDecimalYear?: Date | number | string | false;
+		startISODate?: Date | number | string | false;
+		endDate?: Date | number | string | false;
+		endDecimalYear?: Date | number | string | false;
+		endISODate?: Date | number | string | false;
 	}
 }
