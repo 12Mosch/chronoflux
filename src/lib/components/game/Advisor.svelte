@@ -12,6 +12,9 @@
 	import { tick } from 'svelte';
 	import * as m from '$lib/paraglide/messages';
 	import MarkdownIt from 'markdown-it';
+	import { isAIProviderError } from '$lib/utils/errorClassification';
+	import AIErrorDialog from './AIErrorDialog.svelte';
+	import SettingsModal from './SettingsModal.svelte';
 
 	const md = new MarkdownIt({
 		linkify: true,
@@ -29,6 +32,9 @@
 	const initialMessage = { role: 'advisor' as const, content: m.advisor_initial_greeting() };
 	let messages = $state<{ role: 'user' | 'advisor'; content: string }[]>([initialMessage]);
 	let scrollViewport = $state<HTMLElement | null>(null);
+	let showAIErrorDialog = $state(false);
+	let aiErrorMessage = $state('');
+	let showSettingsModal = $state(false);
 
 	async function scrollToBottom() {
 		await tick();
@@ -59,6 +65,15 @@
 			messages = [...messages, { role: 'advisor', content: response }];
 		} catch (error) {
 			console.error('Advisor error:', error);
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+			// Check if this is an AI connection error (Ollama or OpenRouter)
+			if (isAIProviderError(errorMessage)) {
+				// Show the friendly AI error dialog
+				aiErrorMessage = errorMessage;
+				showAIErrorDialog = true;
+			}
+
 			messages = [
 				...messages,
 				{
@@ -195,3 +210,13 @@
 		</div>
 	</Dialog.Content>
 </Dialog.Root>
+
+<!-- AI Error Dialog -->
+<AIErrorDialog
+	bind:open={showAIErrorDialog}
+	errorMessage={aiErrorMessage}
+	onOpenSettings={() => (showSettingsModal = true)}
+/>
+
+<!-- Settings Modal -->
+<SettingsModal bind:open={showSettingsModal} />

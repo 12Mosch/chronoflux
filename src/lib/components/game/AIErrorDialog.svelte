@@ -20,12 +20,44 @@
 	// Detect if the error is from OpenRouter
 	const isOpenRouterError = $derived(checkIsOpenRouterError(errorMessage));
 
+	// Detect if this is specifically a CORS error
+	const isCorsError = $derived(
+		errorMessage.toLowerCase().includes('cors') ||
+			errorMessage.toLowerCase().includes('failed to fetch') ||
+			errorMessage.toLowerCase().includes('networkerror')
+	);
+
+	// Get the current origin for the CORS command
+	const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '*';
+
 	// Parse the error message to extract helpful steps
 	const helpSteps = $derived(() => {
 		if (isOpenRouterError) {
 			return []; // OpenRouter errors don't need command-line steps
 		}
-		if (errorMessage.includes('Could not connect')) {
+		if (errorMessage.includes('Could not connect') || isCorsError) {
+			// If it's a CORS error, provide more specific instructions
+			if (isCorsError) {
+				return [
+					{
+						label: m.step_enable_cors(),
+						command: `OLLAMA_ORIGINS="${currentOrigin}" ollama serve`,
+						description: m.step_enable_cors_remote_desc()
+					},
+					{
+						label: m.step_enable_cors_systemd(),
+						command: `sudo systemctl edit ollama.service`,
+						description: m.step_enable_cors_systemd_desc(),
+						extraInfo: `[Service]\nEnvironment="OLLAMA_ORIGINS=${currentOrigin}"`
+					},
+					{
+						label: m.step_pull_model(),
+						command: 'ollama pull qwen3:8b',
+						description: m.step_pull_model_desc()
+					}
+				];
+			}
+			// Regular connection error
 			return [
 				{
 					label: m.step_start_ollama(),
@@ -34,7 +66,7 @@
 				},
 				{
 					label: m.step_enable_cors(),
-					command: 'OLLAMA_ORIGINS="*"',
+					command: `OLLAMA_ORIGINS="${currentOrigin}" ollama serve`,
 					description: m.step_enable_cors_desc()
 				},
 				{
@@ -125,13 +157,18 @@
 											</Button>
 										</div>
 									{/if}
+									{#if step.extraInfo}
+										<div class="mt-2 rounded bg-muted/50 p-3">
+											<pre
+												class="font-mono text-xs whitespace-pre-wrap text-muted-foreground">{step.extraInfo}</pre>
+										</div>
+									{/if}
 								</div>
 							</li>
 						{/each}
 					</ol>
 				</div>
 			{/if}
-
 			<!-- Additional Resources -->
 			<div class="rounded-md border bg-muted/50 p-4">
 				<h4 class="mb-2 font-semibold text-foreground">{m.need_more_help()}</h4>
