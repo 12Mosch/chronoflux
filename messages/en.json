@@ -200,5 +200,10 @@
 	"map_status_neutral": "Neutral",
 	"step_enable_cors_remote_desc": "Allow connections from this specific origin",
 	"step_enable_cors_systemd": "Systemd Service (Linux)",
-	"step_enable_cors_systemd_desc": "Configure environment variables for the systemd service"
+	"step_enable_cors_systemd_desc": "Configure environment variables for the systemd service",
+	"select_model_placeholder": "Select model...",
+	"search_models_placeholder": "Search models...",
+	"no_model_found": "No model found.",
+	"loading": "Loading...",
+	"refresh_models": "Refresh models list"
 }
