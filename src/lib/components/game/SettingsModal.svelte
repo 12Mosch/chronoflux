@@ -7,7 +7,11 @@
 	import * as Select from '$lib/components/ui/select';
 	import { Switch } from '$lib/components/ui/switch';
 	import { setMode, resetMode, userPrefersMode } from 'mode-watcher';
-	import { ExternalLink, Eye, EyeOff } from '@lucide/svelte';
+	import { cn } from '$lib/utils';
+	import * as Command from '$lib/components/ui/command';
+	import * as Popover from '$lib/components/ui/popover';
+	import { buttonVariants } from '$lib/components/ui/button';
+	import { Check, ChevronsUpDown, ExternalLink, Eye, EyeOff } from '@lucide/svelte';
 	import {
 		loadSettings,
 		saveSettings as saveSettingsToStorage,
@@ -15,7 +19,11 @@
 		popularOpenRouterModels,
 		type AIProvider
 	} from '$lib/stores/settings';
-	import { testOpenRouterConnection } from '$lib/utils/openrouter';
+	import {
+		testOpenRouterConnection,
+		fetchAvailableModels,
+		type OpenRouterModel
+	} from '$lib/utils/openrouter';
 	import { checkOllamaModelExists } from '$lib/utils/ollama';
 
 	let { open = $bindable(false) } = $props();
@@ -33,7 +41,11 @@
 	let debugMode = $state(false);
 
 	let errorMessage = $state('');
+
 	let isChecking = $state(false);
+	let isLoadingModels = $state(false);
+	let allOpenRouterModels = $state<OpenRouterModel[]>([...popularOpenRouterModels]);
+	let openModelSelect = $state(false);
 
 	onMount(() => {
 		const settings = loadSettings();
@@ -43,7 +55,26 @@
 		openrouterApiKey = settings.openrouterApiKey;
 		openrouterModel = settings.openrouterModel;
 		debugMode = settings.debugMode;
+
+		if (provider === 'openrouter' && openrouterApiKey) {
+			loadModels();
+		}
 	});
+
+	async function loadModels() {
+		if (!openrouterApiKey) return;
+		isLoadingModels = true;
+		try {
+			const models = await fetchAvailableModels(openrouterApiKey);
+			if (models.length > 0) {
+				allOpenRouterModels = models;
+			}
+		} catch (e) {
+			console.error('Failed to load models', e);
+		} finally {
+			isLoadingModels = false;
+		}
+	}
 
 	async function saveSettings() {
 		errorMessage = '';
@@ -232,26 +263,64 @@
 						{m.openrouter_model_label()}
 					</label>
 					<div class="col-span-3">
-						<Select.Root
-							type="single"
-							value={openrouterModel}
-							onValueChange={(v) => {
-								if (v) openrouterModel = v;
-							}}
-						>
-							<Select.Trigger class="w-full" disabled={isChecking}>
-								{popularOpenRouterModels.find((m) => m.id === openrouterModel)?.name ||
-									openrouterModel}
-							</Select.Trigger>
-							<Select.Content>
-								{#each popularOpenRouterModels as model (model.id)}
-									<Select.Item value={model.id}>
-										<span>{model.name}</span>
-										<span class="ml-2 text-xs text-muted-foreground">{model.description}</span>
-									</Select.Item>
-								{/each}
-							</Select.Content>
-						</Select.Root>
+						<Popover.Root bind:open={openModelSelect}>
+							<Popover.Trigger
+								role="combobox"
+								aria-expanded={openModelSelect}
+								class={cn(buttonVariants({ variant: 'outline' }), 'w-full justify-between')}
+								disabled={isChecking || isLoadingModels}
+							>
+								<span class="truncate">
+									{allOpenRouterModels.find((model) => model.id === openrouterModel)?.name ||
+										openrouterModel ||
+										m.select_model_placeholder()}
+								</span>
+								<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+							</Popover.Trigger>
+							<Popover.Content class="w-[450px] p-0" align="start">
+								<Command.Root>
+									<Command.Input placeholder={m.search_models_placeholder()} />
+									<Command.List>
+										<Command.Empty>{m.no_model_found()}</Command.Empty>
+										<Command.Group>
+											{#each allOpenRouterModels as model (model.id)}
+												<Command.Item
+													value={model.name}
+													onSelect={() => {
+														openrouterModel = model.id;
+														openModelSelect = false;
+													}}
+												>
+													<Check
+														class={cn(
+															'mr-2 h-4 w-4',
+															openrouterModel === model.id ? 'opacity-100' : 'opacity-0'
+														)}
+													/>
+													<div class="flex flex-col overflow-hidden">
+														<span class="truncate font-medium">{model.name}</span>
+														{#if model.description}
+															<span class="truncate text-xs text-muted-foreground"
+																>{model.description}</span
+															>
+														{/if}
+													</div>
+												</Command.Item>
+											{/each}
+										</Command.Group>
+									</Command.List>
+								</Command.Root>
+							</Popover.Content>
+						</Popover.Root>
+						<div class="mt-1 flex justify-end">
+							<button
+								class="text-xs text-muted-foreground hover:underline"
+								onclick={loadModels}
+								type="button"
+							>
+								{isLoadingModels ? m.loading() : m.refresh_models()}
+							</button>
+						</div>
 					</div>
 				</div>
 			{/if}
