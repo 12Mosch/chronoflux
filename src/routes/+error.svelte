@@ -70,9 +70,9 @@
 
 	<!-- Decorative Elements -->
 	<div
-		class="absolute right-0 bottom-0 left-0 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-50"
+		class="absolute right-0 bottom-0 left-0 h-px bg-linear-to-r from-transparent via-border to-transparent opacity-50"
 	></div>
 	<div
-		class="absolute top-0 right-0 left-0 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-50"
+		class="absolute top-0 right-0 left-0 h-px bg-linear-to-r from-transparent via-border to-transparent opacity-50"
 	></div>
 </div>
