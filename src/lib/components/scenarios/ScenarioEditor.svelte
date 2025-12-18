@@ -76,7 +76,17 @@
 		const target = e.target as HTMLTextAreaElement;
 		jsonString = target.value;
 		try {
-			initialWorldState = JSON.parse(jsonString);
+			const parsed = JSON.parse(jsonString);
+			if (!parsed || typeof parsed !== 'object') {
+				throw new Error('JSON must be an object');
+			}
+			if (!Array.isArray(parsed.nations)) {
+				throw new Error('JSON must contain a "nations" array');
+			}
+			if (!Array.isArray(parsed.relationships)) {
+				throw new Error('JSON must contain a "relationships" array');
+			}
+			initialWorldState = parsed;
 			jsonError = null;
 		} catch (e) {
 			jsonError = (e as Error).message;

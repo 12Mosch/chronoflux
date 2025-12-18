@@ -24,6 +24,20 @@
 
 	let territoriesInput = $state(nation.territories.join(', '));
 
+	$effect(() => {
+		const fromInput = territoriesInput
+			.split(',')
+			.map((t: string) => t.trim())
+			.filter((t: string) => t.length > 0);
+
+		if (JSON.stringify(fromInput) !== JSON.stringify(nation.territories)) {
+			territoriesInput = nation.territories.join(', ');
+		}
+	});
+
+	// Generate a unique ID for this component instance to avoid ID collisions
+	const instanceId = crypto.randomUUID();
+
 	function updateTerritories() {
 		nation.territories = territoriesInput
 			.split(',')
@@ -36,29 +50,33 @@
 	<CardContent class="pt-6">
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 			<div class="space-y-2">
-				<Label for="nation-id">{m.label_id()}</Label>
-				<Input id="nation-id" bind:value={nation.id} placeholder={m.placeholder_nation_id()} />
+				<Label for="nation-id-{instanceId}">{m.label_id()}</Label>
+				<Input
+					id="nation-id-{instanceId}"
+					bind:value={nation.id}
+					placeholder={m.placeholder_nation_id()}
+				/>
 			</div>
 			<div class="space-y-2">
-				<Label for="nation-name">{m.label_name()}</Label>
+				<Label for="nation-name-{instanceId}">{m.label_name()}</Label>
 				<Input
-					id="nation-name"
+					id="nation-name-{instanceId}"
 					bind:value={nation.name}
 					placeholder={m.placeholder_nation_name()}
 				/>
 			</div>
 			<div class="space-y-2">
-				<Label for="nation-gov">{m.label_government()}</Label>
+				<Label for="nation-gov-{instanceId}">{m.label_government()}</Label>
 				<Input
-					id="nation-gov"
+					id="nation-gov-{instanceId}"
 					bind:value={nation.government}
 					placeholder={m.placeholder_government()}
 				/>
 			</div>
 			<div class="space-y-2">
-				<Label for="nation-territories">{m.label_territories_csv()}</Label>
+				<Label for="nation-territories-{instanceId}">{m.label_territories_csv()}</Label>
 				<Input
-					id="nation-territories"
+					id="nation-territories-{instanceId}"
 					bind:value={territoriesInput}
 					oninput={updateTerritories}
 					placeholder={m.placeholder_territories()}
@@ -68,20 +86,20 @@
 
 		<div class="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
 			<div class="space-y-2">
-				<Label for="res-mil">{m.resource_military()}</Label>
-				<Input type="number" id="res-mil" bind:value={nation.resources.military} />
+				<Label for="res-mil-{instanceId}">{m.resource_military()}</Label>
+				<Input type="number" id="res-mil-{instanceId}" bind:value={nation.resources.military} />
 			</div>
 			<div class="space-y-2">
-				<Label for="res-eco">{m.resource_economy()}</Label>
-				<Input type="number" id="res-eco" bind:value={nation.resources.economy} />
+				<Label for="res-eco-{instanceId}">{m.resource_economy()}</Label>
+				<Input type="number" id="res-eco-{instanceId}" bind:value={nation.resources.economy} />
 			</div>
 			<div class="space-y-2">
-				<Label for="res-stab">{m.resource_stability()}</Label>
-				<Input type="number" id="res-stab" bind:value={nation.resources.stability} />
+				<Label for="res-stab-{instanceId}">{m.resource_stability()}</Label>
+				<Input type="number" id="res-stab-{instanceId}" bind:value={nation.resources.stability} />
 			</div>
 			<div class="space-y-2">
-				<Label for="res-inf">{m.resource_influence()}</Label>
-				<Input type="number" id="res-inf" bind:value={nation.resources.influence} />
+				<Label for="res-inf-{instanceId}">{m.resource_influence()}</Label>
+				<Input type="number" id="res-inf-{instanceId}" bind:value={nation.resources.influence} />
 			</div>
 		</div>
 

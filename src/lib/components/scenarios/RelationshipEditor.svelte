@@ -25,6 +25,8 @@
 		onDelete: () => void;
 	}>();
 
+	const uniqueId = crypto.randomUUID();
+
 	let statuses = $derived([
 		{ value: 'allied', label: m.status_allied() },
 		{ value: 'neutral', label: m.status_neutral() },
@@ -59,6 +61,14 @@
 				}
 			: undefined
 	);
+
+	// Filtered nation lists to prevent selecting the same nation for both sides
+	let availableNationsFor1 = $derived(
+		nations.filter((n: { id: string }) => n.id !== relationship.nation2Id)
+	);
+	let availableNationsFor2 = $derived(
+		nations.filter((n: { id: string }) => n.id !== relationship.nation1Id)
+	);
 </script>
 
 <Card class="mb-4">
@@ -75,7 +85,7 @@
 						{selectedNation1?.label ?? m.select_nation()}
 					</Select.Trigger>
 					<Select.Content>
-						{#each nations as nation (nation.id)}
+						{#each availableNationsFor1 as nation (nation.id)}
 							<Select.Item value={nation.id} label={nation.name}>{nation.name}</Select.Item>
 						{/each}
 					</Select.Content>
@@ -92,7 +102,7 @@
 						{selectedNation2?.label ?? m.select_nation()}
 					</Select.Trigger>
 					<Select.Content>
-						{#each nations as nation (nation.id)}
+						{#each availableNationsFor2 as nation (nation.id)}
 							<Select.Item value={nation.id} label={nation.name}>{nation.name}</Select.Item>
 						{/each}
 					</Select.Content>
@@ -116,19 +126,25 @@
 				</Select.Root>
 			</div>
 			<div class="space-y-2">
-				<Label for="rel-score">{m.label_score_range()}</Label>
-				<Input type="number" id="rel-score" bind:value={relationship.relationshipScore} />
+				<Label for="rel-score-{uniqueId}">{m.label_score_range()}</Label>
+				<Input
+					type="number"
+					id="rel-score-{uniqueId}"
+					min="-100"
+					max="100"
+					bind:value={relationship.relationshipScore}
+				/>
 			</div>
 		</div>
 
 		<div class="mt-4 grid grid-cols-2 gap-4">
 			<div class="flex items-center space-x-2">
-				<Switch id="trade-agreements" bind:checked={relationship.tradeAgreements} />
-				<Label for="trade-agreements">{m.label_trade_agreements()}</Label>
+				<Switch id="trade-agreements-{uniqueId}" bind:checked={relationship.tradeAgreements} />
+				<Label for="trade-agreements-{uniqueId}">{m.label_trade_agreements()}</Label>
 			</div>
 			<div class="flex items-center space-x-2">
-				<Switch id="mil-alliance" bind:checked={relationship.militaryAlliance} />
-				<Label for="mil-alliance">{m.label_military_alliance()}</Label>
+				<Switch id="mil-alliance-{uniqueId}" bind:checked={relationship.militaryAlliance} />
+				<Label for="mil-alliance-{uniqueId}">{m.label_military_alliance()}</Label>
 			</div>
 		</div>
 
