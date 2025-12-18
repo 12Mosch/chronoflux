@@ -117,6 +117,13 @@
 	}
 
 	function handleSearchKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') {
+			e.preventDefault();
+			searchQuery = '';
+			selectedSearchIndex = -1;
+			return;
+		}
+
 		if (!searchResults.length) return;
 
 		switch (e.key) {
@@ -136,11 +143,6 @@
 				} else if (searchResults.length > 0) {
 					handleSearchSelect(searchResults[0]);
 				}
-				break;
-			case 'Escape':
-				e.preventDefault();
-				searchQuery = '';
-				selectedSearchIndex = -1;
 				break;
 		}
 	}
@@ -188,13 +190,25 @@
 					class="border-none bg-background/80 pl-8 text-foreground backdrop-blur-sm placeholder:text-muted-foreground"
 					bind:value={searchQuery}
 					onkeydown={handleSearchKeydown}
+					role="combobox"
+					aria-expanded={searchResults.length > 0}
+					aria-controls="search-results"
+					aria-activedescendant={selectedSearchIndex >= 0
+						? `result-${selectedSearchIndex}`
+						: undefined}
+					aria-autocomplete="list"
 				/>
 				{#if searchResults.length > 0}
 					<div
+						id="search-results"
+						role="listbox"
 						class="absolute top-full mt-1 max-h-60 w-full overflow-y-auto rounded-md bg-background/90 shadow-lg backdrop-blur-sm"
 					>
 						{#each searchResults as nation, i (nation._id)}
 							<button
+								id="result-{i}"
+								role="option"
+								aria-selected={i === selectedSearchIndex}
 								class="w-full px-4 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground {i ===
 								selectedSearchIndex
 									? 'bg-accent text-accent-foreground'
