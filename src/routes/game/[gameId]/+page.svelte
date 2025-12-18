@@ -57,12 +57,30 @@
 	let showAdvisor = $state(false);
 	let lastTurnData = $state<TurnData>(null);
 	let mapComponent = $state<MapComponent | null>(null);
+	let searchQuery = $state('');
+	let selectedSearchIndex = $state(-1);
 
 	// Map layer visibility
 	let showTerritories = $state(true);
 	let showTradeRoutes = $state(true);
 	let showAlliances = $state(true);
 	let showWarZones = $state(true);
+
+	// Filter nations based on search query
+	const searchResults = $derived(
+		searchQuery && worldState.data?.nations
+			? worldState.data.nations.filter((n) =>
+					n.name.toLowerCase().includes(searchQuery.toLowerCase())
+				)
+			: []
+	);
+
+	// Reset selection when query changes
+	$effect(() => {
+		if (searchQuery) {
+			selectedSearchIndex = -1;
+		}
+	});
 
 	// Update game state store when world state loads
 	$effect(() => {
@@ -84,6 +102,47 @@
 	function handleTurnSubmitted(event: { turnData: TurnData }) {
 		lastTurnData = event.turnData;
 		showTurnSummary = true;
+	}
+
+	function handleSearchSelect(nation: NonNullable<typeof worldState.data>['nations'][number]) {
+		if (nation.territories.length > 0) {
+			for (const territory of nation.territories) {
+				if (mapComponent?.flyToTerritory(territory)) {
+					break;
+				}
+			}
+		}
+		searchQuery = '';
+		selectedSearchIndex = -1;
+	}
+
+	function handleSearchKeydown(e: KeyboardEvent) {
+		if (!searchResults.length) return;
+
+		switch (e.key) {
+			case 'ArrowDown':
+				e.preventDefault();
+				selectedSearchIndex = (selectedSearchIndex + 1) % searchResults.length;
+				break;
+			case 'ArrowUp':
+				e.preventDefault();
+				selectedSearchIndex =
+					selectedSearchIndex <= 0 ? searchResults.length - 1 : selectedSearchIndex - 1;
+				break;
+			case 'Enter':
+				e.preventDefault();
+				if (selectedSearchIndex >= 0 && selectedSearchIndex < searchResults.length) {
+					handleSearchSelect(searchResults[selectedSearchIndex]);
+				} else if (searchResults.length > 0) {
+					handleSearchSelect(searchResults[0]);
+				}
+				break;
+			case 'Escape':
+				e.preventDefault();
+				searchQuery = '';
+				selectedSearchIndex = -1;
+				break;
+		}
 	}
 </script>
 
@@ -127,7 +186,26 @@
 				<Input
 					placeholder={m.search_nation()}
 					class="border-none bg-background/80 pl-8 text-foreground backdrop-blur-sm placeholder:text-muted-foreground"
+					bind:value={searchQuery}
+					onkeydown={handleSearchKeydown}
 				/>
+				{#if searchResults.length > 0}
+					<div
+						class="absolute top-full mt-1 max-h-60 w-full overflow-y-auto rounded-md bg-background/90 shadow-lg backdrop-blur-sm"
+					>
+						{#each searchResults as nation, i (nation._id)}
+							<button
+								class="w-full px-4 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground {i ===
+								selectedSearchIndex
+									? 'bg-accent text-accent-foreground'
+									: ''}"
+								onclick={() => handleSearchSelect(nation)}
+							>
+								{nation.name}
+							</button>
+						{/each}
+					</div>
+				{/if}
 			</div>
 		</div>
 
