@@ -86,6 +86,16 @@
 			if (!Array.isArray(parsed.relationships)) {
 				throw new Error('JSON must contain a "relationships" array');
 			}
+			for (const nation of parsed.nations) {
+				if (!nation.id || !nation.name || !nation.resources) {
+					throw new Error('Each nation must have id, name, and resources');
+				}
+			}
+			for (const relationship of parsed.relationships) {
+				if (!relationship.nation1Id || !relationship.nation2Id || !relationship.status) {
+					throw new Error('Each relationship must have nation1Id, nation2Id, and status');
+				}
+			}
 			initialWorldState = parsed;
 			jsonError = null;
 		} catch (e) {
@@ -97,6 +107,15 @@
 
 	async function saveScenario() {
 		try {
+			// Validate relationships
+			const invalidRels = initialWorldState.relationships.filter(
+				(r) => !r.nation1Id || !r.nation2Id
+			);
+			if (invalidRels.length > 0) {
+				alert('Please complete all relationships or remove incomplete ones.');
+				return;
+			}
+
 			await client.mutation(api.scenarios.createOrUpdateScenario, {
 				name,
 				description,
@@ -114,8 +133,21 @@
 	}
 
 	function addNation() {
+		// Find the maximum numeric suffix among existing nation IDs to ensure uniqueness
+		let maxSuffix = 0;
+		for (const nation of initialWorldState.nations) {
+			const match = nation.id.match(/^nation_(\d+)$/);
+			if (match) {
+				const suffix = parseInt(match[1], 10);
+				if (suffix > maxSuffix) {
+					maxSuffix = suffix;
+				}
+			}
+		}
+		const newId = `nation_${maxSuffix + 1}`;
+
 		initialWorldState.nations.push({
-			id: `nation_${initialWorldState.nations.length + 1}`,
+			id: newId,
 			name: m.default_new_nation(),
 			government: m.default_republic(),
 			resources: { military: 50, economy: 50, stability: 50, influence: 50 },

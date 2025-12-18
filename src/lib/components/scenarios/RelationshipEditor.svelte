@@ -27,6 +27,14 @@
 
 	const uniqueId = crypto.randomUUID();
 
+	// Valid status values for runtime validation
+	const validStatuses = ['allied', 'neutral', 'hostile', 'at_war'] as const;
+	type Status = (typeof validStatuses)[number];
+
+	function isValidStatus(value: unknown): value is Status {
+		return typeof value === 'string' && validStatuses.includes(value as Status);
+	}
+
 	let statuses = $derived([
 		{ value: 'allied', label: m.status_allied() },
 		{ value: 'neutral', label: m.status_neutral() },
@@ -113,7 +121,11 @@
 				<Select.Root
 					type="single"
 					value={selectedStatus.value}
-					onValueChange={(v) => (relationship.status = v as typeof relationship.status)}
+					onValueChange={(v) => {
+						if (isValidStatus(v)) {
+							relationship.status = v;
+						}
+					}}
 				>
 					<Select.Trigger>
 						{selectedStatus.label}
