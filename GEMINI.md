@@ -1,34 +1,45 @@
 # Project Context: Chronoflux
 
 ## Overview
+
 Chronoflux is a historical grand strategy game and simulation platform built with SvelteKit and Convex. It features a persistent world where players control nations through natural language interactions, navigating historical scenarios with AI-driven consequences.
 
 ## Tech Stack
-*   **Frontend:** SvelteKit (Svelte 5), Vite
-*   **Backend & Database:** Convex
-*   **Styling:** Shadcn-svelte, Tailwind CSS (v4), Bits UI
-*   **Internationalization:** Inlang Paraglide JS
-*   **Maps:** MapLibre GL, @openhistoricalmap/maplibre-gl-dates
-*   **Testing:** Vitest, Playwright
+
+- **Frontend:** SvelteKit (Svelte 5), Vite
+- **Backend & Database:** Convex
+- **Styling:** Shadcn-svelte, Tailwind CSS (v4), Bits UI
+- **Internationalization:** Inlang Paraglide JS
+- **Maps:** MapLibre GL, @openhistoricalmap/maplibre-gl-dates
+- **Testing:** Vitest, Playwright
 
 ## Key Directories & Files
-*   `src/convex/`: Backend logic and database schema.
-    *   `schema.ts`: Defines the database tables (`games`, `scenarios`, `nations`, `turns`, `relationships`).
-    *   `games.ts`, `nations.ts`: Server-side query/mutation logic.
-*   `src/lib/`: Shared utilities and components.
-    *   `components/game/`: Core game UI (Map, NationPanel, EventLog).
-    *   `paraglide/`: Internationalization messages.
-*   `src/routes/`: SvelteKit pages and routing.
-    *   `+page.svelte`: Landing page/Dashboard.
-    *   `game/[gameId]/`: Main game interface.
-*   `convex.json`: Convex configuration.
-*   `project.inlang/`: Translation project settings.
+
+- `src/convex/`: Backend logic and database schema.
+  - `schema.ts`: Defines the database tables (`games`, `scenarios`, `nations`, `turns`, `relationships`).
+  - `games.ts`, `nations.ts`: Server-side query/mutation logic.
+- `src/lib/`: Shared utilities and components.
+  - `components/game/`: Core game UI (Map, NationPanel, EventLog).
+  - `paraglide/`: Internationalization messages.
+- `src/routes/`: SvelteKit pages and routing.
+  - `+page.svelte`: Landing page/Dashboard.
+  - `game/[gameId]/`: Main game interface.
+- `convex.json`: Convex configuration.
+- `project.inlang/`: Translation project settings.
+
+## Available UI Components
+
+The following Shadcn-svelte components are available for use in the project:
+
+Accordion, Alert, Alert Dialog, Aspect Ratio, Avatar, Badge, Breadcrumb, Button, Button Group, Calendar, Card, Carousel, Chart, Checkbox, Collapsible, Combobox, Command, Context Menu, Data Table, Date Picker, Dialog, Drawer, Dropdown Menu, Empty, Field, Formsnap, Hover Card, Input, Input Group, Input OTP, Item, Kbd, Label, Menubar, Native Select, Navigation Menu, Pagination, Popover, Progress, Radio Group, Range Calendar, Resizable, Scroll Area, Select, Separator, Sheet, Sidebar, Skeleton, Slider, Sonner, Spinner, Switch, Table, Tabs, Textarea, Toggle, Toggle Group, Tooltip, Typography.
 
 ## Prerequisites
-*   Node.js 24
-*   bun
+
+- Node.js 24
+- bun
 
 ## Architecture Notes
-*   **State Management:** Game state is primarily managed via Convex subscriptions (`useQuery`) ensuring real-time updates.
-*   **AI Integration:** The schema suggests AI is used to generate responses (`aiResponse` in `turns` table) and scenario context.
-*   **Maps:** The project uses MapLibre with historical date support to render changing borders/territories over time.
+
+- **State Management:** Game state is primarily managed via Convex subscriptions (`useQuery`) ensuring real-time updates.
+- **AI Integration:** The schema suggests AI is used to generate responses (`aiResponse` in `turns` table) and scenario context.
+- **Maps:** The project uses MapLibre with historical date support to render changing borders/territories over time.
