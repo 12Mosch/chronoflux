@@ -36,6 +36,7 @@ Accordion, Alert, Alert Dialog, Aspect Ratio, Avatar, Badge, Breadcrumb, Button,
 ## Prerequisites
 
 - Node.js 24
+- Graphite CLI (instead of Git) for version control
 - bun
 
 ## Architecture Notes
